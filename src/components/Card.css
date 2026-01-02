@@ -1,14 +1,15 @@
 /**
- * CSS animations for Card component.
- * Includes deal and flip animations with smooth transitions.
+ * CSS animations for Card component - Western saloon style.
+ * Quick, snappy animations like cards being dealt in the Old West.
  */
 
 .card-container {
   perspective: 1000px;
   position: relative;
+  transition: all 0.2s ease-out;
 }
 
-/* Deal Animation - slides in from center */
+/* Deal Animation - quick slide from center */
 @keyframes deal {
   from {
     opacity: 0;
@@ -54,19 +55,12 @@
   transition: all 0.3s ease;
 }
 
-/* Pulse animation for cards being dealt */
-@keyframes pulse-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 5px rgba(234, 179, 8, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(234, 179, 8, 0.8);
-  }
-}
-
 /* Hover effect for interactive cards */
 .card-container:hover .card-face {
+  transform: translateY(-4px);
+}
+
+.card-container:hover .card-back {
   transform: translateY(-4px);
 }
 

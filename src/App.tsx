@@ -2,12 +2,12 @@ import './App.css'
 import { useState, useEffect, useRef } from 'react'
 import { useGameState } from './hooks/useGameState'
 import { PokerTable } from './components/PokerTable'
-import { GameNarration } from './components/GameNarration'
+import { Sidebar } from './components/Sidebar'
 import { makeAIDecision } from './utils/ai'
 
 function App() {
   const { state, startNewHand, handlePlayerAction, isBettingComplete, advancePhase } = useGameState()
-  const [narrationMessages, setNarrationMessages] = useState<string[]>([])
+  const [lastAction, setLastAction] = useState<string>('')
   const [isProcessing, setIsProcessing] = useState(false)
   const processingRef = useRef(false)
   const timeoutRef = useRef<number | null>(null)
@@ -15,9 +15,9 @@ function App() {
   // Check if hand has been dealt
   const hasCards = state.players.some(p => p.holeCards.length > 0)
 
-  // Add narration message
-  const addNarration = (message: string) => {
-    setNarrationMessages(prev => [...prev, message])
+  // Set last action message
+  const setAction = (message: string) => {
+    setLastAction(message)
   }
 
   // Action handlers for user
@@ -25,7 +25,7 @@ function App() {
     const userPlayer = state.players.find(p => p.isUser)
     if (userPlayer && !isProcessing) {
       handlePlayerAction(userPlayer.id, 'fold')
-      addNarration(`You folded.`)
+      setAction('You folded.')
     }
   }
 
@@ -35,10 +35,10 @@ function App() {
       const amountToCall = state.currentBet - userPlayer.currentBet
       if (amountToCall === 0) {
         handlePlayerAction(userPlayer.id, 'check')
-        addNarration(`You checked.`)
+        setAction('You checked.')
       } else {
         handlePlayerAction(userPlayer.id, 'call')
-        addNarration(`You called $${amountToCall}.`)
+        setAction(`You called $${amountToCall}.`)
       }
     }
   }
@@ -49,26 +49,14 @@ function App() {
       // For Phase 1, use minimum raise (currentBet + bigBlind)
       const raiseAmount = state.currentBet + state.bigBlind
       handlePlayerAction(userPlayer.id, 'raise', raiseAmount)
-      addNarration(`You raised to $${raiseAmount}.`)
+      setAction(`You raised to $${raiseAmount}.`)
     }
   }
 
-  // Custom start handler with narration
+  // Custom start handler
   const handleStartNewHand = () => {
-    setNarrationMessages([])
+    setLastAction('')
     startNewHand()
-
-    // Add initial narration after state updates
-    setTimeout(() => {
-      const smallBlindPos = (state.dealerPosition + 1) % state.players.length
-      const bigBlindPos = (state.dealerPosition + 2) % state.players.length
-      const firstToAct = (bigBlindPos + 1) % state.players.length
-
-      addNarration(`New hand started!`)
-      addNarration(`${state.players[smallBlindPos]?.name} posts small blind $5.`)
-      addNarration(`${state.players[bigBlindPos]?.name} posts big blind $10.`)
-      addNarration(`Cards dealt. ${state.players[firstToAct]?.name} to act first.`)
-    }, 500)
   }
 
   // AI automation with delays
@@ -103,7 +91,7 @@ function App() {
       setIsProcessing(true)
 
       timeoutRef.current = window.setTimeout(() => {
-        addNarration('Betting round complete.')
+        setAction('Betting round complete.')
         timeoutRef.current = window.setTimeout(() => {
           advancePhase()
           const phaseNames: Record<string, string> = {
@@ -113,7 +101,7 @@ function App() {
             'showdown': 'Showdown!'
           }
           if (state.currentPhase !== 'pre-flop') {
-            addNarration(phaseNames[state.currentPhase] || 'Next phase...')
+            setAction(phaseNames[state.currentPhase] || 'Next phase...')
           }
           processingRef.current = false
           setIsProcessing(false)
@@ -156,17 +144,15 @@ function App() {
         narration += `raises to $${decision.amount}.`
       }
 
-      addNarration(narration)
+      setAction(narration)
       console.log('AI action:', decision.action, decision.amount)
 
       // Execute the action
       handlePlayerAction(currentPlayer.id, decision.action, decision.amount)
 
-      // Mark processing complete after action
-      setTimeout(() => {
-        processingRef.current = false
-        setIsProcessing(false)
-      }, 300)
+      // Mark processing complete immediately so next player can act
+      processingRef.current = false
+      setIsProcessing(false)
     }, delay)
 
     // Cleanup - don't clear timeout as it's managed by ref
@@ -176,22 +162,90 @@ function App() {
   }, [state.currentPlayerIndex, state.players, state.currentPhase, state.isHandComplete, hasCards])
 
   if (!hasCards) {
-    // Welcome screen
+    // Welcome screen - Saloon entrance
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-800 to-green-900 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-6xl font-bold text-white mb-4">
-            Poker Pal
-          </h1>
-          <p className="text-xl text-green-100 mb-8">
-            Learn Texas Hold'em from the ground up
-          </p>
+      <div
+        className="min-h-screen flex items-center justify-center relative overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, #3E2723 0%, #4E342E 50%, #3E2723 100%)',
+        }}
+      >
+        {/* Wood grain background */}
+        <div
+          className="absolute inset-0 opacity-[0.15] pointer-events-none"
+          style={{
+            backgroundImage: `
+              repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(93, 64, 55, 0.3) 2px, rgba(93, 64, 55, 0.3) 4px),
+              repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(93, 64, 55, 0.2) 80px, rgba(93, 64, 55, 0.2) 160px)
+            `,
+          }}
+        />
+
+        {/* Warm lantern glow */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(218, 165, 32, 0.12) 0%, transparent 60%)',
+          }}
+        />
+
+        <div className="text-center relative z-10">
+          {/* Western decorative stars */}
+          <div className="flex justify-center gap-6 mb-6">
+            <div className="text-gold-400/50 text-4xl">★</div>
+            <div className="text-gold-500/60 text-5xl">★</div>
+            <div className="text-gold-400/50 text-4xl">★</div>
+          </div>
+
+          {/* Wanted poster style title */}
+          <div
+            className="inline-block bg-sand-100 border-8 border-wood-800 p-8 shadow-2xl mb-8"
+            style={{
+              boxShadow: '0 12px 32px rgba(0, 0, 0, 0.8)',
+              background: 'linear-gradient(135deg, #F5E6D3 0%, #E8D5B7 100%)',
+            }}
+          >
+            {/* Title */}
+            <h1
+              className="text-6xl font-display font-bold text-wood-900 mb-2"
+              style={{
+                textShadow: '2px 2px 0px rgba(0, 0, 0, 0.1)',
+              }}
+            >
+              POKER PARDNER
+            </h1>
+
+            {/* Subtitle */}
+            <div className="h-1 w-32 bg-wood-700 mx-auto my-4" />
+            <p className="text-lg font-body text-wood-800 font-semibold tracking-wide">
+              Learn Texas Hold'em
+            </p>
+            <p className="text-base font-body text-wood-700">
+              Old West Style
+            </p>
+          </div>
+
+          {/* Horseshoe for luck */}
+          <div className="text-6xl mb-6">🐴</div>
+
+          {/* Start button - Saloon door style */}
           <button
             onClick={handleStartNewHand}
-            className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-4 px-8 rounded-lg text-xl shadow-lg transition-all hover:scale-105"
+            className="bg-gradient-to-b from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-wood-900 font-body font-bold py-4 px-10 rounded-lg text-xl shadow-xl transition-all hover:scale-105 active:scale-95 border-4 border-gold-600"
+            style={{
+              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+            }}
           >
             Start Tutorial
           </button>
+
+          {/* Card suits */}
+          <div className="flex justify-center gap-4 mt-8 text-2xl">
+            <span className="text-red-600">♥</span>
+            <span className="text-black">♠</span>
+            <span className="text-red-600">♦</span>
+            <span className="text-black">♣</span>
+          </div>
         </div>
       </div>
     )
@@ -199,7 +253,7 @@ function App() {
 
   return (
     <>
-      <GameNarration messages={narrationMessages} />
+      <Sidebar gameState={state} lastAction={lastAction} />
       <PokerTable
         gameState={state}
         onFold={handleFold}

@@ -1,6 +1,6 @@
 /**
- * Card component with animations.
- * Displays poker cards with face-up/face-down states and smooth animations.
+ * Classic Western poker card component.
+ * Traditional playing card design for saloon poker games.
  */
 
 import { Card as CardType } from '../types/game';
@@ -24,7 +24,7 @@ export function Card({
 }: CardProps) {
   // Size classes
   const sizeClasses = {
-    small: 'w-10 h-14 text-sm',
+    small: 'w-12 h-16 text-sm',
     medium: 'w-16 h-24 text-base',
     large: 'w-20 h-28 text-lg',
   };
@@ -38,82 +38,89 @@ export function Card({
     // Placeholder card (empty slot)
     return (
       <div
-        className={`${sizeClass} bg-gray-700 rounded-lg border-2 border-gray-600 flex items-center justify-center`}
+        className={`${sizeClass} bg-felt-900/20 rounded border-2 border-dashed border-sand-200/20 flex items-center justify-center`}
       >
-        <div className="text-gray-500 text-xs">?</div>
+        <div className="text-sand-200/30 text-xs">?</div>
       </div>
     );
   }
 
   if (!faceUp) {
-    // Card back
+    // Card back - Western pattern with rope border
     return (
       <div
         className={`${sizeClass} ${animationClass} card-container`}
         style={{ animationDelay: `${animationDelay}ms` }}
       >
-        <div className="card-back w-full h-full bg-gradient-to-br from-blue-900 to-blue-700 rounded-lg shadow-md border-2 border-blue-800 flex flex-col items-center justify-center p-1">
-          {/* Card back pattern */}
-          <div className="w-full h-full relative overflow-hidden rounded">
-            {/* Diagonal stripes pattern */}
-            <div
-              className="absolute inset-0 opacity-20"
-              style={{
-                backgroundImage:
-                  'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.1) 5px, rgba(255,255,255,0.1) 10px)',
-              }}
-            />
-            {/* Center emblem */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-blue-300 opacity-40 text-2xl">♠</div>
+        <div
+          className="card-back w-full h-full bg-gradient-to-br from-whiskey-700 via-whiskey-800 to-whiskey-700 rounded shadow-lg border-2 border-sand-200 relative overflow-hidden"
+          style={{
+            boxShadow: '0 3px 8px rgba(0, 0, 0, 0.6)',
+          }}
+        >
+          {/* Rope-style border pattern */}
+          <div
+            className="absolute inset-1 border-2 border-sand-100/40 rounded"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(232, 213, 183, 0.1) 4px, rgba(232, 213, 183, 0.1) 8px)',
+            }}
+          />
+
+          {/* Western star pattern */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-gold-400 text-3xl opacity-40" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+              ★
             </div>
-            {/* Corner decorations */}
-            <div className="absolute top-0 left-0 text-blue-400 opacity-30 text-xs p-0.5">♦</div>
-            <div className="absolute top-0 right-0 text-blue-400 opacity-30 text-xs p-0.5">♣</div>
-            <div className="absolute bottom-0 left-0 text-blue-400 opacity-30 text-xs p-0.5">♥</div>
-            <div className="absolute bottom-0 right-0 text-blue-400 opacity-30 text-xs p-0.5">♠</div>
           </div>
+
+          {/* Decorative corners */}
+          <div className="absolute top-1.5 left-1.5 text-gold-400/30 text-xs">✦</div>
+          <div className="absolute top-1.5 right-1.5 text-gold-400/30 text-xs">✦</div>
+          <div className="absolute bottom-1.5 left-1.5 text-gold-400/30 text-xs">✦</div>
+          <div className="absolute bottom-1.5 right-1.5 text-gold-400/30 text-xs">✦</div>
         </div>
       </div>
     );
   }
 
-  // Face-up card
+  // Face-up card - Classic white playing card
   const color = SUIT_COLORS[card.suit];
   const textColor = color === 'red' ? 'text-red-600' : 'text-gray-900';
   const suitSymbol = SUIT_SYMBOLS[card.suit];
 
   // Determine rank display size based on card size
-  const rankSizeClass = size === 'small' ? 'text-xs' : size === 'medium' ? 'text-sm' : 'text-base';
-  const suitSizeClass = size === 'small' ? 'text-lg' : size === 'medium' ? 'text-3xl' : 'text-4xl';
+  const rankSizeClass = size === 'small' ? 'text-sm' : size === 'medium' ? 'text-base' : 'text-xl';
+  const suitSizeClass = size === 'small' ? 'text-2xl' : size === 'medium' ? 'text-4xl' : 'text-5xl';
 
   return (
     <div
       className={`${sizeClass} ${animationClass} card-container`}
       style={{ animationDelay: `${animationDelay}ms` }}
     >
-      <div className="card-face w-full h-full bg-white rounded-lg shadow-md border-2 border-gray-300 p-1 relative overflow-hidden hover:shadow-lg transition-shadow">
+      <div
+        className="card-face w-full h-full bg-white rounded shadow-lg border-2 border-gray-200 p-1 relative overflow-hidden"
+        style={{
+          boxShadow: '0 3px 8px rgba(0, 0, 0, 0.4)',
+        }}
+      >
         {/* Top-left rank and suit */}
-        <div className={`absolute top-0.5 left-1 ${textColor} font-bold leading-none ${rankSizeClass}`}>
+        <div className={`absolute top-1 left-1.5 ${textColor} font-bold leading-none ${rankSizeClass}`}>
           <div>{card.rank}</div>
           <div className="-mt-0.5">{suitSymbol}</div>
         </div>
 
         {/* Bottom-right rank and suit (upside down) */}
         <div
-          className={`absolute bottom-0.5 right-1 ${textColor} font-bold leading-none ${rankSizeClass} rotate-180`}
+          className={`absolute bottom-1 right-1.5 ${textColor} font-bold leading-none ${rankSizeClass} rotate-180`}
         >
           <div>{card.rank}</div>
           <div className="-mt-0.5">{suitSymbol}</div>
         </div>
 
         {/* Center suit symbol */}
-        <div className={`absolute inset-0 flex items-center justify-center ${textColor} ${suitSizeClass} opacity-90`}>
+        <div className={`absolute inset-0 flex items-center justify-center ${textColor} ${suitSizeClass}`}>
           {suitSymbol}
         </div>
-
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent pointer-events-none rounded-lg" />
       </div>
     </div>
   );

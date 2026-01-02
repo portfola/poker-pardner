@@ -253,20 +253,28 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'PLAYER_ACTION': {
       const { playerId, action: playerAction, amount } = action;
-      const newState = { ...state };
-      const player = newState.players.find(p => p.id === playerId);
+      const playerIndex = state.players.findIndex(p => p.id === playerId);
 
-      if (!player) {
+      if (playerIndex === -1) {
         console.error('Player not found:', playerId);
         return state;
       }
 
       // Validate it's the player's turn
-      if (newState.players[newState.currentPlayerIndex].id !== playerId) {
+      if (state.players[state.currentPlayerIndex].id !== playerId) {
         console.error('Not player\'s turn');
         return state;
       }
 
+      // Create new state with properly cloned players array
+      const newState = {
+        ...state,
+        players: state.players.map((p, idx) =>
+          idx === playerIndex ? { ...p } : p
+        )
+      };
+
+      const player = newState.players[playerIndex];
       player.hasActed = true;
 
       switch (playerAction) {
@@ -289,7 +297,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           player.chips -= actualCall;
           player.currentBet += actualCall;
           player.totalBet += actualCall;
+          const oldPot = newState.pot;
           newState.pot += actualCall;
+
+          console.log(`${player.name} called $${actualCall}. Pot: $${oldPot} → $${newState.pot}`);
 
           if (player.chips === 0) {
             player.isAllIn = true;

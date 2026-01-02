@@ -1,4 +1,4 @@
-# Poker Pal - Texas Hold'em Tutorial App
+# Poker Pardner - Texas Hold'em Tutorial App
 
 An interactive web application that teaches complete beginners how to play Texas Hold'em poker through guided tutorial hands followed by assisted practice play.
 
