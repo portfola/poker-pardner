@@ -139,14 +139,6 @@ function postBlinds(state: GameState): GameState {
   // First to act is player after big blind (pre-flop)
   newState.currentPlayerIndex = (bigBlindPos + 1) % newState.players.length;
 
-  console.log('Blinds posted:', {
-    dealer: newState.dealerPosition,
-    smallBlind: smallBlindPos,
-    bigBlind: bigBlindPos,
-    firstToAct: newState.currentPlayerIndex,
-    firstToActPlayer: newState.players[newState.currentPlayerIndex]?.name
-  });
-
   return newState;
 }
 
@@ -212,8 +204,6 @@ function isBettingRoundComplete(state: GameState): boolean {
  * Game state reducer - handles all state transitions.
  */
 function gameReducer(state: GameState, action: GameAction): GameState {
-  console.log('Game Action:', action.type, action);
-
   switch (action.type) {
     case 'START_NEW_HAND': {
       const newState = { ...state };
@@ -297,10 +287,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           player.chips -= actualCall;
           player.currentBet += actualCall;
           player.totalBet += actualCall;
-          const oldPot = newState.pot;
           newState.pot += actualCall;
-
-          console.log(`${player.name} called $${actualCall}. Pot: $${oldPot} → $${newState.pot}`);
 
           if (player.chips === 0) {
             player.isAllIn = true;
@@ -309,9 +296,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         }
 
         case 'raise': {
-          const raiseAmount = amount || newState.minRaise;
-          const totalNeeded = raiseAmount;
-          const actualRaise = Math.min(totalNeeded, player.chips);
+          // The 'amount' parameter is the new total bet amount (e.g., 20 if raising from 10 to 20)
+          const newTotalBet = amount || newState.minRaise;
+          // Calculate how much the player needs to add to reach the new total bet
+          const additionalChips = newTotalBet - player.currentBet;
+          const actualRaise = Math.min(additionalChips, player.chips);
 
           player.chips -= actualRaise;
           player.currentBet += actualRaise;
@@ -339,7 +328,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Check if betting round is complete
       if (isBettingRoundComplete(newState)) {
         // Move to next phase will be handled by separate action
-        console.log('Betting round complete');
       } else {
         // Move to next player
         const nextPlayer = getNextPlayerIndex(newState, newState.currentPlayerIndex);

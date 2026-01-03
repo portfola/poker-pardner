@@ -5,7 +5,7 @@
 
 import { GameState } from '../types/game';
 import { describeHand, evaluateHandStrength, getStrategicAdvice, describeHoleCards } from '../utils/handStrength';
-import { getBestFiveCardHand, evaluateHand } from '../utils/handEvaluator';
+import { getBestFiveCardHand, getBestHandFromSix, evaluateHand } from '../utils/handEvaluator';
 import { cardToString } from '../utils/cards';
 
 interface StrategicAdviceProps {
@@ -33,24 +33,28 @@ export function StrategicAdvice({ gameState }: StrategicAdviceProps) {
   }
 
   // Evaluate current hand based on what cards are available
-  const totalCards = userPlayer.holeCards.length + gameState.communityCards.length;
-
   let strength: 'weak' | 'medium' | 'strong';
   let handDescription: string;
 
-  if (totalCards === 7) {
-    // Full board (river) - evaluate best 5-card hand
+  if (userPlayer.holeCards.length === 2 && gameState.communityCards.length === 5) {
+    // Full board (river) - evaluate best 5-card hand from all 7 cards
     const evaluation = getBestFiveCardHand(userPlayer.holeCards, gameState.communityCards);
     strength = evaluateHandStrength(evaluation);
     handDescription = describeHand(evaluation);
-  } else if (gameState.communityCards.length >= 3) {
-    // Partial board (flop or turn) - evaluate what we have so far
+  } else if (userPlayer.holeCards.length === 2 && gameState.communityCards.length === 3) {
+    // Flop (exactly 5 cards) - evaluate as-is
     const allCards = [...userPlayer.holeCards, ...gameState.communityCards];
     const evaluation = evaluateHand(allCards);
     strength = evaluateHandStrength(evaluation);
     handDescription = describeHand(evaluation);
+  } else if (userPlayer.holeCards.length === 2 && gameState.communityCards.length === 4) {
+    // Turn (6 cards) - find best 5-card combination
+    const allCards = [...userPlayer.holeCards, ...gameState.communityCards];
+    const evaluation = getBestHandFromSix(allCards);
+    strength = evaluateHandStrength(evaluation);
+    handDescription = describeHand(evaluation);
   } else {
-    // Pre-flop - just evaluate starting hand strength
+    // Pre-flop or unusual state - just evaluate starting hand strength
     handDescription = describeHoleCards(userPlayer.holeCards);
 
     // Simple pre-flop strength evaluation

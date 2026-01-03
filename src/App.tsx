@@ -3,14 +3,16 @@ import { useState, useEffect, useRef } from 'react'
 import { useGameState } from './hooks/useGameState'
 import { PokerTable } from './components/PokerTable'
 import { Sidebar } from './components/Sidebar'
+import { ShowdownDisplay } from './components/ShowdownDisplay'
 import { makeAIDecision } from './utils/ai'
 
 function App() {
-  const { state, startNewHand, handlePlayerAction, isBettingComplete, advancePhase } = useGameState()
+  const { state, startNewHand, handlePlayerAction, isBettingComplete, advancePhase, determineWinner, resetForNextHand } = useGameState()
   const [lastAction, setLastAction] = useState<string>('')
   const [isProcessing, setIsProcessing] = useState(false)
   const processingRef = useRef(false)
   const timeoutRef = useRef<number | null>(null)
+  const phaseJustAdvanced = useRef(false)
 
   // Check if hand has been dealt
   const hasCards = state.players.some(p => p.holeCards.length > 0)
@@ -56,8 +58,42 @@ function App() {
   // Custom start handler
   const handleStartNewHand = () => {
     setLastAction('')
+    phaseJustAdvanced.current = false
     startNewHand()
   }
+
+  // Handle next hand after showdown
+  const handleNextHand = () => {
+    const userPlayer = state.players.find(p => p.isUser)
+
+    // If user is eliminated, start completely new game
+    if (userPlayer && userPlayer.chips === 0) {
+      handleStartNewHand()
+      return
+    }
+
+    // Otherwise, reset for next hand
+    resetForNextHand()
+    setLastAction('')
+    phaseJustAdvanced.current = false
+
+    // Start new hand after a brief delay
+    setTimeout(() => {
+      startNewHand()
+    }, 500)
+  }
+
+  // Handle showdown - determine winner when phase is showdown
+  useEffect(() => {
+    if (state.currentPhase === 'showdown' && !state.isHandComplete) {
+      // Trigger winner determination
+      const timer = setTimeout(() => {
+        determineWinner()
+      }, 1500) // Pause to let players see the cards
+
+      return () => clearTimeout(timer)
+    }
+  }, [state.currentPhase, state.isHandComplete, determineWinner])
 
   // AI automation with delays
   useEffect(() => {
@@ -66,43 +102,38 @@ function App() {
       return
     }
 
-    console.log('AI Effect triggered:', {
-      processingRef: processingRef.current,
-      isProcessing,
-      currentPlayerIndex: state.currentPlayerIndex,
-      currentPlayer: state.players[state.currentPlayerIndex]?.name,
-      isUser: state.players[state.currentPlayerIndex]?.isUser,
-      hasCards,
-      isHandComplete: state.isHandComplete
-    })
-
     // Prevent multiple simultaneous processes
     if (processingRef.current) {
-      console.log('Skipping - already processing (ref)')
       return
     }
 
     const currentPlayer = state.players[state.currentPlayerIndex]
 
     // Check if betting round is complete
-    if (!state.isHandComplete && isBettingComplete()) {
-      console.log('Betting round complete, advancing phase')
+    // Don't check immediately after a phase was just advanced
+    if (!state.isHandComplete && isBettingComplete() && !phaseJustAdvanced.current) {
       processingRef.current = true
       setIsProcessing(true)
+      phaseJustAdvanced.current = true
 
       timeoutRef.current = window.setTimeout(() => {
         setAction('Betting round complete.')
         timeoutRef.current = window.setTimeout(() => {
           advancePhase()
+
+          // Reset the flag after a delay to allow new betting round to start
+          window.setTimeout(() => {
+            phaseJustAdvanced.current = false
+          }, 1500)
+
           const phaseNames: Record<string, string> = {
-            'flop': 'Dealing the flop...',
-            'turn': 'Dealing the turn...',
-            'river': 'Dealing the river...',
-            'showdown': 'Showdown!'
+            'pre-flop': 'Dealing the flop...',
+            'flop': 'Dealing the turn...',
+            'turn': 'Dealing the river...',
+            'river': 'Showdown!'
           }
-          if (state.currentPhase !== 'pre-flop') {
-            setAction(phaseNames[state.currentPhase] || 'Next phase...')
-          }
+          setAction(phaseNames[state.currentPhase] || 'Next phase...')
+
           processingRef.current = false
           setIsProcessing(false)
         }, 1000)
@@ -112,11 +143,8 @@ function App() {
 
     // Only process if it's an AI player's turn
     if (!currentPlayer || currentPlayer.isUser || state.isHandComplete) {
-      console.log('Not AI turn or hand complete')
       return
     }
-
-    console.log('Starting AI action for:', currentPlayer.name)
 
     // Mark as processing
     processingRef.current = true
@@ -126,7 +154,7 @@ function App() {
     const delay = 1000 + Math.random() * 1000
 
     timeoutRef.current = window.setTimeout(() => {
-      console.log('Executing AI action for:', currentPlayer.name)
+      console.log('AI turn:', currentPlayer.name)
 
       // Make AI decision
       const decision = makeAIDecision(currentPlayer, state)
@@ -145,7 +173,6 @@ function App() {
       }
 
       setAction(narration)
-      console.log('AI action:', decision.action, decision.amount)
 
       // Execute the action
       handlePlayerAction(currentPlayer.id, decision.action, decision.amount)
@@ -259,6 +286,10 @@ function App() {
         onFold={handleFold}
         onCall={handleCall}
         onRaise={handleRaise}
+      />
+      <ShowdownDisplay
+        gameState={state}
+        onNextHand={handleNextHand}
       />
     </>
   )

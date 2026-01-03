@@ -27,4 +27,5 @@ dist-ssr
 .claude*
 CLAUDE.md
 spec.md
-prompt_plan.md
+prompt_plan*
+repomix*

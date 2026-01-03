@@ -5,21 +5,22 @@
 
 import { Card, HandEvaluation, HandRank } from '../types/game';
 import { RANK_VALUES } from '../constants/cards';
+import { Rank } from '../types/game';
 
 /**
  * Gets the numeric value of a card rank.
  * Aces are treated as 14 by default (can be 1 for ace-low straights).
  */
-function getCardValue(rank: string): number {
-  return RANK_VALUES[rank as keyof typeof RANK_VALUES];
+function getCardValue(rank: Rank): number {
+  return RANK_VALUES[rank];
 }
 
 /**
  * Groups cards by rank.
  * Returns a map of rank -> array of cards with that rank.
  */
-function groupByRank(cards: Card[]): Map<string, Card[]> {
-  const groups = new Map<string, Card[]>();
+function groupByRank(cards: Card[]): Map<Rank, Card[]> {
+  const groups = new Map<Rank, Card[]>();
 
   for (const card of cards) {
     const existing = groups.get(card.rank) || [];
@@ -266,6 +267,32 @@ export function getBestFiveCardHand(holeCards: Card[], communityCards: Card[]): 
           }
         }
       }
+    }
+  }
+
+  return bestHand!;
+}
+
+/**
+ * Finds the best 5-card hand from 6 cards (e.g., 2 hole cards + 4 community cards on the turn).
+ * Evaluates all possible 5-card combinations and returns the best one.
+ * @param cards - Exactly 6 cards to evaluate
+ * @returns The best possible HandEvaluation
+ */
+export function getBestHandFromSix(cards: Card[]): HandEvaluation {
+  if (cards.length !== 6) {
+    throw new Error('getBestHandFromSix requires exactly 6 cards');
+  }
+
+  let bestHand: HandEvaluation | null = null;
+
+  // Try all combinations of 5 cards from 6 (6 combinations)
+  for (let i = 0; i < cards.length; i++) {
+    const fiveCards = cards.filter((_, idx) => idx !== i);
+    const evaluation = evaluateHand(fiveCards);
+
+    if (!bestHand || compareHands(evaluation, bestHand) > 0) {
+      bestHand = evaluation;
     }
   }
 

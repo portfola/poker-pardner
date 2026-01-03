@@ -4,7 +4,7 @@
  */
 
 import { HandEvaluation, HandRank, GameState, Player, Card } from '../types/game';
-import { getBestFiveCardHand, evaluateHand } from './handEvaluator';
+import { getBestFiveCardHand, getBestHandFromSix, evaluateHand } from './handEvaluator';
 
 /**
  * Converts a HandEvaluation to a human-readable description.
@@ -150,20 +150,25 @@ export function getStrategicAdvice(
   }
 
   // Evaluate current hand based on available cards
-  const totalCards = player.holeCards.length + gameState.communityCards.length;
   let evaluation: ReturnType<typeof getBestFiveCardHand>;
   let strength: 'weak' | 'medium' | 'strong';
   let handDescription: string;
 
-  if (totalCards === 7) {
-    // Full board - evaluate best 5-card hand
+  if (player.holeCards.length === 2 && gameState.communityCards.length === 5) {
+    // Full board - evaluate best 5-card hand from all 7 cards
     evaluation = getBestFiveCardHand(player.holeCards, gameState.communityCards);
     strength = evaluateHandStrength(evaluation);
     handDescription = describeHand(evaluation);
-  } else if (gameState.communityCards.length >= 3) {
-    // Partial board - evaluate current cards
+  } else if (player.holeCards.length === 2 && gameState.communityCards.length === 3) {
+    // Flop (exactly 5 cards) - evaluate as-is
     const allCards = [...player.holeCards, ...gameState.communityCards];
     evaluation = evaluateHand(allCards);
+    strength = evaluateHandStrength(evaluation);
+    handDescription = describeHand(evaluation);
+  } else if (player.holeCards.length === 2 && gameState.communityCards.length === 4) {
+    // Turn (6 cards) - find best 5-card combination
+    const allCards = [...player.holeCards, ...gameState.communityCards];
+    evaluation = getBestHandFromSix(allCards);
     strength = evaluateHandStrength(evaluation);
     handDescription = describeHand(evaluation);
   } else {

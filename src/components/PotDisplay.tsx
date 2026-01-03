@@ -4,17 +4,22 @@
 
 interface PotDisplayProps {
   amount: number;
+  isAwarding?: boolean;
 }
 
-export function PotDisplay({ amount }: PotDisplayProps) {
+export function PotDisplay({ amount, isAwarding = false }: PotDisplayProps) {
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className={`flex flex-col items-center justify-center transition-all duration-500 ${isAwarding ? 'scale-110' : ''}`}>
       <div className="relative">
         {/* Pot of gold */}
         <div
-          className="relative bg-gradient-to-b from-whiskey-600 via-whiskey-700 to-whiskey-800 px-6 py-3 rounded-lg shadow-xl border-2 border-wood-700"
+          className={`relative bg-gradient-to-b from-whiskey-600 via-whiskey-700 to-whiskey-800 px-6 py-3 rounded-lg shadow-xl border-2 border-wood-700 transition-all ${
+            isAwarding ? 'ring-4 ring-green-500/50 animate-pulse' : ''
+          }`}
           style={{
-            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(205, 133, 63, 0.2)',
+            boxShadow: isAwarding
+              ? '0 8px 24px rgba(34, 197, 94, 0.5), inset 0 2px 4px rgba(205, 133, 63, 0.2)'
+              : '0 6px 16px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(205, 133, 63, 0.2)',
           }}
         >
           {/* POT label */}

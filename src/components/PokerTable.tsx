@@ -152,7 +152,7 @@ export function PokerTable({ gameState, onFold, onCall, onRaise }: PokerTablePro
             {/* Center Area - Community Cards and Pot */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4">
               {/* Pot Display */}
-              <PotDisplay amount={pot} />
+              <PotDisplay amount={pot} isAwarding={currentPhase === 'showdown' && gameState.isHandComplete} />
 
               {/* Community Cards */}
               {communityCards.length > 0 && (
