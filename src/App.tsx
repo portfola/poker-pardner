@@ -5,14 +5,15 @@ import { PokerTable } from './components/PokerTable'
 import { Sidebar } from './components/Sidebar'
 import { ShowdownDisplay } from './components/ShowdownDisplay'
 import { makeAIDecision } from './utils/ai'
+import { TIMING } from './constants/timing'
+import { logger } from './utils/logger'
 
 function App() {
-  const { state, startNewHand, handlePlayerAction, isBettingComplete, advancePhase, determineWinner, resetForNextHand } = useGameState()
+  const { state, startNewHand, handlePlayerAction, isBettingComplete, startPhaseAdvance, advancePhase, determineWinner, resetForNextHand } = useGameState()
   const [lastAction, setLastAction] = useState<string>('')
   const [isProcessing, setIsProcessing] = useState(false)
   const processingRef = useRef(false)
   const timeoutRef = useRef<number | null>(null)
-  const phaseJustAdvanced = useRef(false)
 
   // Check if hand has been dealt
   const hasCards = state.players.some(p => p.holeCards.length > 0)
@@ -58,7 +59,6 @@ function App() {
   // Custom start handler
   const handleStartNewHand = () => {
     setLastAction('')
-    phaseJustAdvanced.current = false
     startNewHand()
   }
 
@@ -75,12 +75,11 @@ function App() {
     // Otherwise, reset for next hand
     resetForNextHand()
     setLastAction('')
-    phaseJustAdvanced.current = false
 
     // Start new hand after a brief delay
     setTimeout(() => {
       startNewHand()
-    }, 500)
+    }, TIMING.NEW_HAND_DELAY)
   }
 
   // Handle showdown - determine winner when phase is showdown
@@ -89,7 +88,7 @@ function App() {
       // Trigger winner determination
       const timer = setTimeout(() => {
         determineWinner()
-      }, 1500) // Pause to let players see the cards
+      }, TIMING.SHOWDOWN_REVEAL_DELAY) // Pause to let players see the cards
 
       return () => clearTimeout(timer)
     }
@@ -110,22 +109,17 @@ function App() {
     const currentPlayer = state.players[state.currentPlayerIndex]
 
     // Check if betting round is complete
-    // Don't check immediately after a phase was just advanced
-    if (!state.isHandComplete && isBettingComplete() && !phaseJustAdvanced.current) {
+    // Don't start phase advancement if already advancing
+    if (!state.isHandComplete && !state.isAdvancingPhase && isBettingComplete()) {
       processingRef.current = true
       setIsProcessing(true)
-      phaseJustAdvanced.current = true
+
+      // Mark that we're starting to advance (prevents re-triggering)
+      startPhaseAdvance()
 
       timeoutRef.current = window.setTimeout(() => {
         setAction('Betting round complete.')
         timeoutRef.current = window.setTimeout(() => {
-          advancePhase()
-
-          // Reset the flag after a delay to allow new betting round to start
-          window.setTimeout(() => {
-            phaseJustAdvanced.current = false
-          }, 1500)
-
           const phaseNames: Record<string, string> = {
             'pre-flop': 'Dealing the flop...',
             'flop': 'Dealing the turn...',
@@ -134,10 +128,12 @@ function App() {
           }
           setAction(phaseNames[state.currentPhase] || 'Next phase...')
 
+          advancePhase()
+
           processingRef.current = false
           setIsProcessing(false)
-        }, 1000)
-      }, 500)
+        }, TIMING.PHASE_ADVANCE_DELAY)
+      }, TIMING.BETTING_COMPLETE_DELAY)
       return
     }
 
@@ -150,11 +146,11 @@ function App() {
     processingRef.current = true
     setIsProcessing(true)
 
-    // Delay before AI acts (1-2 seconds for realism)
-    const delay = 1000 + Math.random() * 1000
+    // Delay before AI acts (realistic thinking time)
+    const delay = TIMING.AI_TURN_BASE_DELAY + Math.random() * TIMING.AI_TURN_RANDOM_DELAY
 
     timeoutRef.current = window.setTimeout(() => {
-      console.log('AI turn:', currentPlayer.name)
+      logger.debug('AI turn:', currentPlayer.name)
 
       // Make AI decision
       const decision = makeAIDecision(currentPlayer, state)
@@ -182,11 +178,15 @@ function App() {
       setIsProcessing(false)
     }, delay)
 
-    // Cleanup - don't clear timeout as it's managed by ref
+    // Cleanup function - clear any pending timeouts on unmount or dependency change
     return () => {
-      // Don't clear the timeout here - let it complete
+      if (timeoutRef.current !== null) {
+        window.clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
+      processingRef.current = false
     }
-  }, [state.currentPlayerIndex, state.players, state.currentPhase, state.isHandComplete, hasCards])
+  }, [state.currentPlayerIndex, state.players, state.currentPhase, state.isHandComplete, state.isAdvancingPhase, hasCards, isBettingComplete, startPhaseAdvance, advancePhase, handlePlayerAction])
 
   if (!hasCards) {
     // Welcome screen - Saloon entrance
@@ -258,6 +258,7 @@ function App() {
           {/* Start button - Saloon door style */}
           <button
             onClick={handleStartNewHand}
+            aria-label="Start tutorial mode to learn poker"
             className="bg-gradient-to-b from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-wood-900 font-body font-bold py-4 px-10 rounded-lg text-xl shadow-xl transition-all hover:scale-105 active:scale-95 border-4 border-gold-600"
             style={{
               boxShadow: '0 6px 20px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3)',

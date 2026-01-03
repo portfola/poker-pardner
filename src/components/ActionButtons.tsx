@@ -71,6 +71,8 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
           <button
             onClick={onFold}
             disabled={foldDisabled}
+            aria-label="Fold your hand and forfeit this round"
+            aria-disabled={foldDisabled}
             className={`
               px-8 py-4 rounded-lg font-body font-bold text-lg transition-all
               ${
@@ -92,6 +94,8 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
           <button
             onClick={onCall}
             disabled={callDisabled}
+            aria-label={isCheck ? "Check - pass without betting" : `Call the current bet of $${amountToCall}`}
+            aria-disabled={callDisabled}
             className={`
               px-8 py-4 rounded-lg font-body font-bold text-lg transition-all min-w-[140px]
               ${
@@ -113,6 +117,14 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
           <button
             onClick={onRaise}
             disabled={raiseDisabled}
+            aria-label={
+              !canRaise
+                ? "Go all-in with remaining chips"
+                : hasEnoughForMinRaise
+                ? `Raise the bet to $${currentBet + bigBlind}`
+                : "Go all-in with remaining chips"
+            }
+            aria-disabled={raiseDisabled}
             className={`
               px-8 py-4 rounded-lg font-body font-bold text-lg transition-all min-w-[140px]
               ${

@@ -5,7 +5,6 @@
 
 import { Card as CardType } from '../types/game';
 import { SUIT_SYMBOLS, SUIT_COLORS } from '../constants/cards';
-import './Card.css';
 
 interface CardProps {
   card?: CardType;
@@ -32,7 +31,7 @@ export function Card({
   const sizeClass = sizeClasses[size];
 
   // Animation classes
-  const animationClass = animate === 'deal' ? 'card-deal' : animate === 'flip' ? 'card-flip' : '';
+  const animationClass = animate === 'deal' ? 'animate-deal' : animate === 'flip' ? 'animate-flip' : '';
 
   if (!card) {
     // Placeholder card (empty slot)
@@ -49,13 +48,14 @@ export function Card({
     // Card back - Western pattern with rope border
     return (
       <div
-        className={`${sizeClass} ${animationClass} card-container`}
-        style={{ animationDelay: `${animationDelay}ms` }}
+        className={`${sizeClass} ${animationClass} relative transition-all duration-200`}
+        style={{ perspective: '1000px', animationDelay: `${animationDelay}ms` }}
       >
         <div
-          className="card-back w-full h-full bg-gradient-to-br from-whiskey-700 via-whiskey-800 to-whiskey-700 rounded shadow-lg border-2 border-sand-200 relative overflow-hidden"
+          className="w-full h-full bg-gradient-to-br from-whiskey-700 via-whiskey-800 to-whiskey-700 rounded shadow-lg border-2 border-sand-200 relative overflow-hidden transition-all duration-300"
           style={{
             boxShadow: '0 3px 8px rgba(0, 0, 0, 0.6)',
+            backfaceVisibility: 'hidden',
           }}
         >
           {/* Rope-style border pattern */}
@@ -94,13 +94,14 @@ export function Card({
 
   return (
     <div
-      className={`${sizeClass} ${animationClass} card-container`}
-      style={{ animationDelay: `${animationDelay}ms` }}
+      className={`${sizeClass} ${animationClass} relative transition-all duration-200`}
+      style={{ perspective: '1000px', animationDelay: `${animationDelay}ms` }}
     >
       <div
-        className="card-face w-full h-full bg-white rounded shadow-lg border-2 border-gray-200 p-1 relative overflow-hidden"
+        className="w-full h-full bg-white rounded shadow-lg border-2 border-gray-200 p-1 relative overflow-hidden transition-all duration-300"
         style={{
           boxShadow: '0 3px 8px rgba(0, 0, 0, 0.4)',
+          backfaceVisibility: 'hidden',
         }}
       >
         {/* Top-left rank and suit */}

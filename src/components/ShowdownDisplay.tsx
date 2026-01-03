@@ -43,7 +43,12 @@ export function ShowdownDisplay({ gameState, onNextHand }: ShowdownDisplayProps)
   const isUserEliminated = userPlayer && userPlayer.chips === 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="winner-announcement"
+    >
       {/* Winner Announcement - Wanted Poster Style */}
       <div
         className="bg-sand-100 border-8 border-wood-800 p-8 shadow-2xl max-w-md"
@@ -62,6 +67,7 @@ export function ShowdownDisplay({ gameState, onNextHand }: ShowdownDisplayProps)
         {/* Winner announcement */}
         <div className="text-center mb-6">
           <h2
+            id="winner-announcement"
             className={`text-4xl font-display font-bold mb-2 ${
               userWon ? 'text-green-700' : 'text-wood-900'
             }`}
@@ -110,6 +116,7 @@ export function ShowdownDisplay({ gameState, onNextHand }: ShowdownDisplayProps)
           {/* Next hand button */}
           <button
             onClick={onNextHand}
+            aria-label={isUserEliminated ? "Start a new game" : "Deal the next hand"}
             className="bg-gradient-to-b from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-wood-900 font-body font-bold py-4 px-10 rounded-lg text-xl shadow-xl transition-all hover:scale-105 active:scale-95 border-4 border-gold-600"
             style={{
               boxShadow: '0 6px 20px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3)',

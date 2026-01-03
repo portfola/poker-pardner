@@ -7,6 +7,7 @@ import { describe, it, expect } from 'vitest';
 import {
   evaluateHand,
   getBestFiveCardHand,
+  getBestHandFromSix,
   compareHands,
   determineWinners,
 } from './handEvaluator';
@@ -314,6 +315,123 @@ describe('getBestFiveCardHand', () => {
     const communityCards = [c('5', 'hearts'), c('4', 'hearts'), c('3', 'hearts'), c('A', 'spades'), c('K', 'clubs')];
     const result = getBestFiveCardHand(holeCards, communityCards);
     expect(result.rank).toBe(HandRank.StraightFlush);
+  });
+});
+
+describe('getBestHandFromSix', () => {
+  it('should throw error for non-6-card input', () => {
+    expect(() => getBestHandFromSix([c('A', 'spades'), c('K', 'hearts')])).toThrow('exactly 6 cards');
+    expect(() => getBestHandFromSix([c('A', 'spades'), c('K', 'hearts'), c('Q', 'diamonds'), c('J', 'clubs'), c('10', 'spades')])).toThrow('exactly 6 cards');
+    expect(() => getBestHandFromSix([c('A', 'spades'), c('K', 'hearts'), c('Q', 'diamonds'), c('J', 'clubs'), c('10', 'spades'), c('9', 'hearts'), c('8', 'clubs')])).toThrow('exactly 6 cards');
+  });
+
+  it('should find best 5-card hand from 6 cards', () => {
+    // 6 cards where we have three Aces + K, Q, 2
+    // Best hand is Aces with K and Q kickers
+    const cards = [
+      c('A', 'spades'), c('A', 'hearts'), c('A', 'diamonds'),
+      c('K', 'clubs'), c('Q', 'spades'), c('2', 'hearts')
+    ];
+    const result = getBestHandFromSix(cards);
+
+    expect(result.rank).toBe(HandRank.ThreeOfAKind);
+    expect(result.description).toContain('As');
+  });
+
+  it('should correctly drop the weakest card', () => {
+    // Flush draw: 5 hearts + 1 spade
+    // Best hand drops the spade and makes flush
+    const cards = [
+      c('A', 'hearts'), c('K', 'hearts'), c('Q', 'hearts'),
+      c('J', 'hearts'), c('9', 'hearts'), c('2', 'spades')
+    ];
+    const result = getBestHandFromSix(cards);
+
+    expect(result.rank).toBe(HandRank.Flush);
+    expect(result.description).toContain('A-high');
+  });
+
+  it('should find best hand when one specific card must be dropped', () => {
+    // Cards: A♠ K♠ Q♠ J♠ 10♠ 9♦
+    // Best hand is Royal Flush (drops the 9♦)
+    const cards = [
+      c('A', 'spades'), c('K', 'spades'), c('Q', 'spades'),
+      c('J', 'spades'), c('10', 'spades'), c('9', 'diamonds')
+    ];
+    const result = getBestHandFromSix(cards);
+
+    expect(result.rank).toBe(HandRank.RoyalFlush);
+  });
+
+  it('should find straight when dropping one card breaks a pair', () => {
+    // Cards: 9♥ 8♣ 7♦ 6♠ 5♥ 5♣
+    // Best hand is straight 9-high (drops one 5)
+    const cards = [
+      c('9', 'hearts'), c('8', 'clubs'), c('7', 'diamonds'),
+      c('6', 'spades'), c('5', 'hearts'), c('5', 'clubs')
+    ];
+    const result = getBestHandFromSix(cards);
+
+    expect(result.rank).toBe(HandRank.Straight);
+    expect(result.description).toContain('9-high');
+  });
+
+  it('should find two pair when three pairs are available', () => {
+    // Cards: A♠ A♥ K♦ K♣ Q♠ Q♥
+    // Best hand is Aces and Kings (drops Queens)
+    const cards = [
+      c('A', 'spades'), c('A', 'hearts'),
+      c('K', 'diamonds'), c('K', 'clubs'),
+      c('Q', 'spades'), c('Q', 'hearts')
+    ];
+    const result = getBestHandFromSix(cards);
+
+    expect(result.rank).toBe(HandRank.TwoPair);
+    expect(result.description).toContain('As and Ks');
+  });
+
+  it('should prefer full house over two pair', () => {
+    // Cards: A♠ A♥ A♦ K♣ K♠ Q♥
+    // Best hand is Full House Aces over Kings (drops Q)
+    const cards = [
+      c('A', 'spades'), c('A', 'hearts'), c('A', 'diamonds'),
+      c('K', 'clubs'), c('K', 'spades'), c('Q', 'hearts')
+    ];
+    const result = getBestHandFromSix(cards);
+
+    expect(result.rank).toBe(HandRank.FullHouse);
+    expect(result.description).toContain('As over Ks');
+  });
+
+  it('should handle ace-low straight from 6 cards', () => {
+    // Cards: A♠ 5♥ 4♦ 3♣ 2♠ K♥
+    // Best hand is wheel (A-2-3-4-5), drops K
+    const cards = [
+      c('A', 'spades'), c('5', 'hearts'), c('4', 'diamonds'),
+      c('3', 'clubs'), c('2', 'spades'), c('K', 'hearts')
+    ];
+    const result = getBestHandFromSix(cards);
+
+    expect(result.rank).toBe(HandRank.Straight);
+    expect(result.description).toContain('5-high');
+  });
+
+  it('should maximize kickers when hand rank is the same', () => {
+    // Cards: A♠ A♥ K♦ Q♣ J♠ 2♥
+    // Best hand is pair of Aces with K, Q, J (drops 2)
+    const cards = [
+      c('A', 'spades'), c('A', 'hearts'),
+      c('K', 'diamonds'), c('Q', 'clubs'),
+      c('J', 'spades'), c('2', 'hearts')
+    ];
+    const result = getBestHandFromSix(cards);
+
+    expect(result.rank).toBe(HandRank.Pair);
+    // Should include K, Q, J as kickers (not 2)
+    expect(result.values[0]).toBe(14); // Ace pair
+    expect(result.values[1]).toBe(13); // King kicker
+    expect(result.values[2]).toBe(12); // Queen kicker
+    expect(result.values[3]).toBe(11); // Jack kicker
   });
 });
 

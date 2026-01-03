@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Keyboard navigation focus indicators */
+button:focus-visible {
+  outline: 2px solid #DAA520;
+  outline-offset: 2px;
+}

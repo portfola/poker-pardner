@@ -4,7 +4,7 @@
  */
 
 import { useReducer, useCallback } from 'react';
-import { GameState, Player, BettingAction, Card } from '../types/game';
+import { GameState, Player, BettingAction } from '../types/game';
 import { createShuffledDeck, dealCards } from '../utils/cards';
 import { getBestFiveCardHand, determineWinners } from '../utils/handEvaluator';
 
@@ -12,11 +12,11 @@ import { getBestFiveCardHand, determineWinners } from '../utils/handEvaluator';
 type GameAction =
   | { type: 'START_NEW_HAND' }
   | { type: 'PLAYER_ACTION'; playerId: string; action: BettingAction; amount?: number }
+  | { type: 'START_PHASE_ADVANCE' }
   | { type: 'ADVANCE_PHASE' }
   | { type: 'DETERMINE_WINNER' }
   | { type: 'RESET_FOR_NEXT_HAND' }
-  | { type: 'ELIMINATE_PLAYER'; playerId: string }
-  | { type: 'DEAL_COMMUNITY_CARDS'; cards: Card[] };
+  | { type: 'ELIMINATE_PLAYER'; playerId: string };
 
 /**
  * Creates the initial game state with 4 players.
@@ -93,6 +93,7 @@ function createInitialState(): GameState {
     isHandComplete: false,
     winners: [],
     winningHands: [],
+    isAdvancingPhase: false,
   };
 }
 
@@ -104,8 +105,7 @@ function postBlinds(state: GameState): GameState {
   const activePlayers = newState.players.filter(p => p.chips > 0);
 
   if (activePlayers.length < 2) {
-    console.warn('Not enough players to post blinds');
-    return newState;
+    throw new Error(`Not enough players to post blinds: ${activePlayers.length}`);
   }
 
   const smallBlindPos = (newState.dealerPosition + 1) % newState.players.length;
@@ -231,6 +231,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       newState.isHandComplete = false;
       newState.winners = [];
       newState.winningHands = [];
+      newState.isAdvancingPhase = false;
 
       // Post blinds
       const stateWithBlinds = postBlinds(newState);
@@ -246,14 +247,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const playerIndex = state.players.findIndex(p => p.id === playerId);
 
       if (playerIndex === -1) {
-        console.error('Player not found:', playerId);
-        return state;
+        throw new Error(`Player not found: ${playerId}`);
       }
 
       // Validate it's the player's turn
       if (state.players[state.currentPlayerIndex].id !== playerId) {
-        console.error('Not player\'s turn');
-        return state;
+        throw new Error(
+          `Not player's turn: expected ${state.players[state.currentPlayerIndex].id}, got ${playerId}`
+        );
       }
 
       // Create new state with properly cloned players array
@@ -275,8 +276,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         case 'check':
           // Check is only valid if current bet is 0 or player has matched it
           if (newState.currentBet > player.currentBet) {
-            console.error('Cannot check - must call or fold');
-            return state;
+            throw new Error('Cannot check - must call or fold');
           }
           break;
 
@@ -339,6 +339,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return newState;
     }
 
+    case 'START_PHASE_ADVANCE': {
+      // Mark that we're starting to advance phase (prevents re-triggering)
+      return { ...state, isAdvancingPhase: true };
+    }
+
     case 'ADVANCE_PHASE': {
       const newState = { ...state };
 
@@ -349,6 +354,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         p.hasActed = false;
       });
 
+      // Mark that phase advancement is complete
+      newState.isAdvancingPhase = false;
+
       // Advance to next phase
       switch (newState.currentPhase) {
         case 'pre-flop':
@@ -358,20 +366,21 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           break;
 
         case 'flop':
-          // Deal turn (1 card)
-          newState.communityCards.push(...dealCards(newState.deck, 1));
+          // Deal turn (1 card) - create new array to avoid mutation
+          newState.communityCards = [...newState.communityCards, ...dealCards(newState.deck, 1)];
           newState.currentPhase = 'turn';
           break;
 
         case 'turn':
-          // Deal river (1 card)
-          newState.communityCards.push(...dealCards(newState.deck, 1));
+          // Deal river (1 card) - create new array to avoid mutation
+          newState.communityCards = [...newState.communityCards, ...dealCards(newState.deck, 1)];
           newState.currentPhase = 'river';
           break;
 
         case 'river':
           // Move to showdown
           newState.currentPhase = 'showdown';
+          newState.isAdvancingPhase = false;
           return newState;
 
         default:
@@ -395,8 +404,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const activePlayers = newState.players.filter(p => !p.isFolded);
 
       if (activePlayers.length === 0) {
-        console.error('No active players');
-        return state;
+        throw new Error('Cannot determine winner - no active players');
       }
 
       // If only one player remains, they win
@@ -410,9 +418,25 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       }
 
       // Evaluate all active players' hands
-      const handEvaluations = activePlayers.map(player =>
-        getBestFiveCardHand(player.holeCards, newState.communityCards)
-      );
+      // Only use getBestFiveCardHand if we have exactly 5 community cards
+      const handEvaluations = activePlayers.map(player => {
+        if (player.holeCards.length !== 2) {
+          throw new Error(
+            `Player ${player.id} has ${player.holeCards.length} hole cards (expected 2). ` +
+            `Phase: ${newState.currentPhase}, Community cards: ${newState.communityCards.length}`
+          );
+        }
+
+        if (newState.communityCards.length !== 5) {
+          throw new Error(
+            `Cannot evaluate hands at showdown - expected 5 community cards but got ${newState.communityCards.length}. ` +
+            `Phase: ${newState.currentPhase}, Active players: ${activePlayers.length}, ` +
+            `Total players: ${newState.players.length}`
+          );
+        }
+
+        return getBestFiveCardHand(player.holeCards, newState.communityCards);
+      });
 
       // Determine winner(s)
       const winnerIndices = determineWinners(handEvaluations);
@@ -481,6 +505,10 @@ export function useGameState() {
     dispatch({ type: 'PLAYER_ACTION', playerId, action, amount });
   }, []);
 
+  const startPhaseAdvance = useCallback(() => {
+    dispatch({ type: 'START_PHASE_ADVANCE' });
+  }, []);
+
   const advancePhase = useCallback(() => {
     dispatch({ type: 'ADVANCE_PHASE' });
   }, []);
@@ -518,6 +546,7 @@ export function useGameState() {
     state,
     startNewHand,
     handlePlayerAction,
+    startPhaseAdvance,
     advancePhase,
     determineWinner,
     resetForNextHand,

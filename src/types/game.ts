@@ -137,6 +137,8 @@ export interface GameState {
   winners: Player[];
   /** Winning hand evaluation(s) */
   winningHands: HandEvaluation[];
+  /** Whether the game is currently transitioning between phases */
+  isAdvancingPhase: boolean;
 }
 
 /**
@@ -151,34 +153,6 @@ export interface PlayerAction {
   amount?: number;
 }
 
-/**
- * Tutorial hand script data.
- * Defines pre-determined cards and actions for tutorial hands.
- */
-export interface TutorialHandScript {
-  /** Tutorial hand number (1-3) */
-  handNumber: number;
-  /** Title of the tutorial hand */
-  title: string;
-  /** Pre-determined hole cards for each player */
-  playerHoleCards: Card[][];
-  /** Pre-determined community cards */
-  communityCards: Card[];
-  /** Scripted AI actions for each phase */
-  aiActions: {
-    phase: GamePhase;
-    playerId: string;
-    action: BettingAction;
-    amount?: number;
-  }[];
-  /** Guidance text for the sidebar at different decision points */
-  guidance: {
-    phase: GamePhase;
-    text: string;
-  }[];
-  /** Post-hand explanation shown after the hand completes */
-  postHandExplanation: string;
-}
 
 /**
  * Strength classification for a hand.

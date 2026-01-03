@@ -46,6 +46,20 @@ export default {
         body: ['Roboto Slab', 'serif'],
         accent: ['Alfa Slab One', 'cursive'],
       },
+      keyframes: {
+        deal: {
+          'from': { opacity: '0', transform: 'translate(-50%, -50%) scale(0.3)' },
+          'to': { opacity: '1', transform: 'translate(0, 0) scale(1)' },
+        },
+        flip: {
+          'from': { transform: 'rotateY(180deg)' },
+          'to': { transform: 'rotateY(0deg)' },
+        },
+      },
+      animation: {
+        'deal': 'deal 0.4s ease-out forwards',
+        'flip': 'flip 0.6s ease-in-out forwards',
+      },
     },
   },
   plugins: [],
