@@ -30,7 +30,8 @@ export function ShowdownDisplay({ gameState, onNextHand }: ShowdownDisplayProps)
     winnerMessage = `Split Pot! ${winnerNames} tie`;
   } else {
     const winner = winners[0];
-    winnerMessage = `${winner.name} wins $${pot}!`;
+    const verb = winner.isUser ? 'win' : 'wins';
+    winnerMessage = `${winner.name} ${verb} $${pot}!`;
   }
 
   // Get hand description

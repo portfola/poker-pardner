@@ -4,6 +4,7 @@ import { useGameState } from './hooks/useGameState'
 import { PokerTable } from './components/PokerTable'
 import { Sidebar } from './components/Sidebar'
 import { ShowdownDisplay } from './components/ShowdownDisplay'
+import { MusicPlayer } from './components/MusicPlayer'
 import { makeAIDecision } from './utils/ai'
 import { TIMING } from './constants/timing'
 import { logger } from './utils/logger'
@@ -191,6 +192,8 @@ function App() {
   if (!hasCards) {
     // Welcome screen - Saloon entrance
     return (
+      <>
+      <MusicPlayer gameStarted={false} />
       <div
         className="min-h-screen flex items-center justify-center relative overflow-hidden"
         style={{
@@ -276,11 +279,13 @@ function App() {
           </div>
         </div>
       </div>
+      </>
     )
   }
 
   return (
     <>
+      <MusicPlayer gameStarted={true} />
       <Sidebar gameState={state} lastAction={lastAction} />
       <PokerTable
         gameState={state}

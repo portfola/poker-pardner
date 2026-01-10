@@ -148,9 +148,10 @@ function postBlinds(state: GameState): GameState {
 function dealHoleCards(state: GameState): GameState {
   const newState = { ...state };
 
-  // Deal 2 cards to each player
+  // Deal 2 cards to each player who is still in the hand
+  // This includes players who went all-in on blinds (chips === 0 but isAllIn === true)
   for (const player of newState.players) {
-    if (player.chips > 0) {
+    if (player.chips > 0 || player.isAllIn) {
       player.holeCards = dealCards(newState.deck, 2);
     }
   }
