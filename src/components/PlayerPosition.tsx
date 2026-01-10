@@ -1,6 +1,7 @@
 /**
  * Western saloon style player position display.
  * Shows name, chip count, hole cards, dealer button, and status.
+ * Responsive: compact mode for AI players on smaller screens.
  */
 
 import { Player } from '../types/game';
@@ -10,7 +11,8 @@ interface PlayerPositionProps {
   player: Player;
   isDealer: boolean;
   isCurrentTurn: boolean;
-  showCards?: boolean; // User's cards are always shown, others only at showdown
+  showCards?: boolean;
+  compact?: boolean; // Use compact layout for AI players
 }
 
 export function PlayerPosition({
@@ -18,16 +20,22 @@ export function PlayerPosition({
   isDealer,
   isCurrentTurn,
   showCards = false,
+  compact = false,
 }: PlayerPositionProps) {
   const isFolded = player.isFolded;
   const isAllIn = player.isAllIn;
+
+  // Determine card size based on compact mode and screen size
+  // User (non-compact) gets medium cards, AI players (compact) get small cards
+  const cardSize = compact ? 'small' : 'small';
 
   return (
     <div className="relative">
       {/* Player Info Container - Leather wallet style */}
       <div
         className={`
-          relative bg-gradient-to-br from-leather-800 to-leather-900 rounded-lg p-3 min-w-[140px] border-2 transition-all
+          relative bg-gradient-to-br from-leather-800 to-leather-900 rounded-lg border-2 transition-all
+          ${compact ? 'p-1.5 sm:p-2 md:p-3 min-w-[80px] sm:min-w-[100px] md:min-w-[140px]' : 'p-2 sm:p-3 min-w-[100px] sm:min-w-[140px]'}
           ${isCurrentTurn ? 'border-gold-500 shadow-lg shadow-gold-500/50' : 'border-wood-700'}
           ${isFolded ? 'opacity-50' : ''}
         `}
@@ -48,25 +56,28 @@ export function PlayerPosition({
         {/* Dealer Button - Sheriff star */}
         {isDealer && (
           <div
-            className="absolute -top-3 -right-3 bg-gradient-to-br from-gold-400 to-gold-600 rounded-full w-10 h-10 flex items-center justify-center border-2 border-wood-900 shadow-lg z-10"
+            className={`
+              absolute bg-gradient-to-br from-gold-400 to-gold-600 rounded-full flex items-center justify-center border-2 border-wood-900 shadow-lg z-10
+              ${compact ? '-top-2 -right-2 w-6 h-6 sm:w-8 sm:h-8 md:-top-3 md:-right-3 md:w-10 md:h-10' : '-top-3 -right-3 w-8 h-8 sm:w-10 sm:h-10'}
+            `}
             style={{
               boxShadow: '0 3px 8px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.4)',
             }}
           >
-            <span className="font-body font-bold text-base text-wood-900">D</span>
+            <span className={`font-body font-bold text-wood-900 ${compact ? 'text-xs sm:text-sm md:text-base' : 'text-sm sm:text-base'}`}>D</span>
           </div>
         )}
 
         {/* Player Name */}
-        <div className="text-sand-100 font-body font-semibold mb-2 text-center">
+        <div className={`text-sand-100 font-body font-semibold text-center ${compact ? 'text-xs sm:text-sm mb-1' : 'text-sm sm:text-base mb-2'}`}>
           {player.name}
         </div>
 
         {/* Chip Stack - Gold coin icon */}
-        <div className="flex items-center justify-center gap-1 mb-2">
-          <span className="text-xl">🪙</span>
+        <div className={`flex items-center justify-center gap-1 ${compact ? 'mb-1' : 'mb-2'}`}>
+          <span className={compact ? 'text-sm sm:text-base md:text-xl' : 'text-base sm:text-xl'}>🪙</span>
           <span
-            className={`font-body font-bold text-lg ${
+            className={`font-body font-bold ${compact ? 'text-xs sm:text-sm md:text-lg' : 'text-sm sm:text-lg'} ${
               player.chips > 75
                 ? 'text-green-400'
                 : player.chips > 30
@@ -80,7 +91,7 @@ export function PlayerPosition({
 
         {/* Current Bet */}
         {player.currentBet > 0 && !isFolded && (
-          <div className="text-center text-yellow-300 text-sm mb-1">
+          <div className={`text-center text-yellow-300 mb-1 ${compact ? 'text-xs' : 'text-xs sm:text-sm'}`}>
             Bet: ${player.currentBet}
           </div>
         )}
@@ -88,8 +99,8 @@ export function PlayerPosition({
         {/* All-In Indicator */}
         {isAllIn && (
           <div className="text-center mb-1">
-            <div className="inline-block bg-red-900/40 border border-red-700 rounded px-2 py-0.5">
-              <span className="text-red-400 text-xs font-body font-bold tracking-wider">
+            <div className="inline-block bg-red-900/40 border border-red-700 rounded px-1.5 sm:px-2 py-0.5">
+              <span className={`text-red-400 font-body font-bold tracking-wider ${compact ? 'text-[10px] sm:text-xs' : 'text-xs'}`}>
                 ALL IN
               </span>
             </div>
@@ -99,8 +110,8 @@ export function PlayerPosition({
         {/* Folded Indicator */}
         {isFolded && (
           <div className="text-center mb-1">
-            <div className="inline-block bg-gray-800/40 border border-gray-600 rounded px-2 py-0.5">
-              <span className="text-gray-400 text-xs font-body font-bold tracking-wider">
+            <div className="inline-block bg-gray-800/40 border border-gray-600 rounded px-1.5 sm:px-2 py-0.5">
+              <span className={`text-gray-400 font-body font-bold tracking-wider ${compact ? 'text-[10px] sm:text-xs' : 'text-xs'}`}>
                 FOLDED
               </span>
             </div>
@@ -108,14 +119,14 @@ export function PlayerPosition({
         )}
 
         {/* Hole Cards */}
-        <div className="flex gap-1 justify-center mt-2">
+        <div className={`flex gap-0.5 sm:gap-1 justify-center ${compact ? 'mt-1' : 'mt-2'}`}>
           {player.holeCards.length > 0 ? (
             player.holeCards.map((card, index) => (
               <Card
                 key={index}
                 card={card}
                 faceUp={showCards || player.isUser}
-                size="small"
+                size={cardSize}
                 animate="deal"
                 animationDelay={index * 100}
               />
@@ -123,8 +134,8 @@ export function PlayerPosition({
           ) : (
             // Placeholder when no cards dealt
             <>
-              <Card size="small" />
-              <Card size="small" />
+              <Card size={cardSize} />
+              <Card size={cardSize} />
             </>
           )}
         </div>

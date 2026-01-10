@@ -31,7 +31,7 @@ export function PokerTable({ gameState, onFold, onCall, onRaise }: PokerTablePro
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4 pb-48 pr-[360px] relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center p-2 sm:p-4 pb-32 sm:pb-48 xl:pr-[360px] relative overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #3E2723 0%, #4E342E 50%, #3E2723 100%)',
       }}
@@ -80,7 +80,7 @@ export function PokerTable({ gameState, onFold, onCall, onRaise }: PokerTablePro
               rounded-[50%]
               shadow-inner
               aspect-[16/9]
-              p-6
+              p-2 sm:p-4 md:p-6
             "
             style={{
               boxShadow: 'inset 0 0 60px rgba(0,0,0,0.4), inset 0 4px 8px rgba(0,0,0,0.3)',
@@ -103,48 +103,51 @@ export function PokerTable({ gameState, onFold, onCall, onRaise }: PokerTablePro
 
             {/* Top Player (Position 2) */}
             {topPlayer && (
-              <div className="absolute top-4 left-1/2 -translate-x-1/2">
+              <div className="absolute top-1 sm:top-2 md:top-4 left-1/2 -translate-x-1/2">
                 <PlayerPosition
                   player={topPlayer}
                   isDealer={dealerPosition === 2}
                   isCurrentTurn={currentPlayerIndex === 2}
                   showCards={showAllCards}
+                  compact={true}
                 />
               </div>
             )}
 
             {/* Left Player (Position 1) */}
             {leftPlayer && (
-              <div className="absolute top-1/2 left-4 -translate-y-1/2">
+              <div className="absolute top-1/2 left-1 sm:left-2 md:left-4 -translate-y-1/2">
                 <PlayerPosition
                   player={leftPlayer}
                   isDealer={dealerPosition === 1}
                   isCurrentTurn={currentPlayerIndex === 1}
                   showCards={showAllCards}
+                  compact={true}
                 />
               </div>
             )}
 
             {/* Right Player (Position 3) */}
             {rightPlayer && (
-              <div className="absolute top-1/2 right-4 -translate-y-1/2">
+              <div className="absolute top-1/2 right-1 sm:right-2 md:right-4 -translate-y-1/2">
                 <PlayerPosition
                   player={rightPlayer}
                   isDealer={dealerPosition === 3}
                   isCurrentTurn={currentPlayerIndex === 3}
                   showCards={showAllCards}
+                  compact={true}
                 />
               </div>
             )}
 
             {/* Bottom Player - User (Position 0) */}
             {bottomPlayer && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+              <div className="absolute bottom-1 sm:bottom-2 md:bottom-4 left-1/2 -translate-x-1/2">
                 <PlayerPosition
                   player={bottomPlayer}
                   isDealer={dealerPosition === 0}
                   isCurrentTurn={currentPlayerIndex === 0}
-                  showCards={true} // User's cards always visible
+                  showCards={true}
                 />
               </div>
             )}

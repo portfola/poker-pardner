@@ -31,7 +31,7 @@ npm test          # Run tests
 npm run test:ui   # Run tests with UI
 ```
 
-**Current Test Coverage: 103 tests passing ✓**
+**Current Test Coverage: 167 tests passing ✓**
 
 ## Project Status
 
@@ -69,6 +69,9 @@ The application is **fully functional and playable** with:
 - **Responsive States** - Visual indicators for folded, all-in, current turn
 - **Accessibility** - ARIA labels, focus indicators, keyboard navigation
 
+### Audio
+- **Background Music** - Optional looping background music with play/pause control (top-left corner)
+
 ## Game Configuration
 
 - **Players**: 4 total (1 user + 3 AI)
@@ -81,12 +84,13 @@ The application is **fully functional and playable** with:
 
 ### Completed
 
-**From prompt_plan_1.md (Steps 1-16):**
+**From prompt_plan_1.md (Steps 1-17):**
 - ✅ Steps 1-8: Project setup, types, utilities, UI components, animations
 - ✅ Steps 9-11: Sidebar, hand strength display, AI engine
 - ✅ Steps 12-14: Betting rounds, phase transitions, showdown
 - ✅ Step 15: Game over screen
 - ✅ Step 16: Visual polish and animations
+- ✅ Step 17: Responsive design (mobile/tablet/desktop)
 
 **From prompt_plan_2.md (All 12 tasks):**
 - ✅ Type safety improvements
@@ -102,26 +106,18 @@ The application is **fully functional and playable** with:
 **From prompt_plan_3.md:**
 - ✅ Sprint 1: Stability fixes (phase advancement, memory leaks, constants)
 - ✅ Sprint 2: Code quality (logging, error handling, type safety, dead code)
+- ✅ Sprint 3: Testing (AI, hand strength, component tests)
 - ✅ Sprint 4: Polish (error boundary, accessibility, CSS conversion)
 
 ### Remaining Work
 
-**Testing (prompt_plan_3.md Sprint 3):**
-- ⏳ Add AI decision tests (src/utils/ai.test.ts)
-- ⏳ Add hand strength utility tests (src/utils/handStrength.test.ts)
-- ⏳ Add component render tests (src/components/components.test.tsx)
-
-**Responsive Design (prompt_plan_1.md Step 17):**
-- ⏳ Tablet optimization (768px - 1199px)
-- ⏳ Mobile optimization (< 768px)
-- ⏳ Touch-friendly action buttons
-- ⏳ Collapsible sidebar for small screens
-
 **Deployment Preparation (prompt_plan_1.md Steps 18-21):**
-- ⏳ Edge case testing and bug fixes
-- ⏳ User experience refinements
 - ⏳ Final integration testing
 - ⏳ Production deployment setup
+
+### Recent Bug Fixes
+- ✅ Fixed "You wins" grammar error (now correctly shows "You win")
+- ✅ Fixed players not getting hole cards when all-in on blinds
 
 ### Future Enhancements (Phase 2)
 

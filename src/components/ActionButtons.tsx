@@ -51,9 +51,9 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
   const raiseDisabled = !isUserTurn || !canRaise;
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-[calc(50%+90px)] z-10">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 xl:-translate-x-[calc(50%+90px)] z-10 w-[calc(100%-2rem)] sm:w-auto max-w-lg">
       <div
-        className="bg-gradient-to-b from-wood-700 via-wood-800 to-wood-900 rounded-lg shadow-2xl p-4 border-2 border-sand-200/30"
+        className="bg-gradient-to-b from-wood-700 via-wood-800 to-wood-900 rounded-lg shadow-2xl p-2 sm:p-4 border-2 border-sand-200/30"
         style={{
           boxShadow: '0 8px 24px rgba(0, 0, 0, 0.7), inset 0 1px 2px rgba(139, 69, 19, 0.3)',
         }}
@@ -66,7 +66,7 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
           }}
         />
 
-        <div className="flex gap-3 relative z-10">
+        <div className="flex gap-2 sm:gap-3 relative z-10">
           {/* Fold Button */}
           <button
             onClick={onFold}
@@ -74,7 +74,7 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
             aria-label="Fold your hand and forfeit this round"
             aria-disabled={foldDisabled}
             className={`
-              px-8 py-4 rounded-lg font-body font-bold text-lg transition-all
+              flex-1 sm:flex-none px-4 sm:px-8 py-3 sm:py-4 rounded-lg font-body font-bold text-base sm:text-lg transition-all min-h-[48px]
               ${
                 foldDisabled
                   ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
@@ -97,7 +97,7 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
             aria-label={isCheck ? "Check - pass without betting" : `Call the current bet of $${amountToCall}`}
             aria-disabled={callDisabled}
             className={`
-              px-8 py-4 rounded-lg font-body font-bold text-lg transition-all min-w-[140px]
+              flex-1 sm:flex-none px-4 sm:px-8 py-3 sm:py-4 rounded-lg font-body font-bold text-base sm:text-lg transition-all min-w-[80px] sm:min-w-[140px] min-h-[48px]
               ${
                 callDisabled
                   ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
@@ -126,7 +126,7 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
             }
             aria-disabled={raiseDisabled}
             className={`
-              px-8 py-4 rounded-lg font-body font-bold text-lg transition-all min-w-[140px]
+              flex-1 sm:flex-none px-4 sm:px-8 py-3 sm:py-4 rounded-lg font-body font-bold text-base sm:text-lg transition-all min-w-[80px] sm:min-w-[140px] min-h-[48px]
               ${
                 raiseDisabled
                   ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
@@ -145,13 +145,13 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
 
         {/* Hint Text */}
         {isUserTurn && (
-          <div className="mt-3 text-center text-yellow-300 text-sm font-body font-medium animate-pulse">
+          <div className="mt-2 sm:mt-3 text-center text-yellow-300 text-xs sm:text-sm font-body font-medium animate-pulse">
             Your turn to act
           </div>
         )}
 
         {!isUserTurn && currentPlayer && (
-          <div className="mt-3 text-center text-sand-200/70 text-sm font-body">
+          <div className="mt-2 sm:mt-3 text-center text-sand-200/70 text-xs sm:text-sm font-body">
             Waiting for {currentPlayer.name}...
           </div>
         )}

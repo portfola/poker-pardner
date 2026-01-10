@@ -52,24 +52,24 @@ export function ShowdownDisplay({ gameState, onNextHand }: ShowdownDisplayProps)
     >
       {/* Winner Announcement - Wanted Poster Style */}
       <div
-        className="bg-sand-100 border-8 border-wood-800 p-8 shadow-2xl max-w-md"
+        className="bg-sand-100 border-4 sm:border-8 border-wood-800 p-4 sm:p-8 shadow-2xl max-w-[calc(100%-2rem)] sm:max-w-md mx-4"
         style={{
           boxShadow: '0 12px 32px rgba(0, 0, 0, 0.8)',
           background: 'linear-gradient(135deg, #F5E6D3 0%, #E8D5B7 100%)',
         }}
       >
         {/* Decorative stars */}
-        <div className="flex justify-center gap-4 mb-4">
-          <span className="text-gold-500 text-3xl">★</span>
-          <span className="text-gold-600 text-4xl">★</span>
-          <span className="text-gold-500 text-3xl">★</span>
+        <div className="flex justify-center gap-2 sm:gap-4 mb-3 sm:mb-4">
+          <span className="text-gold-500 text-2xl sm:text-3xl">★</span>
+          <span className="text-gold-600 text-3xl sm:text-4xl">★</span>
+          <span className="text-gold-500 text-2xl sm:text-3xl">★</span>
         </div>
 
         {/* Winner announcement */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-4 sm:mb-6">
           <h2
             id="winner-announcement"
-            className={`text-4xl font-display font-bold mb-2 ${
+            className={`text-2xl sm:text-4xl font-display font-bold mb-2 ${
               userWon ? 'text-green-700' : 'text-wood-900'
             }`}
             style={{
@@ -80,17 +80,17 @@ export function ShowdownDisplay({ gameState, onNextHand }: ShowdownDisplayProps)
           </h2>
 
           {/* Winner details */}
-          <div className="bg-wood-700/10 rounded-lg p-4 mb-4">
-            <p className="text-wood-900 font-body text-lg font-semibold mb-2">
+          <div className="bg-wood-700/10 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+            <p className="text-wood-900 font-body text-base sm:text-lg font-semibold mb-2">
               {winnerMessage}
             </p>
             {handDescription && (
-              <p className="text-wood-800 font-body text-base">
+              <p className="text-wood-800 font-body text-sm sm:text-base">
                 with {handDescription}
               </p>
             )}
             {isSplit && (
-              <p className="text-wood-700 font-body text-sm mt-2">
+              <p className="text-wood-700 font-body text-xs sm:text-sm mt-2">
                 Each player wins ${potShare}
               </p>
             )}
@@ -109,16 +109,16 @@ export function ShowdownDisplay({ gameState, onNextHand }: ShowdownDisplayProps)
           )}
 
           {/* Divider */}
-          <div className="h-1 w-24 bg-wood-700 mx-auto my-4" />
+          <div className="h-1 w-16 sm:w-24 bg-wood-700 mx-auto my-3 sm:my-4" />
 
           {/* Chip icon */}
-          <div className="text-5xl mb-4">🪙</div>
+          <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">🪙</div>
 
           {/* Next hand button */}
           <button
             onClick={onNextHand}
             aria-label={isUserEliminated ? "Start a new game" : "Deal the next hand"}
-            className="bg-gradient-to-b from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-wood-900 font-body font-bold py-4 px-10 rounded-lg text-xl shadow-xl transition-all hover:scale-105 active:scale-95 border-4 border-gold-600"
+            className="bg-gradient-to-b from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-wood-900 font-body font-bold py-3 sm:py-4 px-6 sm:px-10 rounded-lg text-lg sm:text-xl shadow-xl transition-all hover:scale-105 active:scale-95 border-2 sm:border-4 border-gold-600 min-h-[48px]"
             style={{
               boxShadow: '0 6px 20px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
             }}
