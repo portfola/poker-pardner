@@ -136,6 +136,9 @@ function postBlinds(state: GameState): GameState {
     bbPlayer.isAllIn = true;
   }
 
+  // Set minimum raise to current bet + big blind
+  newState.minRaise = newState.currentBet + newState.bigBlind;
+
   // First to act is player after big blind (pre-flop)
   newState.currentPlayerIndex = (bigBlindPos + 1) % newState.players.length;
 
@@ -460,16 +463,16 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'RESET_FOR_NEXT_HAND': {
       const newState = { ...state };
 
-      // Rotate dealer button
-      newState.dealerPosition = (newState.dealerPosition + 1) % newState.players.length;
-
-      // Eliminate players with no chips
+      // Eliminate players with no chips first
       newState.players = newState.players.filter(p => p.chips > 0);
 
       // Re-assign positions
       newState.players.forEach((p, index) => {
         p.position = index;
       });
+
+      // Rotate dealer button after eliminations (so it's within valid range)
+      newState.dealerPosition = (newState.dealerPosition + 1) % newState.players.length;
 
       return newState;
     }

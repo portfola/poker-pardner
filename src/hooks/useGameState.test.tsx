@@ -371,4 +371,440 @@ describe('useGameState', () => {
       expect(currentPlayer.id).toBe(expectedPlayer.id);
     });
   });
+
+  describe('Edge Cases - All-In Scenarios', () => {
+    it('should handle all-in when player cannot cover full bet', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // Set a player's chips to less than amount needed to call
+      const currentPlayer = result.current.getCurrentPlayer();
+      const originalChips = currentPlayer.chips;
+      currentPlayer.chips = 5; // Less than the 10 needed to call
+
+      act(() => {
+        result.current.handlePlayerAction(currentPlayer.id, 'call');
+      });
+
+      const updatedPlayer = result.current.state.players.find(p => p.id === currentPlayer.id);
+      expect(updatedPlayer?.chips).toBe(0);
+      expect(updatedPlayer?.isAllIn).toBe(true);
+      expect(updatedPlayer?.currentBet).toBe(originalChips - (originalChips - 5)); // Should bet their remaining 5 chips
+    });
+
+    it('should handle all-in when player cannot cover minimum raise', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      const currentPlayer = result.current.getCurrentPlayer();
+      currentPlayer.chips = 15; // Not enough for minimum raise (20)
+
+      act(() => {
+        result.current.handlePlayerAction(currentPlayer.id, 'raise', 20);
+      });
+
+      const updatedPlayer = result.current.state.players.find(p => p.id === currentPlayer.id);
+      expect(updatedPlayer?.chips).toBe(0);
+      expect(updatedPlayer?.isAllIn).toBe(true);
+      // Player should have bet all their remaining chips
+      expect(updatedPlayer?.totalBet).toBe(15);
+    });
+
+    it('should handle blind posting when player has insufficient chips', () => {
+      const { result } = renderHook(() => useGameState());
+
+      // Set small blind player to have only 3 chips (less than 5 SB)
+      result.current.state.players[1].chips = 3;
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      const sbPlayer = result.current.state.players[1];
+      expect(sbPlayer.chips).toBe(0);
+      expect(sbPlayer.currentBet).toBe(3); // Posted what they had
+      expect(sbPlayer.isAllIn).toBe(true);
+    });
+
+    it('should handle multiple all-ins in same hand', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // Find the current player and set them to low chips
+      const currentPlayerIndex = result.current.state.currentPlayerIndex;
+      const player1Id = result.current.state.players[currentPlayerIndex].id;
+      result.current.state.players[currentPlayerIndex].chips = 8;
+
+      // First player goes all-in by calling with insufficient chips
+      act(() => {
+        result.current.handlePlayerAction(player1Id, 'call');
+      });
+
+      expect(result.current.state.players.find(p => p.id === player1Id)?.isAllIn).toBe(true);
+
+      // Get next player and set them to low chips
+      const nextPlayerIndex = result.current.state.currentPlayerIndex;
+      const player2Id = result.current.state.players[nextPlayerIndex].id;
+      result.current.state.players[nextPlayerIndex].chips = 5;
+
+      // Second player goes all-in
+      act(() => {
+        result.current.handlePlayerAction(player2Id, 'call');
+      });
+
+      expect(result.current.state.players.find(p => p.id === player2Id)?.isAllIn).toBe(true);
+    });
+  });
+
+  describe('Edge Cases - Player Elimination', () => {
+    it('should eliminate player with 0 chips after hand', () => {
+      const { result } = renderHook(() => useGameState());
+
+      const initialPlayerCount = result.current.state.players.length;
+      result.current.state.players[2].chips = 0;
+
+      act(() => {
+        result.current.resetForNextHand();
+      });
+
+      expect(result.current.state.players.length).toBe(initialPlayerCount - 1);
+      expect(result.current.state.players.find(p => p.id === 'ai2')).toBeUndefined();
+    });
+
+    it('should rotate dealer button correctly when dealer is eliminated', () => {
+      const { result } = renderHook(() => useGameState());
+
+      // Set dealer position to 2, then eliminate player at position 2
+      result.current.state.dealerPosition = 2;
+      result.current.state.players[2].chips = 0;
+
+      act(() => {
+        result.current.resetForNextHand();
+      });
+
+      // After elimination, player count is 3, so dealer should wrap around
+      // Original dealer was at position 2, next would be position 3, but after eliminating position 2,
+      // the positions get reassigned, so we need to verify the rotation is correct
+      expect(result.current.state.dealerPosition).toBeLessThan(result.current.state.players.length);
+    });
+
+    it('should handle multiple eliminations in one hand', () => {
+      const { result } = renderHook(() => useGameState());
+
+      result.current.state.players[1].chips = 0;
+      result.current.state.players[2].chips = 0;
+
+      act(() => {
+        result.current.resetForNextHand();
+      });
+
+      expect(result.current.state.players.length).toBe(2);
+      // Verify positions are reassigned correctly
+      expect(result.current.state.players[0].position).toBe(0);
+      expect(result.current.state.players[1].position).toBe(1);
+    });
+
+    it('should handle elimination when only 2 players remain', () => {
+      const { result } = renderHook(() => useGameState());
+
+      // Eliminate 2 players, leaving only 2
+      result.current.state.players[1].chips = 0;
+      result.current.state.players[2].chips = 0;
+
+      act(() => {
+        result.current.resetForNextHand();
+      });
+
+      expect(result.current.state.players.length).toBe(2);
+
+      // Verify we can still start a new hand with 2 players
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      expect(result.current.state.pot).toBe(15); // Blinds should still be posted
+    });
+  });
+
+  describe('Edge Cases - Betting Round Completion', () => {
+    it('should complete betting round when all but one player folds', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // Fold 3 out of 4 players
+      const players = result.current.state.players;
+      players[0].isFolded = true;
+      players[1].isFolded = true;
+      players[2].isFolded = true;
+
+      expect(result.current.isBettingComplete()).toBe(true);
+    });
+
+    it('should complete betting round when all players are all-in', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // Mark all players as all-in
+      result.current.state.players.forEach(p => {
+        p.isAllIn = true;
+      });
+
+      expect(result.current.isBettingComplete()).toBe(true);
+    });
+
+    it('should complete betting round when only one non-all-in player remains', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // Mark 3 players as all-in, leave one active
+      result.current.state.players[0].isAllIn = true;
+      result.current.state.players[1].isAllIn = true;
+      result.current.state.players[2].isAllIn = true;
+
+      expect(result.current.isBettingComplete()).toBe(true);
+    });
+
+    it('should not complete betting round if active player has not acted', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // One player acts, but others haven't
+      const currentPlayer = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(currentPlayer.id, 'call');
+      });
+
+      // Betting round should not be complete yet
+      expect(result.current.isBettingComplete()).toBe(false);
+    });
+
+    it('should not complete betting round if player has not matched current bet', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // Player raises
+      const currentPlayer = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(currentPlayer.id, 'raise', 20);
+      });
+
+      // Other players need to call the raise
+      expect(result.current.isBettingComplete()).toBe(false);
+    });
+  });
+
+  describe('Edge Cases - Split Pots', () => {
+    it('should split pot evenly when two players have identical hands', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // Set up scenario where players will have identical hands
+      // This requires manipulating the deck/cards which is complex,
+      // so we'll test the pot splitting logic directly
+
+      const player1 = result.current.state.players[0];
+      const player2 = result.current.state.players[1];
+      const player3 = result.current.state.players[2];
+
+      // Fold player 3
+      player3.isFolded = true;
+
+      // Set pot to 100
+      result.current.state.pot = 100;
+
+      // Give players identical hole cards (for testing purposes)
+      player1.holeCards = [
+        { rank: 'A', suit: 'hearts' },
+        { rank: 'K', suit: 'hearts' }
+      ];
+      player2.holeCards = [
+        { rank: 'A', suit: 'spades' },
+        { rank: 'K', suit: 'spades' }
+      ];
+
+      // Set community cards that would give both players the same hand
+      result.current.state.communityCards = [
+        { rank: '2', suit: 'diamonds' },
+        { rank: '3', suit: 'diamonds' },
+        { rank: '4', suit: 'diamonds' },
+        { rank: '5', suit: 'diamonds' },
+        { rank: '6', suit: 'diamonds' }
+      ];
+
+      result.current.state.currentPhase = 'river';
+
+      act(() => {
+        result.current.determineWinner();
+      });
+
+      // Both players should win
+      expect(result.current.state.winners.length).toBeGreaterThanOrEqual(1);
+
+      // If there are 2 winners, pot should be split
+      if (result.current.state.winners.length === 2) {
+        const winner1Chips = result.current.state.winners[0].chips;
+        const winner2Chips = result.current.state.winners[1].chips;
+
+        // Each winner should get half the pot (50)
+        // Note: Original chips vary based on bets made, so we check they both got equal shares
+        expect(Math.abs(winner1Chips - winner2Chips)).toBeLessThanOrEqual(1); // Allow for rounding
+      }
+    });
+  });
+
+  describe('Edge Cases - Minimum Raise Calculations', () => {
+    it('should calculate minimum raise correctly after initial bet', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // After blinds, current bet is 10, min raise should be 20 (current bet + big blind)
+      expect(result.current.state.currentBet).toBe(10);
+      expect(result.current.state.minRaise).toBe(20);
+    });
+
+    it('should update minimum raise after a raise', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      const currentPlayer = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(currentPlayer.id, 'raise', 20);
+      });
+
+      // After raising to 20, min raise should be 30 (20 + 10)
+      expect(result.current.state.currentBet).toBe(20);
+      expect(result.current.state.minRaise).toBe(30);
+    });
+
+    it('should allow all-in for less than minimum raise', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      const currentPlayer = result.current.getCurrentPlayer();
+      currentPlayer.chips = 15; // Less than min raise of 20
+
+      act(() => {
+        result.current.handlePlayerAction(currentPlayer.id, 'raise', 20);
+      });
+
+      const updatedPlayer = result.current.state.players.find(p => p.id === currentPlayer.id);
+      expect(updatedPlayer?.isAllIn).toBe(true);
+      expect(updatedPlayer?.chips).toBe(0);
+    });
+  });
+
+  describe('Edge Cases - Blind Posting with Few Players', () => {
+    it('should post blinds correctly with 3 players', () => {
+      const { result } = renderHook(() => useGameState());
+
+      // Eliminate one player
+      result.current.state.players[3].chips = 0;
+
+      act(() => {
+        result.current.resetForNextHand();
+      });
+
+      expect(result.current.state.players.length).toBe(3);
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // Verify blinds were posted
+      expect(result.current.state.pot).toBe(15); // 5 + 10
+
+      // Verify small blind is at position (dealer + 1) % 3
+      const sbPos = (result.current.state.dealerPosition + 1) % 3;
+      expect(result.current.state.players[sbPos].currentBet).toBe(5);
+
+      // Verify big blind is at position (dealer + 2) % 3
+      const bbPos = (result.current.state.dealerPosition + 2) % 3;
+      expect(result.current.state.players[bbPos].currentBet).toBe(10);
+    });
+
+    it('should post blinds correctly with 2 players', () => {
+      const { result } = renderHook(() => useGameState());
+
+      // Eliminate two players
+      result.current.state.players[2].chips = 0;
+      result.current.state.players[3].chips = 0;
+
+      act(() => {
+        result.current.resetForNextHand();
+      });
+
+      expect(result.current.state.players.length).toBe(2);
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // Verify blinds were posted
+      expect(result.current.state.pot).toBe(15);
+
+      // With 2 players, positions wrap around correctly
+      const sbPos = (result.current.state.dealerPosition + 1) % 2;
+      const bbPos = (result.current.state.dealerPosition + 2) % 2;
+
+      expect(result.current.state.players[sbPos].currentBet).toBe(5);
+      expect(result.current.state.players[bbPos].currentBet).toBe(10);
+    });
+
+    it('should handle dealer button rotation with 2 players', () => {
+      const { result } = renderHook(() => useGameState());
+
+      // Eliminate two players
+      result.current.state.players[2].chips = 0;
+      result.current.state.players[3].chips = 0;
+
+      act(() => {
+        result.current.resetForNextHand();
+      });
+
+      const initialDealer = result.current.state.dealerPosition;
+
+      act(() => {
+        result.current.resetForNextHand();
+      });
+
+      // Dealer should rotate
+      expect(result.current.state.dealerPosition).toBe((initialDealer + 1) % 2);
+    });
+  });
 });

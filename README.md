@@ -2,50 +2,7 @@
 
 An interactive web application that teaches complete beginners how to play Texas Hold'em poker through guided practice play. Built with React, TypeScript, and Tailwind CSS with a classic Western saloon theme.
 
-## Getting Started
-
-### Installation
-
-```bash
-npm install
-```
-
-### Development
-
-```bash
-npm run dev
-```
-
-Open your browser to the URL shown (typically http://localhost:5173)
-
-### Build
-
-```bash
-npm run build
-```
-
-### Testing
-
-```bash
-npm test          # Run tests
-npm run test:ui   # Run tests with UI
-```
-
-**Current Test Coverage: 167 tests passing ✓**
-
-## Project Status
-
-### Phase 1: Core Gameplay - ✅ COMPLETE
-
-The application is **fully functional and playable** with:
-- Complete poker game mechanics (betting rounds, phase transitions, showdown)
-- 4-player games with realistic AI opponents
-- Beautiful Western-themed UI with animations
-- Real-time hand strength analysis and strategic advice
-- Accessible keyboard navigation and screen reader support
-- Production-ready error handling and logging
-
-## Features Implemented
+## Features
 
 ### Core Game Systems
 - **Game State Management** - React useReducer for complex state handling
@@ -80,56 +37,36 @@ The application is **fully functional and playable** with:
 - **Betting**: Minimum raise only (currentBet + bigBlind)
 - **End conditions**: User goes broke (game ends) or AI eliminated (game continues)
 
-## Development Plans
+## Getting Started
 
-### Completed
+### Installation
 
-**From prompt_plan_1.md (Steps 1-17):**
-- ✅ Steps 1-8: Project setup, types, utilities, UI components, animations
-- ✅ Steps 9-11: Sidebar, hand strength display, AI engine
-- ✅ Steps 12-14: Betting rounds, phase transitions, showdown
-- ✅ Step 15: Game over screen
-- ✅ Step 16: Visual polish and animations
-- ✅ Step 17: Responsive design (mobile/tablet/desktop)
+```bash
+npm install
+```
 
-**From prompt_plan_2.md (All 12 tasks):**
-- ✅ Type safety improvements
-- ✅ Dead code removal
-- ✅ Logging utility
-- ✅ Error handling standardization
-- ✅ Magic number extraction
-- ✅ Code duplication elimination
-- ✅ Accessibility improvements
-- ✅ Error boundary
-- ✅ Tailwind CSS conversion
+### Development
 
-**From prompt_plan_3.md:**
-- ✅ Sprint 1: Stability fixes (phase advancement, memory leaks, constants)
-- ✅ Sprint 2: Code quality (logging, error handling, type safety, dead code)
-- ✅ Sprint 3: Testing (AI, hand strength, component tests)
-- ✅ Sprint 4: Polish (error boundary, accessibility, CSS conversion)
+```bash
+npm run dev
+```
 
-### Remaining Work
+Open your browser to the URL shown (typically http://localhost:5173)
 
-**Deployment Preparation (prompt_plan_1.md Steps 18-21):**
-- ⏳ Final integration testing
-- ⏳ Production deployment setup
+### Build
 
-### Recent Bug Fixes
-- ✅ Fixed "You wins" grammar error (now correctly shows "You win")
-- ✅ Fixed players not getting hole cards when all-in on blinds
+```bash
+npm run build
+```
 
-### Future Enhancements (Phase 2)
+### Testing
 
-Items deferred for future development:
-- Side pot calculation (multiple all-ins)
-- Custom raise amounts (slider/input)
-- Play Mode (no guidance)
-- Variable AI difficulty
-- Progress tracking & statistics
-- Sound effects
-- Hand history review
-- Multiplayer features
+```bash
+npm test          # Run tests
+npm run test:ui   # Run tests with UI
+```
+
+The project includes comprehensive test coverage with 167+ passing tests.
 
 ## Technologies
 
@@ -140,7 +77,19 @@ Items deferred for future development:
 - **Vitest** - Unit testing framework
 - **React Testing Library** - Component testing utilities
 
-## Architecture Highlights
+## Roadmap
+
+Potential future enhancements:
+- Side pot calculation (multiple all-ins)
+- Custom raise amounts (slider/input)
+- Play Mode (no guidance)
+- Variable AI difficulty
+- Progress tracking & statistics
+- Sound effects
+- Hand history review
+- Multiplayer features
+
+## Architecture
 
 ### State Management
 Uses React's `useReducer` for complex game state with well-defined actions:
@@ -169,7 +118,7 @@ Educational AI with predictable but varied play:
 
 ## Contributing
 
-This is an educational project following a structured development plan. See the prompt plan documents for planned improvements and current status.
+Contributions are welcome! This is an educational project designed to help beginners learn Texas Hold'em poker. Feel free to open issues for bugs or feature requests, and submit pull requests for improvements.
 
 ## License
 
