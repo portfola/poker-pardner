@@ -5,14 +5,18 @@ import { PokerTable } from './components/PokerTable'
 import { Sidebar } from './components/Sidebar'
 import { ShowdownDisplay } from './components/ShowdownDisplay'
 import { MusicPlayer } from './components/MusicPlayer'
+import { ConfirmDialog } from './components/ConfirmDialog'
 import { makeAIDecision } from './utils/ai'
 import { TIMING } from './constants/timing'
 import { logger } from './utils/logger'
+import { getBestFiveCardHand, getBestHandFromSix, evaluateHand } from './utils/handEvaluator'
+import { evaluateHandStrength } from './utils/handStrength'
 
 function App() {
   const { state, startNewHand, handlePlayerAction, isBettingComplete, startPhaseAdvance, advancePhase, determineWinner, resetForNextHand } = useGameState()
   const [lastAction, setLastAction] = useState<string>('')
   const [isProcessing, setIsProcessing] = useState(false)
+  const [showFoldConfirm, setShowFoldConfirm] = useState(false)
   const processingRef = useRef(false)
   const timeoutRef = useRef<number | null>(null)
 
@@ -24,13 +28,81 @@ function App() {
     setLastAction(message)
   }
 
+  // Helper function to evaluate current hand strength
+  const evaluateCurrentHandStrength = (): 'weak' | 'medium' | 'strong' => {
+    const userPlayer = state.players.find(p => p.isUser)
+    if (!userPlayer || userPlayer.holeCards.length === 0) {
+      return 'weak'
+    }
+
+    // Pre-flop: simple evaluation
+    if (state.communityCards.length === 0) {
+      const card1 = userPlayer.holeCards[0]
+      const card2 = userPlayer.holeCards[1]
+
+      if (card1.rank === card2.rank) {
+        const highRanks = ['A', 'K', 'Q', 'J', '10']
+        return highRanks.includes(card1.rank) ? 'strong' : 'medium'
+      }
+
+      const highRanks = ['A', 'K', 'Q']
+      const hasHighCard = highRanks.includes(card1.rank) || highRanks.includes(card2.rank)
+      const suited = card1.suit === card2.suit
+      return (hasHighCard && suited) ? 'medium' : 'weak'
+    }
+
+    // Post-flop: evaluate actual hand
+    let evaluation
+    const totalCards = userPlayer.holeCards.length + state.communityCards.length
+
+    if (totalCards === 7) {
+      // River (7 cards)
+      evaluation = getBestFiveCardHand(userPlayer.holeCards, state.communityCards)
+    } else if (totalCards === 6) {
+      // Turn (6 cards)
+      const allCards = [...userPlayer.holeCards, ...state.communityCards]
+      evaluation = getBestHandFromSix(allCards)
+    } else if (totalCards === 5) {
+      // Flop (5 cards)
+      const allCards = [...userPlayer.holeCards, ...state.communityCards]
+      evaluation = evaluateHand(allCards)
+    } else {
+      return 'weak'
+    }
+
+    return evaluateHandStrength(evaluation)
+  }
+
   // Action handlers for user
   const handleFold = () => {
     const userPlayer = state.players.find(p => p.isUser)
     if (userPlayer && !isProcessing) {
+      // Check hand strength - confirm if medium or strong
+      const strength = evaluateCurrentHandStrength()
+
+      if (strength === 'medium' || strength === 'strong') {
+        setShowFoldConfirm(true)
+      } else {
+        // Weak hand, fold immediately
+        handlePlayerAction(userPlayer.id, 'fold')
+        setAction('You folded.')
+      }
+    }
+  }
+
+  // Confirm fold action
+  const confirmFold = () => {
+    const userPlayer = state.players.find(p => p.isUser)
+    if (userPlayer) {
       handlePlayerAction(userPlayer.id, 'fold')
       setAction('You folded.')
     }
+    setShowFoldConfirm(false)
+  }
+
+  // Cancel fold action
+  const cancelFold = () => {
+    setShowFoldConfirm(false)
   }
 
   const handleCall = () => {
@@ -296,6 +368,16 @@ function App() {
       <ShowdownDisplay
         gameState={state}
         onNextHand={handleNextHand}
+      />
+      <ConfirmDialog
+        isOpen={showFoldConfirm}
+        title="Fold a Good Hand?"
+        message="You have a decent hand. Are you sure you want to fold? This could be a winning hand!"
+        confirmLabel="Yes, Fold"
+        cancelLabel="Keep Playing"
+        onConfirm={confirmFold}
+        onCancel={cancelFold}
+        variant="warning"
       />
     </>
   )

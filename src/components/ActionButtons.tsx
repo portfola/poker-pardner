@@ -78,7 +78,7 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
               ${
                 foldDisabled
                   ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                  : 'bg-red-700 hover:bg-red-600 text-white shadow-lg hover:shadow-red-700/50 hover:scale-105 active:scale-95 border-2 border-red-800'
+                  : 'bg-red-700 hover:bg-red-600 text-white shadow-lg hover:shadow-red-700/50 hover:scale-105 active:scale-95 border-2 border-red-800 ripple-effect'
               }
             `}
             style={
@@ -101,7 +101,7 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
               ${
                 callDisabled
                   ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                  : 'bg-green-700 hover:bg-green-600 text-white shadow-lg hover:shadow-green-700/50 hover:scale-105 active:scale-95 border-2 border-green-800'
+                  : 'bg-green-700 hover:bg-green-600 text-white shadow-lg hover:shadow-green-700/50 hover:scale-105 active:scale-95 border-2 border-green-800 ripple-effect'
               }
             `}
             style={
@@ -130,7 +130,7 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
               ${
                 raiseDisabled
                   ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                  : 'bg-gradient-to-b from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-wood-900 shadow-lg hover:shadow-gold-500/50 hover:scale-105 active:scale-95 border-2 border-gold-600'
+                  : 'bg-gradient-to-b from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-wood-900 shadow-lg hover:shadow-gold-500/50 hover:scale-105 active:scale-95 border-2 border-gold-600 ripple-effect'
               }
             `}
             style={

@@ -8,6 +8,7 @@ import { GameState } from '../types/game';
 import { GameStateDisplay } from './GameStateDisplay';
 import { ActionNarration } from './ActionNarration';
 import { StrategicAdvice } from './StrategicAdvice';
+import { HandRankings } from './HandRankings';
 
 interface SidebarProps {
   gameState: GameState;
@@ -106,12 +107,15 @@ export function Sidebar({ gameState, lastAction }: SidebarProps) {
         </div>
 
         {/* Section 3: Strategic Advice */}
-        <div className="p-4">
+        <div className="p-4 border-b border-gray-700">
           <h3 className="text-green-400 font-semibold text-sm uppercase tracking-wide mb-3">
             Your Hand
           </h3>
           <StrategicAdvice gameState={gameState} />
         </div>
+
+        {/* Section 4: Hand Rankings Reference */}
+        <HandRankings />
       </div>
     </>
   );

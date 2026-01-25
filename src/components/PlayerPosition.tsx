@@ -36,14 +36,14 @@ export function PlayerPosition({
         className={`
           relative bg-gradient-to-br from-leather-800 to-leather-900 rounded-lg border-2 transition-all
           ${compact ? 'p-1.5 sm:p-2 md:p-3 min-w-[80px] sm:min-w-[100px] md:min-w-[140px]' : 'p-2 sm:p-3 min-w-[100px] sm:min-w-[140px]'}
-          ${isCurrentTurn ? 'border-gold-500 shadow-lg shadow-gold-500/50' : 'border-wood-700'}
+          ${isCurrentTurn ? 'border-gold-500 shadow-lg shadow-gold-500/50 pulse-glow' : 'border-wood-700'}
           ${isFolded ? 'opacity-50' : ''}
         `}
-        style={{
-          boxShadow: isCurrentTurn
-            ? '0 0 20px rgba(218, 165, 32, 0.5), inset 0 1px 2px rgba(139, 69, 19, 0.3)'
-            : '0 4px 8px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(139, 69, 19, 0.3)',
-        }}
+        style={
+          !isCurrentTurn
+            ? { boxShadow: '0 4px 8px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(139, 69, 19, 0.3)' }
+            : undefined
+        }
       >
         {/* Leather texture */}
         <div
