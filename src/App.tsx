@@ -42,6 +42,7 @@ function App() {
   const hasShownHandStart = useRef(false)
   const isProcessingAI = useRef(false)
   const lastPhaseRef = useRef<string>('')
+  const userActionTimestamp = useRef<number>(0)
 
   // Check if hand has been dealt
   const hasCards = state.players.some(p => p.holeCards.length > 0)
@@ -214,8 +215,19 @@ function App() {
     if (currentPlayer && !currentPlayer.isUser && !currentPlayer.isFolded && !currentPlayer.isAllIn && !state.isWaitingForNextAction) {
       isProcessingAI.current = true
 
-      // Small delay before AI "thinks"
-      const thinkingDelay = TIMING.AI_TURN_BASE_DELAY + Math.random() * TIMING.AI_TURN_RANDOM_DELAY
+      // Calculate delay based on game phase (longer in later rounds)
+      let baseDelay = TIMING.AI_TURN_BASE_DELAY
+      if (state.currentPhase === 'turn' || state.currentPhase === 'river') {
+        baseDelay += TIMING.AI_TURN_LATE_DELAY
+      }
+      const randomDelay = Math.random() * TIMING.AI_TURN_RANDOM_DELAY
+      let thinkingDelay = baseDelay + randomDelay
+
+      // Add extra delay if this follows a user action (to allow reading cowboy message)
+      const timeSinceUserAction = Date.now() - userActionTimestamp.current
+      if (timeSinceUserAction < TIMING.USER_ACTION_DELAY) {
+        thinkingDelay += TIMING.USER_ACTION_DELAY - timeSinceUserAction
+      }
 
       setTimeout(() => {
         // Calculate decision but DON'T execute yet - wait for user to click Next
@@ -302,6 +314,7 @@ function App() {
       hasShownHandStart.current = false
       isProcessingAI.current = false
       lastPhaseRef.current = ''
+      userActionTimestamp.current = 0
     }
   }, [hasCards])
 
@@ -329,6 +342,7 @@ function App() {
             message: generateUserActionNarration('fold'),
             action: 'fold',
           })
+          userActionTimestamp.current = Date.now()
         }, NARRATION_DELAY)
       }
     }
@@ -352,6 +366,7 @@ function App() {
           message: generateUserActionNarration('fold'),
           action: 'fold',
         })
+        userActionTimestamp.current = Date.now()
       }, NARRATION_DELAY)
     }
     setShowFoldConfirm(false)
@@ -384,6 +399,7 @@ function App() {
           message: generateUserActionNarration(action),
           action,
         })
+        userActionTimestamp.current = Date.now()
       }, NARRATION_DELAY)
     }
   }
@@ -411,6 +427,7 @@ function App() {
           message: generateUserActionNarration('raise', raiseAmount),
           action: 'raise',
         })
+        userActionTimestamp.current = Date.now()
       }, NARRATION_DELAY)
     }
   }

@@ -7,6 +7,12 @@
 - [x] Action Panel gets too tall and covers up the user's cards (2026-01-26)
 - [x] Hand strength box needs more space to show all text clearly. Increase the width of the right column and decrease the width of the center column to make room (2026-01-26)
 - [x] Refine the border colors and curves throughout the action panel components (2026-01-26) 
+
+### Allow time to read guidance
+
+- [x] Ensure the user has enough time to read messages from the cowboy. There are areas where messages are shown momentarily and then move forward automatically (2026-01-26)
+- [x] For example, when the user selects "Raise" then the cowboy said something like "You're showing some gumption!" - but the message flashed too quickly to see before the next player moved and the cowboy commented on that move (2026-01-26)
+- [x] Have the AI players typically take 4-6 seconds to make their move. Make it clear that we're waiting for that player to decide. Especially deeper into the hand, have AI players take a little longer to decide, like 7-8 seconds (2026-01-26)
  
 ## Backlog
 
