@@ -24,7 +24,8 @@ type GameAction =
   | { type: 'ADD_ACTION_HISTORY'; entry: Omit<ActionHistoryEntry, 'id' | 'timestamp'> }
   | { type: 'SET_WAITING_FOR_NEXT'; waiting: boolean }
   | { type: 'SET_MODE'; mode: GameMode }
-  | { type: 'SET_DIFFICULTY'; difficulty: DifficultyLevel };
+  | { type: 'SET_DIFFICULTY'; difficulty: DifficultyLevel }
+  | { type: 'RESTART_GAME' };
 
 /**
  * Creates the initial game state with 4 players.
@@ -107,6 +108,7 @@ function createInitialState(): GameState {
     pendingEvent: null,
     actionHistory: [],
     isWaitingForNextAction: false,
+    isGameOver: false,
   };
 }
 
@@ -566,6 +568,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Eliminate players with no chips first
       newState.players = newState.players.filter(p => p.chips > 0);
 
+      // Check if game is over (only 1 player remaining)
+      if (newState.players.length === 1) {
+        newState.isGameOver = true;
+        newState.gameWinner = newState.players[0];
+        return newState;
+      }
+
       // Re-assign positions
       newState.players.forEach((p, index) => {
         p.position = index;
@@ -638,6 +647,16 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'RESTART_GAME': {
+      // Reset the entire game to initial state, preserving mode and difficulty
+      const initialState = createInitialState();
+      return {
+        ...initialState,
+        mode: state.mode,
+        difficulty: state.difficulty,
+      };
+    }
+
     default:
       return state;
   }
@@ -702,6 +721,10 @@ export function useGameState() {
     dispatch({ type: 'SET_DIFFICULTY', difficulty });
   }, []);
 
+  const restartGame = useCallback(() => {
+    dispatch({ type: 'RESTART_GAME' });
+  }, []);
+
   // Helper to check if betting round is complete
   const isBettingComplete = useCallback(() => {
     return isBettingRoundComplete(state);
@@ -737,5 +760,6 @@ export function useGameState() {
     setWaitingForNext,
     setMode,
     setDifficulty,
+    restartGame,
   };
 }

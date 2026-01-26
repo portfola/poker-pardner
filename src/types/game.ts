@@ -168,6 +168,10 @@ export interface GameState {
   userWentAllInThisHand?: boolean;
   /** Pot results from showdown (main and side pots) */
   potResults?: PotResult[];
+  /** Whether the game is over (only 1 player with chips remaining) */
+  isGameOver: boolean;
+  /** The winner of the entire game (if game is over) */
+  gameWinner?: Player;
 }
 
 /**

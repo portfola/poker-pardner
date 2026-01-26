@@ -6,6 +6,7 @@ import { CowboyPanel } from './components/CowboyPanel'
 import { MusicPlayer } from './components/MusicPlayer'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { ModeSelection } from './components/ModeSelection'
+import { GameOverScreen } from './components/GameOverScreen'
 import { makeAIDecision } from './utils/ai'
 import { TIMING } from './constants/timing'
 import { getBestFiveCardHand, getBestHandFromSix, evaluateHand } from './utils/handEvaluator'
@@ -43,6 +44,7 @@ function App() {
     setWaitingForNext,
     setMode,
     setDifficulty,
+    restartGame,
   } = useGameState()
 
   const [showFoldConfirm, setShowFoldConfirm] = useState(false)
@@ -481,6 +483,14 @@ function App() {
     }, TIMING.NEW_HAND_DELAY)
   }
 
+  const handlePlayAgain = () => {
+    restartGame()
+    hasShownHandStart.current = false
+    isProcessingAI.current = false
+    lastPhaseRef.current = ''
+    userActionTimestamp.current = 0
+  }
+
   // Handle "Next" button click in tutorial mode - executes the pending AI action
   const handleNext = () => {
     const pendingAction = state.pendingEvent?.pendingAction
@@ -606,6 +616,16 @@ function App() {
         onCancel={cancelFold}
         variant="warning"
       />
+      {state.isGameOver && state.gameWinner && (
+        <GameOverScreen
+          winner={{
+            name: state.gameWinner.name,
+            chips: state.gameWinner.chips,
+            isUser: state.gameWinner.isUser,
+          }}
+          onPlayAgain={handlePlayAgain}
+        />
+      )}
     </>
   )
 }

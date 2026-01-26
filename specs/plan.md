@@ -52,9 +52,9 @@
 - [x] Test multiple side pots (2026-01-26)
 
 ### End Game Scenarios (Phase 2 Priority)
-- [ ] Game ending when only 1 player has chips (all others eliminated)
-- [ ] Game over screen display with celebration
-- [ ] Restart/replay functionality after game ends
+- [x] Game ending when only 1 player has chips (all others eliminated) (2026-01-26)
+- [x] Game over screen display with celebration (2026-01-26)
+- [x] Restart/replay functionality after game ends (2026-01-26)
 
 ### UI Edge Cases (Phase 2 Priority)
 - [ ] Test rapid clicking during animations
