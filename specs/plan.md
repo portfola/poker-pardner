@@ -7,7 +7,7 @@
 
 ### Pre-Production & Deployment
 - [x] Create favicon - 32x32px minimum, poker/western theme (.ico or .svg) (2026-01-26)
-- [ ] Create Open Graph image - 1200x630px PNG for social sharing
+- [x] Create Open Graph image - 1200x630px PNG for social sharing (2026-01-26)
 - [ ] Run pre-deployment checklist - Code quality, assets, SEO, performance verification
 - [ ] Browser testing - Chrome, Firefox, Safari, Edge (latest versions)
 - [ ] Mobile browser testing - iOS Safari, Chrome Mobile (Android)
