@@ -42,7 +42,7 @@ function createInitialState(): GameState {
     },
     {
       id: 'ai1',
-      name: 'Player 2',
+      name: 'Doc',
       chips: 100,
       holeCards: [],
       isFolded: false,
@@ -55,7 +55,7 @@ function createInitialState(): GameState {
     },
     {
       id: 'ai2',
-      name: 'Player 3',
+      name: 'Slim',
       chips: 100,
       holeCards: [],
       isFolded: false,
@@ -68,7 +68,7 @@ function createInitialState(): GameState {
     },
     {
       id: 'ai3',
-      name: 'Player 4',
+      name: 'Annie',
       chips: 100,
       holeCards: [],
       isFolded: false,
