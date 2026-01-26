@@ -27,7 +27,7 @@
 - [x] Play mode implementation - Hide strategic advice from cowboy; keep game state display (2026-01-26)
 
 ### Variable AI Difficulty
-- [ ] Difficulty constants - Create `src/constants/difficulty.ts` with thresholds for Easy/Medium/Hard
+- [x] Difficulty constants - Create `src/constants/difficulty.ts` with thresholds for Easy/Medium/Hard (2026-01-26)
 - [ ] AI difficulty parameter - Modify `src/utils/ai.ts` to accept and use difficulty parameter
 - [ ] Difficulty type definition - Add difficulty to GameState in `src/types/game.ts`
 - [ ] Difficulty selection UI - Add difficulty selection to mode selection screen
