@@ -1,22 +1,41 @@
 # Poker Pardner - Development Roadmap
 
-#### Play Mode (No Guidance)
+## Higher Priority Development
+
+### Ensure the pace of game play
+
+- Keep a running log of each player's actions that can be viewed by clicking a history button in the action panel
+- In tutorial mode, play the moves one at a time, and wait for user action before moving on. So, when the cowboy explains what player one did, wait for the user to click "Next" to advance the game play. The Next button should replace the Fold/Call/Raise buttons when AI players are playing, and then those buttons should appear (and the Next button should disappear) when it is the user's turn
+- Ensure that the first actions in the hand are recorded in the log, we want the user to see the small blind and big blind. Currently we are not seeing those first actions recorded in the log.
+- Pause on the introduction of the flop, turn, and river, so the user has time to read the cowboy's words. Have them click Next to move ahead.
+
+### Give names to the AI players
+
+- Give each AI player a unique name that fits with the Cowboy/Western theme
+- Persist these player names throughout the game
+
+### Move game status box into the action panel
+
+- There is a box that displays the game phase: "Turn", "Flop", etc, which is placed between the table and the action panel
+- To conserve vertical space, let's move this element into the action panel, placed on the left side beneath the cowboy avatar
+
+### End of Hand display
+
+- At the end of the hand, a modal is currently presented which shows the results. But the user cannot see the table anymore, which makes it difficult to understand why the hand was won or lost.
+- Instead of a modal, move this information into the action panel. Have the cowboy explain who won and why.
+
+## Lower Priority Development
+
+### Play Mode (No Guidance)
 Add a second mode for users who want to practice without guidance:
 
 **Implementation:**
-- Add mode selection screen: Practice (with guidance), Play (no guidance)
-- In Play Mode, hide strategic advice from sidebar
+- Home page should present mode selection: Tutorial (with guidance), Play (no guidance)
+- In Play Mode, hide strategic advice from cowboy
 - Keep game state display (pot, round, current player)
 - Update UI to indicate current mode
 
-**Files to Modify:**
-- `src/types/game.ts` - Add 'play' to mode type
-- `src/App.tsx` - Add mode selection screen
-- `src/components/Sidebar.tsx` - Conditional strategic advice rendering
-
-#### Variable AI Difficulty
-**Effort:** Medium (1 day)
-**Impact:** Medium - more engaging gameplay
+### Variable AI Difficulty
 
 Add difficulty levels that affect AI decision-making:
 
@@ -38,9 +57,7 @@ Add difficulty levels that affect AI decision-making:
 - `src/utils/ai.ts` - Accept and use difficulty parameter
 - `src/types/game.ts` - Add difficulty to GameState
 
-#### Progress Tracking & Statistics
-**Effort:** Medium (1-2 days)
-**Impact:** Medium - engagement and learning feedback
+### Progress Tracking & Statistics
 
 Track player performance across sessions:
 
@@ -63,10 +80,7 @@ Track player performance across sessions:
 - `src/components/StatisticsScreen.tsx` - Stats display UI
 - `src/types/statistics.ts` - Statistics type definitions
 
-
-#### Custom Raise Amounts
-**Effort:** Medium (1 day)
-**Impact:** Low-Medium - more realistic poker
+### Custom Raise Amounts
 
 Replace minimum raise with custom raise input:
 
@@ -80,9 +94,7 @@ Replace minimum raise with custom raise input:
 - `src/components/ActionButtons.tsx` - Add raise amount controls
 - `src/hooks/useGameState.ts` - Handle custom raise amounts
 
-#### Side Pot Calculation
-**Effort:** Large (2-3 days)
-**Impact:** Low - edge case handling
+### Side Pot Calculation
 
 Handle multiple all-ins at different amounts:
 
@@ -99,9 +111,7 @@ Handle multiple all-ins at different amounts:
 - `src/utils/showdown.ts` - Multiple winner determination
 - `src/components/ShowdownDisplay.tsx` - Display side pots
 
-#### Sound Effects
-**Effort:** Small-Medium (1 day)
-**Impact:** Low - ambiance
+### Sound Effects
 
 Add sound effects for game actions:
 
@@ -122,9 +132,7 @@ Add sound effects for game actions:
 - `src/utils/audio.ts` - Audio management
 - `public/audio/` - Sound effect files
 
-#### Hand History Review
-**Effort:** Medium (1-2 days)
-**Impact:** Low - learning tool
+### Hand History Review
 
 Allow users to review previous hands:
 
