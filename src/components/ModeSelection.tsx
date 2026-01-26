@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { GameMode, DifficultyLevel } from '../types/game'
 import { DIFFICULTY_LABELS, DIFFICULTY_DESCRIPTIONS, DEFAULT_DIFFICULTY } from '../constants/difficulty'
+import { StatisticsScreen } from './StatisticsScreen'
 
 interface ModeSelectionProps {
   onSelectMode: (mode: GameMode, difficulty: DifficultyLevel) => void
@@ -9,6 +10,12 @@ interface ModeSelectionProps {
 export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null)
   const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel>(DEFAULT_DIFFICULTY)
+  const [showStats, setShowStats] = useState(false)
+
+  // If showing statistics, render the statistics screen
+  if (showStats) {
+    return <StatisticsScreen onBack={() => setShowStats(false)} />
+  }
 
   // If mode is selected, show difficulty selection
   if (selectedMode) {
@@ -192,6 +199,21 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
           <span className="text-black">♠</span>
           <span className="text-red-600">♦</span>
           <span className="text-black">♣</span>
+        </div>
+
+        {/* Statistics button */}
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={() => setShowStats(true)}
+            aria-label="View your statistics"
+            className="bg-gradient-to-b from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-wood-900 font-body font-bold py-3 px-8 rounded-lg shadow-xl transition-all hover:scale-105 active:scale-95 border-4 border-gold-700"
+            style={{
+              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+            }}
+          >
+            <span className="mr-2">📊</span>
+            View Statistics
+          </button>
         </div>
       </div>
     </div>

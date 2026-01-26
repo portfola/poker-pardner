@@ -35,7 +35,7 @@
 ### Progress Tracking & Statistics
 - [x] Statistics utility - Create `src/utils/statistics.ts` for tracking and localStorage persistence (2026-01-26)
 - [x] Statistics types - Create `src/types/statistics.ts` with type definitions (2026-01-26)
-- [ ] Statistics screen - Create `src/components/StatisticsScreen.tsx` for stats display
+- [x] Statistics screen - Create `src/components/StatisticsScreen.tsx` for stats display (2026-01-26)
 - [ ] Stats integration - Track hands played, hands won, biggest pot, win rate, streaks
 
 ### Custom Raise Amounts
