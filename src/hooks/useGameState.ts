@@ -4,7 +4,7 @@
  */
 
 import { useReducer, useCallback } from 'react';
-import { GameState, Player, BettingAction, NarratorEvent, ActionHistoryEntry, GameMode } from '../types/game';
+import { GameState, Player, BettingAction, NarratorEvent, ActionHistoryEntry, GameMode, DifficultyLevel } from '../types/game';
 import { createShuffledDeck, dealCards } from '../utils/cards';
 import { getBestFiveCardHand, determineWinners } from '../utils/handEvaluator';
 
@@ -21,7 +21,8 @@ type GameAction =
   | { type: 'CLEAR_PENDING_EVENT' }
   | { type: 'ADD_ACTION_HISTORY'; entry: Omit<ActionHistoryEntry, 'id' | 'timestamp'> }
   | { type: 'SET_WAITING_FOR_NEXT'; waiting: boolean }
-  | { type: 'SET_MODE'; mode: GameMode };
+  | { type: 'SET_MODE'; mode: GameMode }
+  | { type: 'SET_DIFFICULTY'; difficulty: DifficultyLevel };
 
 /**
  * Creates the initial game state with 4 players.
@@ -577,6 +578,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'SET_DIFFICULTY': {
+      return {
+        ...state,
+        difficulty: action.difficulty,
+      };
+    }
+
     default:
       return state;
   }
@@ -637,6 +645,10 @@ export function useGameState() {
     dispatch({ type: 'SET_MODE', mode });
   }, []);
 
+  const setDifficulty = useCallback((difficulty: DifficultyLevel) => {
+    dispatch({ type: 'SET_DIFFICULTY', difficulty });
+  }, []);
+
   // Helper to check if betting round is complete
   const isBettingComplete = useCallback(() => {
     return isBettingRoundComplete(state);
@@ -671,5 +683,6 @@ export function useGameState() {
     addActionHistory,
     setWaitingForNext,
     setMode,
+    setDifficulty,
   };
 }

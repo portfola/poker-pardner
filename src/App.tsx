@@ -41,6 +41,7 @@ function App() {
     addActionHistory,
     setWaitingForNext,
     setMode,
+    setDifficulty,
   } = useGameState()
 
   const [showFoldConfirm, setShowFoldConfirm] = useState(false)
@@ -59,8 +60,9 @@ function App() {
   }, [])
 
   // Handle mode selection
-  const handleModeSelect = (mode: 'tutorial' | 'training') => {
+  const handleModeSelect = (mode: 'tutorial' | 'training', difficulty: 'easy' | 'medium' | 'hard') => {
     setMode(mode)
+    setDifficulty(difficulty)
     setModeSelected(true)
     trackModeSelection(mode)
   }
