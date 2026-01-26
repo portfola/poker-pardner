@@ -45,7 +45,7 @@
 ### Side Pot Calculation (Phase 2 Priority)
 - [x] Side pot logic - Calculate side pots when multiple players all-in at different amounts (2026-01-26)
 - [x] Side pot showdown - Award main pot and side pots to correct winners in `src/utils/showdown.ts` (2026-01-26)
-- [ ] Side pot UI - Display side pot amounts in `src/components/ShowdownDisplay.tsx`
+- [x] Side pot UI - Display side pot amounts in `src/components/ShowdownDisplay.tsx` (2026-01-26)
 - [x] Test 2-player all-in with different amounts (2026-01-26)
 - [x] Test 3-player all-in with different amounts (2026-01-26)
 - [x] Test side pot with folded players (2026-01-26)

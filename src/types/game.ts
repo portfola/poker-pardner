@@ -166,6 +166,8 @@ export interface GameState {
   userFoldedThisHand?: boolean;
   /** Whether the user went all-in during the current hand */
   userWentAllInThisHand?: boolean;
+  /** Pot results from showdown (main and side pots) */
+  potResults?: PotResult[];
 }
 
 /**
@@ -245,4 +247,18 @@ export interface ActionHistoryEntry {
   timestamp: number;
   /** Whether this is a user action */
   isUser: boolean;
+}
+
+/**
+ * Result information for a single pot (main or side).
+ */
+export interface PotResult {
+  /** Total chips in this pot */
+  amount: number;
+  /** IDs of players who won this pot */
+  winnerIds: string[];
+  /** Names of players who won this pot */
+  winnerNames: string[];
+  /** Whether this is a side pot (false = main pot) */
+  isSidePot: boolean;
 }

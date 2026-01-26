@@ -5,7 +5,31 @@
 
 import { Player } from '../types/game';
 import { HandEvaluation, determineWinners } from './handEvaluator';
-import { calculateSidePots, distributePot } from './sidePots';
+import { calculateSidePots, distributePot, Pot } from './sidePots';
+
+/**
+ * Result of showdown processing with winner and pot information.
+ */
+export interface ShowdownResult {
+  /** Players who won at least one pot */
+  winners: Player[];
+  /** All pots (main and side) with winner information */
+  pots: PotResult[];
+}
+
+/**
+ * Result information for a single pot.
+ */
+export interface PotResult {
+  /** Total chips in this pot */
+  amount: number;
+  /** IDs of players who won this pot */
+  winnerIds: string[];
+  /** Names of players who won this pot */
+  winnerNames: string[];
+  /** Whether this is a side pot (false = main pot) */
+  isSidePot: boolean;
+}
 
 /**
  * Handles the complete showdown process including side pot distribution.
@@ -17,17 +41,17 @@ import { calculateSidePots, distributePot } from './sidePots';
  *
  * @param players All players in the hand (will be modified with updated chip counts)
  * @param handEvaluations Hand evaluations for active (non-folded) players
- * @returns Array of winners (players who won at least one pot)
+ * @returns ShowdownResult with winners and pot information
  */
 export function handleShowdown(
   players: Player[],
   handEvaluations: HandEvaluation[]
-): Player[] {
+): ShowdownResult {
   // Calculate all pots (main and side pots)
   const pots = calculateSidePots(players);
 
   if (pots.length === 0) {
-    return [];
+    return { winners: [], pots: [] };
   }
 
   // Get mapping of player IDs to their hand evaluations (for active players only)
@@ -39,9 +63,10 @@ export function handleShowdown(
 
   // Track all winners across all pots
   const allWinnerIds = new Set<string>();
+  const potResults: PotResult[] = [];
 
   // Process each pot from main to side pots
-  for (const pot of pots) {
+  pots.forEach((pot, index) => {
     // Filter to only eligible players for this pot
     const eligiblePlayers = activePlayers.filter(p =>
       pot.eligiblePlayerIds.includes(p.id)
@@ -49,7 +74,7 @@ export function handleShowdown(
 
     if (eligiblePlayers.length === 0) {
       // Should not happen if calculateSidePots is correct, but handle gracefully
-      continue;
+      return;
     }
 
     // Get hand evaluations for eligible players only
@@ -66,8 +91,17 @@ export function handleShowdown(
 
     // Track all winners
     potWinnerIds.forEach(id => allWinnerIds.add(id));
-  }
 
-  // Return all players who won at least one pot
-  return players.filter(p => allWinnerIds.has(p.id));
+    // Store pot result for display
+    potResults.push({
+      amount: pot.amount,
+      winnerIds: potWinnerIds,
+      winnerNames: potWinnerIds.map(id => players.find(p => p.id === id)!.name),
+      isSidePot: index > 0, // First pot is main pot, rest are side pots
+    });
+  });
+
+  // Return all players who won at least one pot, plus pot information
+  const winners = players.filter(p => allWinnerIds.has(p.id));
+  return { winners, pots: potResults };
 }

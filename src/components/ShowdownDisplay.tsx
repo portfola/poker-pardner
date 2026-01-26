@@ -12,7 +12,7 @@ interface ShowdownDisplayProps {
 }
 
 export function ShowdownDisplay({ gameState, onNextHand }: ShowdownDisplayProps) {
-  const { winners, winningHands, pot, players } = gameState;
+  const { winners, winningHands, pot, players, potResults } = gameState;
 
   if (!gameState.isHandComplete || winners.length === 0) {
     return null;
@@ -23,9 +23,15 @@ export function ShowdownDisplay({ gameState, onNextHand }: ShowdownDisplayProps)
   const isSplit = winners.length > 1;
   const potShare = Math.floor(pot / winners.length);
 
+  // Determine if there are side pots
+  const hasSidePots = potResults && potResults.length > 1;
+
   // Generate winner message
   let winnerMessage: string;
-  if (isSplit) {
+  if (hasSidePots) {
+    // When there are side pots, just show the total pot amount
+    winnerMessage = `Total pot: $${pot}`;
+  } else if (isSplit) {
     const winnerNames = winners.map(w => w.name).join(', ');
     winnerMessage = `Split Pot! ${winnerNames} tie`;
   } else {
@@ -84,17 +90,47 @@ export function ShowdownDisplay({ gameState, onNextHand }: ShowdownDisplayProps)
             <p className="text-wood-900 font-body text-base sm:text-lg font-semibold mb-2">
               {winnerMessage}
             </p>
-            {handDescription && (
+            {!hasSidePots && handDescription && (
               <p className="text-wood-800 font-body text-sm sm:text-base">
                 with {handDescription}
               </p>
             )}
-            {isSplit && (
+            {!hasSidePots && isSplit && (
               <p className="text-wood-700 font-body text-xs sm:text-sm mt-2">
                 Each player wins ${potShare}
               </p>
             )}
           </div>
+
+          {/* Side pot breakdown */}
+          {hasSidePots && potResults && (
+            <div className="bg-wood-700/10 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4 space-y-2">
+              <p className="text-wood-900 font-body text-sm sm:text-base font-semibold mb-2">
+                Pot Distribution:
+              </p>
+              {potResults.map((potResult, index) => {
+                const potLabel = potResult.isSidePot
+                  ? `Side Pot ${index}`
+                  : 'Main Pot';
+                const isMultipleWinners = potResult.winnerNames.length > 1;
+                const winnerDisplay = isMultipleWinners
+                  ? potResult.winnerNames.join(', ')
+                  : potResult.winnerNames[0];
+                const shareAmount = Math.floor(potResult.amount / potResult.winnerNames.length);
+
+                return (
+                  <div key={index} className="border-l-2 border-wood-700 pl-3">
+                    <p className="text-wood-800 font-body text-xs sm:text-sm">
+                      <span className="font-semibold">{potLabel}</span> (${potResult.amount})
+                    </p>
+                    <p className="text-wood-700 font-body text-xs sm:text-sm">
+                      → {winnerDisplay} {isMultipleWinners ? `(${potResult.winnerNames.length} way split, $${shareAmount} each)` : `wins $${potResult.amount}`}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* User eliminated message */}
           {isUserEliminated && (

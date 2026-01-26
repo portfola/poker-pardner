@@ -528,22 +528,23 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       });
 
       // Handle showdown with side pot distribution
-      const winners = handleShowdown(newState.players, handEvaluations);
+      const showdownResult = handleShowdown(newState.players, handEvaluations);
 
       // Get winning hands for display
-      const winningHands = winners.map(winner => {
+      const winningHands = showdownResult.winners.map(winner => {
         const playerIndex = activePlayers.findIndex(p => p.id === winner.id);
         return handEvaluations[playerIndex];
       });
 
-      newState.winners = winners;
+      newState.winners = showdownResult.winners;
       newState.winningHands = winningHands;
+      newState.potResults = showdownResult.pots;
       newState.isHandComplete = true;
 
       // Track statistics for the user
       const userPlayer = newState.players.find(p => p.isUser);
       if (userPlayer && newState.userStartingChips !== undefined) {
-        const userWon = winners.some(w => w.id === userPlayer.id);
+        const userWon = showdownResult.winners.some(w => w.id === userPlayer.id);
         const chipChange = userPlayer.chips - newState.userStartingChips;
 
         updateHandStatistics({
