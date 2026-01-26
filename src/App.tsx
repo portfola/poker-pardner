@@ -252,10 +252,10 @@ function App() {
       return
     }
 
-    // If it's the user's turn, show advice
+    // If it's the user's turn, show advice only in tutorial mode
     if (currentPlayer && currentPlayer.isUser && !currentPlayer.isFolded && !currentPlayer.isAllIn) {
       const userPlayer = state.players.find(p => p.isUser)
-      if (userPlayer) {
+      if (userPlayer && state.mode === 'tutorial') {
         const turnNarration = generateUserTurnNarration(userPlayer, state)
         setPendingEvent({
           type: 'user_turn',

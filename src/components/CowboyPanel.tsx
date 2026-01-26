@@ -267,7 +267,7 @@ export function CowboyPanel({
                           </div>
                         )}
 
-                        {narratorEvent.advice && (
+                        {narratorEvent.advice && gameState.mode === 'tutorial' && (
                           <div className="pt-3 border-t border-amber-800/20">
                             <p className="text-stone-700 text-xs sm:text-sm font-semibold flex items-start gap-2">
                               <span className="text-emerald-700 flex-shrink-0 text-base">→</span>
@@ -287,41 +287,43 @@ export function CowboyPanel({
                   </div>
                 </div>
 
-                {/* Right: Hand Strength Badge + Help */}
-                <div className="flex lg:flex-col flex-row items-center gap-3 justify-center">
-                  {/* Hand Strength Badge */}
-                  {narratorEvent?.handStrength && (
-                    <div
-                      className={`poker-chip rounded-xl w-24 h-24 sm:w-28 sm:h-28 flex flex-col items-center justify-center ${strengthBadge.bg} border-4 ${strengthBadge.border}`}
-                    >
+                {/* Right: Hand Strength Badge + Help (hidden in training mode) */}
+                {gameState.mode === 'tutorial' && (
+                  <div className="flex lg:flex-col flex-row items-center gap-3 justify-center">
+                    {/* Hand Strength Badge */}
+                    {narratorEvent?.handStrength && (
                       <div
-                        className="text-[9px] sm:text-xs font-bold uppercase tracking-wider opacity-70"
-                        style={{ fontFamily: "'Playfair Display', serif" }}
+                        className={`poker-chip rounded-xl w-24 h-24 sm:w-28 sm:h-28 flex flex-col items-center justify-center ${strengthBadge.bg} border-4 ${strengthBadge.border}`}
                       >
-                        Hand
+                        <div
+                          className="text-[9px] sm:text-xs font-bold uppercase tracking-wider opacity-70"
+                          style={{ fontFamily: "'Playfair Display', serif" }}
+                        >
+                          Hand
+                        </div>
+                        <div
+                          className={`text-xs sm:text-sm font-black ${strengthBadge.text} text-center leading-snug px-2 mt-1`}
+                          style={{ fontFamily: "'Playfair Display', serif" }}
+                        >
+                          {narratorEvent.handStrength.split(' ').map((word, i) => (
+                            <div key={i}>{word}</div>
+                          ))}
+                        </div>
                       </div>
-                      <div
-                        className={`text-xs sm:text-sm font-black ${strengthBadge.text} text-center leading-snug px-2 mt-1`}
-                        style={{ fontFamily: "'Playfair Display', serif" }}
-                      >
-                        {narratorEvent.handStrength.split(' ').map((word, i) => (
-                          <div key={i}>{word}</div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Help button */}
-                  <button
-                    onClick={() => setShowHandRankings(true)}
-                    className="poker-chip w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-stone-700 to-stone-900 hover:from-stone-600 hover:to-stone-800 text-amber-300 font-black text-lg sm:text-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
-                    aria-label="View hand rankings"
-                    title="Hand Rankings"
-                    style={{ fontFamily: "'Playfair Display', serif" }}
-                  >
-                    ?
-                  </button>
-                </div>
+                    {/* Help button */}
+                    <button
+                      onClick={() => setShowHandRankings(true)}
+                      className="poker-chip w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-stone-700 to-stone-900 hover:from-stone-600 hover:to-stone-800 text-amber-300 font-black text-lg sm:text-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
+                      aria-label="View hand rankings"
+                      title="Hand Rankings"
+                      style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
+                      ?
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons Row - Improved spacing and size */}
