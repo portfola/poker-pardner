@@ -3,13 +3,14 @@
  * Rustic wood and leather aesthetic for poker decisions.
  */
 
+import { useState, useEffect } from 'react';
 import { GameState } from '../types/game';
 
 interface ActionButtonsProps {
   gameState: GameState;
   onFold: () => void;
   onCall: () => void;
-  onRaise: () => void;
+  onRaise: (amount?: number) => void;
 }
 
 export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButtonsProps) {
@@ -28,7 +29,23 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
   const amountToCall = currentBet - userPlayer.currentBet;
   const canCall = userPlayer.chips >= amountToCall;
   const canRaise = userPlayer.chips > amountToCall;
-  const hasEnoughForMinRaise = userPlayer.chips >= minRaise;
+
+  // Calculate minimum and maximum raise amounts
+  const minRaiseAmount = Math.min(minRaise, userPlayer.currentBet + userPlayer.chips);
+  const maxRaiseAmount = userPlayer.currentBet + userPlayer.chips;
+  const hasEnoughForMinRaise = userPlayer.chips >= (minRaise - userPlayer.currentBet);
+
+  // State for custom raise amount
+  const [raiseAmount, setRaiseAmount] = useState(minRaiseAmount);
+  const [showRaiseSlider, setShowRaiseSlider] = useState(false);
+
+  // Reset raise amount when it's the user's turn or when betting changes
+  useEffect(() => {
+    if (isUserTurn) {
+      setRaiseAmount(minRaiseAmount);
+      setShowRaiseSlider(false);
+    }
+  }, [isUserTurn, minRaiseAmount]);
 
   // Determine button text and states
   const isCheck = amountToCall === 0;
@@ -39,8 +56,11 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
   if (!canRaise) {
     raiseButtonText = 'All-In';
   } else if (hasEnoughForMinRaise) {
-    const raiseAmount = currentBet + bigBlind;
-    raiseButtonText = `Raise to $${raiseAmount}`;
+    if (showRaiseSlider) {
+      raiseButtonText = `Raise to $${raiseAmount}`;
+    } else {
+      raiseButtonText = 'Raise';
+    }
   } else {
     raiseButtonText = 'All-In';
   }
@@ -49,6 +69,21 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
   const foldDisabled = !isUserTurn;
   const callDisabled = !isUserTurn || !canCall;
   const raiseDisabled = !isUserTurn || !canRaise;
+
+  // Handle raise button click
+  const handleRaiseClick = () => {
+    if (!hasEnoughForMinRaise || maxRaiseAmount === minRaiseAmount) {
+      // Go all-in immediately if can't meet min raise or no range to choose from
+      onRaise(maxRaiseAmount);
+    } else if (showRaiseSlider) {
+      // Confirm the raise with the selected amount
+      onRaise(raiseAmount);
+      setShowRaiseSlider(false);
+    } else {
+      // Show the slider
+      setShowRaiseSlider(true);
+    }
+  };
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 xl:-translate-x-[calc(50%+90px)] z-10 w-[calc(100%-2rem)] sm:w-auto max-w-lg">
@@ -65,6 +100,34 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
             backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(62, 39, 35, 0.3) 3px, rgba(62, 39, 35, 0.3) 6px)',
           }}
         />
+
+        {/* Raise amount slider */}
+        {showRaiseSlider && isUserTurn && hasEnoughForMinRaise && (
+          <div className="mb-3 relative z-10 px-2">
+            <div className="bg-wood-800/50 rounded-lg p-3 border border-sand-200/20">
+              <label htmlFor="raise-slider" className="block text-sand-200 text-sm font-body mb-2">
+                Select raise amount: ${raiseAmount}
+              </label>
+              <input
+                id="raise-slider"
+                type="range"
+                min={minRaiseAmount}
+                max={maxRaiseAmount}
+                step={bigBlind}
+                value={raiseAmount}
+                onChange={(e) => setRaiseAmount(Number(e.target.value))}
+                className="w-full h-2 bg-wood-700 rounded-lg appearance-none cursor-pointer slider-thumb"
+                style={{
+                  background: `linear-gradient(to right, #d4af37 0%, #d4af37 ${((raiseAmount - minRaiseAmount) / (maxRaiseAmount - minRaiseAmount)) * 100}%, #4a3f35 ${((raiseAmount - minRaiseAmount) / (maxRaiseAmount - minRaiseAmount)) * 100}%, #4a3f35 100%)`
+                }}
+              />
+              <div className="flex justify-between text-xs text-sand-200/70 mt-1">
+                <span>Min: ${minRaiseAmount}</span>
+                <span>Max: ${maxRaiseAmount}</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex gap-2 sm:gap-3 relative z-10">
           {/* Fold Button */}
@@ -115,13 +178,15 @@ export function ActionButtons({ gameState, onFold, onCall, onRaise }: ActionButt
 
           {/* Raise Button */}
           <button
-            onClick={onRaise}
+            onClick={handleRaiseClick}
             disabled={raiseDisabled}
             aria-label={
               !canRaise
                 ? "Go all-in with remaining chips"
                 : hasEnoughForMinRaise
-                ? `Raise the bet to $${currentBet + bigBlind}`
+                ? showRaiseSlider
+                  ? `Confirm raise to $${raiseAmount}`
+                  : "Open raise amount selector"
                 : "Go all-in with remaining chips"
             }
             aria-disabled={raiseDisabled}

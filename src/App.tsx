@@ -426,10 +426,11 @@ function App() {
     }
   }
 
-  const handleRaise = () => {
+  const handleRaise = (customAmount?: number) => {
     const userPlayer = state.players.find(p => p.isUser)
     if (userPlayer) {
-      const raiseAmount = state.currentBet + state.bigBlind
+      // Use custom amount if provided, otherwise use default minimum raise
+      const raiseAmount = customAmount !== undefined ? customAmount : (state.currentBet + state.bigBlind)
       const additionalChips = raiseAmount - userPlayer.currentBet
 
       handlePlayerAction(userPlayer.id, 'raise', raiseAmount)

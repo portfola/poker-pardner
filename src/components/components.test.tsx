@@ -240,7 +240,12 @@ describe('ActionButtons component', () => {
       />
     );
 
+    // First click shows the slider
     fireEvent.click(screen.getByText(/Raise/));
+    expect(onRaise).toHaveBeenCalledTimes(0);
+
+    // Second click confirms the raise
+    fireEvent.click(screen.getByText(/Raise to \$/));
     expect(onRaise).toHaveBeenCalledTimes(1);
   });
 

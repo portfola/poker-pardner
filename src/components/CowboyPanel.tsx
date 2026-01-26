@@ -4,7 +4,7 @@
  * Redesigned with vintage playing card aesthetic.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GameState, NarratorEvent } from '../types/game';
 import { HandRankings } from './HandRankings';
 import { ActionHistory } from './ActionHistory';
@@ -15,7 +15,7 @@ interface CowboyPanelProps {
   narratorEvent: NarratorEvent | null;
   onFold: () => void;
   onCall: () => void;
-  onRaise: () => void;
+  onRaise: (amount?: number) => void;
   onNext: () => void;
   onNextHand: () => void;
 }
@@ -45,21 +45,57 @@ export function CowboyPanel({
   const amountToCall = currentBet - userPlayer.currentBet;
   const canCall = userPlayer.chips >= amountToCall;
   const canRaise = userPlayer.chips > amountToCall;
-  const hasEnoughForMinRaise = userPlayer.chips >= minRaise;
+
+  // Calculate minimum and maximum raise amounts
+  const minRaiseAmount = Math.min(minRaise, userPlayer.currentBet + userPlayer.chips);
+  const maxRaiseAmount = userPlayer.currentBet + userPlayer.chips;
+  const hasEnoughForMinRaise = userPlayer.chips >= (minRaise - userPlayer.currentBet);
+
   const isCheck = amountToCall === 0;
   const callButtonText = isCheck ? 'Check' : `Call $${amountToCall}`;
+
+  // State for custom raise amount
+  const [raiseAmount, setRaiseAmount] = useState(minRaiseAmount);
+  const [showRaiseSlider, setShowRaiseSlider] = useState(false);
+
+  // Reset raise amount when it's the user's turn or when betting changes
+  useEffect(() => {
+    if (isUserTurn) {
+      setRaiseAmount(minRaiseAmount);
+      setShowRaiseSlider(false);
+    }
+  }, [isUserTurn, minRaiseAmount]);
 
   let raiseButtonText = 'Raise';
   if (!canRaise) {
     raiseButtonText = 'All-In';
   } else if (hasEnoughForMinRaise) {
-    raiseButtonText = `Raise to $${currentBet + bigBlind}`;
+    if (showRaiseSlider) {
+      raiseButtonText = `Raise to $${raiseAmount}`;
+    } else {
+      raiseButtonText = 'Raise';
+    }
   } else {
     raiseButtonText = 'All-In';
   }
 
   // Button states - only enabled when it's user's turn and hand is active
   const buttonsDisabled = !isUserTurn || isHandComplete;
+
+  // Handle raise button click
+  const handleRaiseClick = () => {
+    if (!hasEnoughForMinRaise || maxRaiseAmount === minRaiseAmount) {
+      // Go all-in immediately if can't meet min raise or no range to choose from
+      onRaise(maxRaiseAmount);
+    } else if (showRaiseSlider) {
+      // Confirm the raise with the selected amount
+      onRaise(raiseAmount);
+      setShowRaiseSlider(false);
+    } else {
+      // Show the slider
+      setShowRaiseSlider(true);
+    }
+  };
 
   // End of hand info
   const { winners, winningHands, pot } = gameState;
@@ -325,6 +361,34 @@ export function CowboyPanel({
                 )}
               </div>
 
+              {/* Raise amount slider */}
+              {showRaiseSlider && isUserTurn && hasEnoughForMinRaise && !isHandComplete && (
+                <div className="mt-4 mx-auto max-w-md">
+                  <div className="card-texture rounded-xl p-4 border-2 border-amber-700/50">
+                    <label htmlFor="raise-slider" className="block text-stone-800 text-sm font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      Select raise amount: ${raiseAmount}
+                    </label>
+                    <input
+                      id="raise-slider"
+                      type="range"
+                      min={minRaiseAmount}
+                      max={maxRaiseAmount}
+                      step={bigBlind}
+                      value={raiseAmount}
+                      onChange={(e) => setRaiseAmount(Number(e.target.value))}
+                      className="w-full h-3 rounded-lg appearance-none cursor-pointer"
+                      style={{
+                        background: `linear-gradient(to right, #d4af37 0%, #d4af37 ${((raiseAmount - minRaiseAmount) / (maxRaiseAmount - minRaiseAmount)) * 100}%, #8b7355 ${((raiseAmount - minRaiseAmount) / (maxRaiseAmount - minRaiseAmount)) * 100}%, #8b7355 100%)`
+                      }}
+                    />
+                    <div className="flex justify-between text-xs text-stone-600 mt-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      <span>Min: ${minRaiseAmount}</span>
+                      <span>Max: ${maxRaiseAmount}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Action Buttons Row - Improved spacing and size */}
               <div className="mt-5 flex gap-3 sm:gap-4 justify-center items-center flex-wrap">
                 {/* History Button - always visible */}
@@ -394,9 +458,9 @@ export function CowboyPanel({
                     </button>
 
                     <button
-                      onClick={onRaise}
+                      onClick={handleRaiseClick}
                       disabled={buttonsDisabled || !canRaise}
-                      aria-label={raiseButtonText}
+                      aria-label={showRaiseSlider ? `Confirm raise to $${raiseAmount}` : raiseButtonText}
                       className={`
                         poker-chip px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all min-w-[100px] sm:min-w-[130px]
                         ${buttonsDisabled || !canRaise

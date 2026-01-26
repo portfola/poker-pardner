@@ -39,8 +39,8 @@
 - [x] Stats integration - Track hands played, hands won, biggest pot, win rate, streaks (2026-01-26)
 
 ### Custom Raise Amounts
-- [ ] Raise slider/input - Add raise amount controls to `src/components/ActionButtons.tsx`
-- [ ] Raise validation - Handle custom raise amounts in `src/hooks/useGameState.ts`
+- [x] Raise slider/input - Add raise amount controls to `src/components/ActionButtons.tsx` and `src/components/CowboyPanel.tsx` (2026-01-26)
+- [x] Raise validation - Handle custom raise amounts in `src/hooks/useGameState.ts` and `src/App.tsx` (2026-01-26)
 
 ### Side Pot Calculation (Phase 2 Priority)
 - [ ] Side pot logic - Calculate side pots when multiple players all-in at different amounts
