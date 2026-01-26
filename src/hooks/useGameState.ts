@@ -6,8 +6,9 @@
 import { useReducer, useCallback } from 'react';
 import { GameState, Player, BettingAction, NarratorEvent, ActionHistoryEntry, GameMode, DifficultyLevel } from '../types/game';
 import { createShuffledDeck, dealCards } from '../utils/cards';
-import { getBestFiveCardHand, determineWinners } from '../utils/handEvaluator';
+import { getBestFiveCardHand } from '../utils/handEvaluator';
 import { updateHandStatistics } from '../utils/statistics';
+import { handleShowdown } from '../utils/showdown';
 
 // Action types for the reducer
 type GameAction =
@@ -526,15 +527,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return getBestFiveCardHand(player.holeCards, newState.communityCards);
       });
 
-      // Determine winner(s)
-      const winnerIndices = determineWinners(handEvaluations);
-      const winners = winnerIndices.map(i => activePlayers[i]);
-      const winningHands = winnerIndices.map(i => handEvaluations[i]);
+      // Handle showdown with side pot distribution
+      const winners = handleShowdown(newState.players, handEvaluations);
 
-      // Award pot (split if multiple winners)
-      const potShare = Math.floor(newState.pot / winners.length);
-      winners.forEach(winner => {
-        winner.chips += potShare;
+      // Get winning hands for display
+      const winningHands = winners.map(winner => {
+        const playerIndex = activePlayers.findIndex(p => p.id === winner.id);
+        return handEvaluations[playerIndex];
       });
 
       newState.winners = winners;
