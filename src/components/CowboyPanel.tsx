@@ -119,30 +119,29 @@ export function CowboyPanel({
         }
 
         .ornate-border {
-          border: 3px solid;
-          border-image: linear-gradient(135deg, #8b6914, #d4af37, #8b6914) 1;
+          border: 2px solid #d4af37;
           box-shadow:
-            0 0 0 1px rgba(212, 175, 55, 0.3),
-            inset 0 0 0 1px rgba(255, 255, 255, 0.5),
-            0 8px 24px rgba(0, 0, 0, 0.4);
+            0 0 12px rgba(212, 175, 55, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+            0 8px 24px rgba(0, 0, 0, 0.3);
         }
 
         .cowboy-portrait {
-          border: 4px solid;
-          border-image: linear-gradient(145deg, #8b6914, #d4af37, #f4e5a8, #d4af37, #8b6914) 1;
+          border: 3px solid #d4af37;
           box-shadow:
-            0 0 0 2px rgba(139, 105, 20, 0.4),
-            inset 0 2px 8px rgba(255, 255, 255, 0.3),
-            0 6px 16px rgba(0, 0, 0, 0.5);
+            0 0 8px rgba(212, 175, 55, 0.5),
+            inset 0 1px 3px rgba(255, 255, 255, 0.4),
+            0 4px 12px rgba(0, 0, 0, 0.4);
           background: radial-gradient(circle at 30% 30%, #f4e5a8, #d4af37, #8b6914);
         }
 
         .poker-chip {
           position: relative;
           box-shadow:
-            0 4px 12px rgba(0, 0, 0, 0.4),
-            inset 0 2px 4px rgba(255, 255, 255, 0.3),
-            inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+            0 4px 12px rgba(0, 0, 0, 0.3),
+            inset 0 1px 3px rgba(255, 255, 255, 0.2),
+            inset 0 -1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .poker-chip::before {
@@ -169,7 +168,7 @@ export function CowboyPanel({
             <div className="relative p-4 sm:p-5">
 
               {/* Main Content Grid - Improved spacing and layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-4 sm:gap-5 items-start">
+              <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_120px] gap-4 sm:gap-5 items-start">
 
                 {/* Left: Cowboy Portrait + Phase Indicator */}
                 <div className="flex flex-col items-center lg:items-start gap-3">
@@ -289,20 +288,20 @@ export function CowboyPanel({
 
                 {/* Right: Hand Strength Badge + Help (hidden in training mode) */}
                 {gameState.mode === 'tutorial' && (
-                  <div className="flex lg:flex-col flex-row items-center gap-3 justify-center">
+                  <div className="flex lg:flex-col flex-row items-center gap-2 lg:gap-3 justify-center lg:justify-start">
                     {/* Hand Strength Badge */}
                     {narratorEvent?.handStrength && (
                       <div
-                        className={`poker-chip rounded-xl w-24 h-24 sm:w-28 sm:h-28 flex flex-col items-center justify-center ${strengthBadge.bg} border-4 ${strengthBadge.border}`}
+                        className={`poker-chip rounded-lg lg:rounded-xl w-20 h-20 lg:w-24 lg:h-24 flex flex-col items-center justify-center ${strengthBadge.bg} border-4 ${strengthBadge.border}`}
                       >
                         <div
-                          className="text-[9px] sm:text-xs font-bold uppercase tracking-wider opacity-70"
+                          className="text-[8px] lg:text-[9px] font-bold uppercase tracking-wider opacity-70"
                           style={{ fontFamily: "'Playfair Display', serif" }}
                         >
                           Hand
                         </div>
                         <div
-                          className={`text-xs sm:text-sm font-black ${strengthBadge.text} text-center leading-snug px-2 mt-1`}
+                          className={`text-[9px] lg:text-xs font-black ${strengthBadge.text} text-center leading-tight px-1 mt-0.5 lg:mt-1`}
                           style={{ fontFamily: "'Playfair Display', serif" }}
                         >
                           {narratorEvent.handStrength.split(' ').map((word, i) => (
@@ -315,7 +314,7 @@ export function CowboyPanel({
                     {/* Help button */}
                     <button
                       onClick={() => setShowHandRankings(true)}
-                      className="poker-chip w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-stone-700 to-stone-900 hover:from-stone-600 hover:to-stone-800 text-amber-300 font-black text-lg sm:text-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
+                      className="poker-chip w-10 h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-gradient-to-br from-stone-700 to-stone-900 hover:from-stone-600 hover:to-stone-800 text-amber-300 font-black text-base lg:text-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
                       aria-label="View hand rankings"
                       title="Hand Rankings"
                       style={{ fontFamily: "'Playfair Display', serif" }}

@@ -27,7 +27,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-2 sm:p-4 pb-44 sm:pb-52 relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center p-2 sm:p-4 pb-56 sm:pb-64 md:pb-72 relative overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #3E2723 0%, #4E342E 50%, #3E2723 100%)',
       }}
