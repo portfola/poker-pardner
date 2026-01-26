@@ -4,7 +4,7 @@
  */
 
 import { useReducer, useCallback } from 'react';
-import { GameState, Player, BettingAction, NarratorEvent, ActionHistoryEntry } from '../types/game';
+import { GameState, Player, BettingAction, NarratorEvent, ActionHistoryEntry, GameMode } from '../types/game';
 import { createShuffledDeck, dealCards } from '../utils/cards';
 import { getBestFiveCardHand, determineWinners } from '../utils/handEvaluator';
 
@@ -20,7 +20,8 @@ type GameAction =
   | { type: 'SET_PENDING_EVENT'; event: NarratorEvent | null }
   | { type: 'CLEAR_PENDING_EVENT' }
   | { type: 'ADD_ACTION_HISTORY'; entry: Omit<ActionHistoryEntry, 'id' | 'timestamp'> }
-  | { type: 'SET_WAITING_FOR_NEXT'; waiting: boolean };
+  | { type: 'SET_WAITING_FOR_NEXT'; waiting: boolean }
+  | { type: 'SET_MODE'; mode: GameMode };
 
 /**
  * Creates the initial game state with 4 players.
@@ -569,6 +570,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'SET_MODE': {
+      return {
+        ...state,
+        mode: action.mode,
+      };
+    }
+
     default:
       return state;
   }
@@ -625,6 +633,10 @@ export function useGameState() {
     dispatch({ type: 'SET_WAITING_FOR_NEXT', waiting });
   }, []);
 
+  const setMode = useCallback((mode: GameMode) => {
+    dispatch({ type: 'SET_MODE', mode });
+  }, []);
+
   // Helper to check if betting round is complete
   const isBettingComplete = useCallback(() => {
     return isBettingRoundComplete(state);
@@ -658,5 +670,6 @@ export function useGameState() {
     clearPendingEvent,
     addActionHistory,
     setWaitingForNext,
+    setMode,
   };
 }

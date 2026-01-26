@@ -5,6 +5,7 @@ import { PokerTable } from './components/PokerTable'
 import { CowboyPanel } from './components/CowboyPanel'
 import { MusicPlayer } from './components/MusicPlayer'
 import { ConfirmDialog } from './components/ConfirmDialog'
+import { ModeSelection } from './components/ModeSelection'
 import { makeAIDecision } from './utils/ai'
 import { TIMING } from './constants/timing'
 import { getBestFiveCardHand, getBestHandFromSix, evaluateHand } from './utils/handEvaluator'
@@ -33,15 +34,23 @@ function App() {
     setPendingEvent,
     addActionHistory,
     setWaitingForNext,
+    setMode,
   } = useGameState()
 
   const [showFoldConfirm, setShowFoldConfirm] = useState(false)
+  const [modeSelected, setModeSelected] = useState(false)
   const hasShownHandStart = useRef(false)
   const isProcessingAI = useRef(false)
   const lastPhaseRef = useRef<string>('')
 
   // Check if hand has been dealt
   const hasCards = state.players.some(p => p.holeCards.length > 0)
+
+  // Handle mode selection
+  const handleModeSelect = (mode: 'tutorial' | 'training') => {
+    setMode(mode)
+    setModeSelected(true)
+  }
 
   // Helper to get AI hand strength for narration
   const getAIHandStrength = useCallback((playerId: string): number => {
@@ -467,7 +476,18 @@ function App() {
     setWaitingForNext(false)
   }
 
+  // Show mode selection if not yet selected
+  if (!modeSelected) {
+    return (
+      <>
+        <MusicPlayer gameStarted={false} />
+        <ModeSelection onSelectMode={handleModeSelect} />
+      </>
+    )
+  }
+
   if (!hasCards) {
+    // After mode selection, show loading/waiting screen before first hand
     return (
       <>
         <MusicPlayer gameStarted={false} />
@@ -500,45 +520,22 @@ function App() {
               <div className="text-gold-400/50 text-4xl">★</div>
             </div>
 
-            <div
-              className="inline-block bg-sand-100 border-8 border-wood-800 p-8 shadow-2xl mb-8"
-              style={{
-                boxShadow: '0 12px 32px rgba(0, 0, 0, 0.8)',
-                background: 'linear-gradient(135deg, #F5E6D3 0%, #E8D5B7 100%)',
-              }}
-            >
-              <h1
-                className="text-6xl font-display font-bold text-wood-900 mb-2"
-                style={{ textShadow: '2px 2px 0px rgba(0, 0, 0, 0.1)' }}
-              >
-                POKER PARDNER
-              </h1>
-              <div className="h-1 w-32 bg-wood-700 mx-auto my-4" />
-              <p className="text-lg font-body text-wood-800 font-semibold tracking-wide">
-                Learn Texas Hold'em
-              </p>
-              <p className="text-base font-body text-wood-700">Old West Style</p>
-            </div>
-
             <div className="text-6xl mb-6">🐴</div>
+
+            <p className="text-gold-400 text-xl font-display font-bold mb-8 tracking-wide">
+              {state.mode === 'tutorial' ? 'Starting Tutorial Mode...' : 'Starting Play Mode...'}
+            </p>
 
             <button
               onClick={handleStartNewHand}
-              aria-label="Start tutorial mode to learn poker"
+              aria-label="Deal first hand"
               className="bg-gradient-to-b from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-wood-900 font-body font-bold py-4 px-10 rounded-lg text-xl shadow-xl transition-all hover:scale-105 active:scale-95 border-4 border-gold-600"
               style={{
                 boxShadow: '0 6px 20px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
               }}
             >
-              Start Tutorial
+              Deal Hand
             </button>
-
-            <div className="flex justify-center gap-4 mt-8 text-2xl">
-              <span className="text-red-600">♥</span>
-              <span className="text-black">♠</span>
-              <span className="text-red-600">♦</span>
-              <span className="text-black">♣</span>
-            </div>
           </div>
         </div>
       </>

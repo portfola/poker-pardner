@@ -2,6 +2,7 @@
 
 ## Next Up
 - [x] Improve design, layout, and spacing of the elements within the action panel. Prefer rounded rectangles and squares to circles. Ensure the text is readable and buttons are usable. (2026-01-26)
+- [x] Home screen mode selection - Present choice between Tutorial (with guidance) and Play (no guidance) (2026-01-26)
 
 ## Backlog
 
@@ -16,7 +17,7 @@
 - [ ] Set up analytics - PostHog integration for user tracking and insights
 
 ### Play Mode (No Guidance)
-- [ ] Home screen mode selection - Present choice between Tutorial (with guidance) and Play (no guidance)
+- [x] Home screen mode selection - Present choice between Tutorial (with guidance) and Play (no guidance) (2026-01-26)
 - [ ] Play mode implementation - Hide strategic advice from cowboy; keep game state display
 
 ### Variable AI Difficulty
