@@ -1,14 +1,19 @@
 # Poker Pardner - Development Roadmap
 
 ## Next Up
-- [ ] Action log: blind recording - Ensure small blind and big blind are recorded as first actions in the history log
-- [ ] Tutorial pacing: AI turns - Show "Next" button instead of Fold/Call/Raise when AI players act; wait for user click to advance
-- [ ] Tutorial pacing: community cards - Pause on flop/turn/river introduction with cowboy explanation; require "Next" click to proceed
-- [ ] AI player names - Give each AI player a unique Western-themed name; persist throughout game
-- [ ] Relocate game phase indicator - Move "Turn"/"Flop" status box from between table and action panel into action panel, left side beneath cowboy avatar
-- [ ] End of hand display - Replace modal with cowboy explanation in action panel; keep table visible so user can see final hands
+- [ ] Improve design, layout, and spacing of the elements within the action panel. Prefer rounded rectangles and squares to circles. Ensure the text is readable and buttons are usable.
 
 ## Backlog
+
+### Pre-Production & Deployment
+- [ ] Create favicon - 32x32px minimum, poker/western theme (.ico or .svg)
+- [ ] Create Open Graph image - 1200x630px PNG for social sharing
+- [ ] Run pre-deployment checklist - Code quality, assets, SEO, performance verification
+- [ ] Browser testing - Chrome, Firefox, Safari, Edge (latest versions)
+- [ ] Mobile browser testing - iOS Safari, Chrome Mobile (Android)
+- [ ] Functionality testing checklist - All gameplay flows, UI interactions, responsive design
+- [ ] Post-deployment verification - Load testing, social sharing test, Lighthouse audit
+- [ ] Set up analytics - PostHog integration for user tracking and insights
 
 ### Play Mode (No Guidance)
 - [ ] Home screen mode selection - Present choice between Tutorial (with guidance) and Play (no guidance)
@@ -30,10 +35,30 @@
 - [ ] Raise slider/input - Add raise amount controls to `src/components/ActionButtons.tsx`
 - [ ] Raise validation - Handle custom raise amounts in `src/hooks/useGameState.ts`
 
-### Side Pot Calculation
+### Side Pot Calculation (Phase 2 Priority)
 - [ ] Side pot logic - Calculate side pots when multiple players all-in at different amounts
 - [ ] Side pot showdown - Award main pot and side pots to correct winners in `src/utils/showdown.ts`
 - [ ] Side pot UI - Display side pot amounts in `src/components/ShowdownDisplay.tsx`
+- [ ] Test 2-player all-in with different amounts
+- [ ] Test 3-player all-in with different amounts
+- [ ] Test side pot with folded players
+- [ ] Test multiple side pots
+
+### End Game Scenarios (Phase 2 Priority)
+- [ ] Game ending when only 1 player has chips (all others eliminated)
+- [ ] Game over screen display with celebration
+- [ ] Restart/replay functionality after game ends
+
+### UI Edge Cases (Phase 2 Priority)
+- [ ] Test rapid clicking during animations
+- [ ] Test action buttons during phase transitions
+- [ ] Test display of very large pot amounts (e.g., $10,000+)
+- [ ] Test display with long player names (10+ characters)
+
+### Performance Testing (Phase 2 Priority)
+- [ ] Test with 100+ consecutive hands
+- [ ] Test memory usage over extended gameplay
+- [ ] Test animation performance on low-end devices
 
 ### Sound Effects
 - [ ] Audio utility - Create `src/utils/audio.ts` for audio management

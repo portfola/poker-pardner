@@ -8,12 +8,12 @@ You are an autonomous coding agent working on Poker Pardner, a Texas Hold'em pok
 
 # Your Task
 1. From plan.md, select the FIRST unchecked item (`- [ ]`) under "Next Up"
-2. If no unchecked items exist, output "ALL TASKS COMPLETE" and exit
-3. Implement ONLY that single task
-4. Run `npm test` to verify no regressions
-5. Commit with format: `feat|fix(scope): description`
-6. In plan.md, mark the item `[x]` and add completion date
-7. Exit
+1. If no unchecked items exist, output "ALL TASKS COMPLETE" and exit
+1. Implement ONLY that single task
+1. Run `npm test` to verify no regressions
+1. In plan.md, mark the item `[x]` and add completion date
+1. Commit with format: `feat|fix(scope): description`
+1. Exit
 
 # Constraints
 - One task per session
