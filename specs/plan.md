@@ -1,7 +1,7 @@
 # Poker Pardner - Development Roadmap
 
 ## Next Up
-- [ ] Improve design, layout, and spacing of the elements within the action panel. Prefer rounded rectangles and squares to circles. Ensure the text is readable and buttons are usable.
+- [x] Improve design, layout, and spacing of the elements within the action panel. Prefer rounded rectangles and squares to circles. Ensure the text is readable and buttons are usable. (2026-01-26)
 
 ## Backlog
 

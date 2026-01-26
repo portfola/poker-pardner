@@ -166,16 +166,16 @@ export function CowboyPanel({
       <div className="fixed bottom-0 left-0 right-0 z-20">
         <div className="mx-auto max-w-5xl px-2 sm:px-4 pb-2 sm:pb-3">
           <div className="card-texture rounded-t-2xl sm:rounded-2xl ornate-border overflow-visible">
-            <div className="relative p-3 sm:p-4">
+            <div className="relative p-4 sm:p-5">
 
-              {/* Main Content Grid - Optimized for compactness */}
-              <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-3 items-center">
+              {/* Main Content Grid - Improved spacing and layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-4 sm:gap-5 items-start">
 
                 {/* Left: Cowboy Portrait + Phase Indicator */}
-                <div className="flex flex-col items-center lg:items-start gap-2">
+                <div className="flex flex-col items-center lg:items-start gap-3">
                   <div className="relative">
                     <div
-                      className="cowboy-portrait rounded-full w-16 h-16 sm:w-20 sm:h-20 overflow-hidden flex items-center justify-center"
+                      className="cowboy-portrait rounded-2xl w-20 h-20 sm:w-24 sm:h-24 overflow-hidden flex items-center justify-center"
                     >
                       <img
                         src="/img/cowboy_smile.png"
@@ -193,13 +193,13 @@ export function CowboyPanel({
 
                   {/* Game Phase Indicator */}
                   <div
-                    className="px-3 py-1 rounded border-2 border-amber-700/60 shadow-sm"
+                    className="px-3 py-2 rounded-lg border-2 border-amber-700/60 shadow-sm w-full text-center"
                     style={{
                       background: 'linear-gradient(135deg, #F5E6D3 0%, #E8D5B7 100%)',
                     }}
                   >
                     <span
-                      className="text-stone-800 text-[10px] sm:text-xs font-bold tracking-wider uppercase"
+                      className="text-stone-800 text-xs sm:text-sm font-bold tracking-wider uppercase block"
                       style={{ fontFamily: "'Playfair Display', serif" }}
                     >
                       {gameState.currentPhase.replace('-', ' ')}
@@ -210,19 +210,19 @@ export function CowboyPanel({
                 {/* Center: Combined Narration & Advice */}
                 <div>
                   {/* Main message with reasoning combined */}
-                  <div className="relative bg-gradient-to-br from-amber-50/90 via-yellow-50/90 to-amber-100/90 rounded-lg border-2 border-amber-800/30 p-2.5 sm:p-3 shadow-lg">
+                  <div className="relative bg-gradient-to-br from-amber-50/90 via-yellow-50/90 to-amber-100/90 rounded-xl border-2 border-amber-800/30 p-4 sm:p-5 shadow-lg">
                     <div
-                      className="absolute top-0 left-0 right-0 h-1 rounded-t-lg"
+                      className="absolute top-0 left-0 right-0 h-1.5 rounded-t-xl"
                       style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
                     ></div>
 
                     {isHandComplete && winners.length > 0 ? (
-                      <div className="space-y-1.5">
+                      <div className="space-y-3">
                         {/* Winner announcement */}
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{userWon ? '🎉' : '🤠'}</span>
+                        <div className="flex items-start gap-3">
+                          <span className="text-2xl flex-shrink-0">{userWon ? '🎉' : '🤠'}</span>
                           <p
-                            className={`leading-snug text-xs sm:text-sm font-semibold ${userWon ? 'text-emerald-700' : 'text-stone-800'}`}
+                            className={`leading-relaxed text-sm sm:text-base font-semibold ${userWon ? 'text-emerald-700' : 'text-stone-800'}`}
                             style={{ fontFamily: "'Crimson Text', serif" }}
                           >
                             {getEndOfHandMessage()}
@@ -231,9 +231,9 @@ export function CowboyPanel({
 
                         {/* Winning hand description */}
                         {handDescription && (
-                          <div className="pt-1.5 border-t border-amber-800/20">
-                            <p className="text-stone-600 text-[11px] sm:text-xs flex items-start gap-1.5">
-                              <span className="text-amber-700 flex-shrink-0">🃏</span>
+                          <div className="pt-3 border-t border-amber-800/20">
+                            <p className="text-stone-600 text-xs sm:text-sm flex items-start gap-2">
+                              <span className="text-amber-700 flex-shrink-0 text-base">🃏</span>
                               <span>Winning hand: <strong>{handDescription}</strong></span>
                             </p>
                           </div>
@@ -241,36 +241,36 @@ export function CowboyPanel({
 
                         {/* User eliminated warning */}
                         {isUserEliminated && (
-                          <div className="pt-1.5 border-t border-amber-800/20">
-                            <p className="text-rose-700 text-[11px] sm:text-xs font-semibold flex items-start gap-1.5">
-                              <span className="flex-shrink-0">💸</span>
+                          <div className="pt-3 border-t border-amber-800/20">
+                            <p className="text-rose-700 text-xs sm:text-sm font-semibold flex items-start gap-2">
+                              <span className="flex-shrink-0 text-base">💸</span>
                               <span>You're out of chips! Start a new game to try again.</span>
                             </p>
                           </div>
                         )}
                       </div>
                     ) : narratorEvent ? (
-                      <div className="space-y-1.5">
+                      <div className="space-y-3">
                         <p
-                          className="text-stone-800 leading-snug text-xs sm:text-sm"
+                          className="text-stone-800 leading-relaxed text-sm sm:text-base"
                           style={{ fontFamily: "'Crimson Text', serif" }}
                         >
                           {narratorEvent.message}
                         </p>
 
                         {narratorEvent.reasoning && (
-                          <div className="pt-1.5 border-t border-amber-800/20">
-                            <p className="text-stone-600 text-[11px] sm:text-xs italic flex items-start gap-1.5">
-                              <span className="text-amber-700 flex-shrink-0 text-xs">💭</span>
+                          <div className="pt-3 border-t border-amber-800/20">
+                            <p className="text-stone-600 text-xs sm:text-sm italic flex items-start gap-2">
+                              <span className="text-amber-700 flex-shrink-0 text-base">💭</span>
                               <span>{narratorEvent.reasoning}</span>
                             </p>
                           </div>
                         )}
 
                         {narratorEvent.advice && (
-                          <div className="pt-1.5 border-t border-amber-800/20">
-                            <p className="text-stone-700 text-[11px] sm:text-xs font-semibold flex items-start gap-1.5">
-                              <span className="text-emerald-700 flex-shrink-0">→</span>
+                          <div className="pt-3 border-t border-amber-800/20">
+                            <p className="text-stone-700 text-xs sm:text-sm font-semibold flex items-start gap-2">
+                              <span className="text-emerald-700 flex-shrink-0 text-base">→</span>
                               <span>{narratorEvent.advice}</span>
                             </p>
                           </div>
@@ -278,7 +278,7 @@ export function CowboyPanel({
                       </div>
                     ) : (
                       <p
-                        className="text-stone-600 italic text-xs sm:text-sm"
+                        className="text-stone-600 italic text-sm sm:text-base"
                         style={{ fontFamily: "'Crimson Text', serif" }}
                       >
                         {isUserTurn ? "Your move, partner!" : `Watchin' ${currentPlayer?.name || 'the table'}...`}
@@ -288,20 +288,20 @@ export function CowboyPanel({
                 </div>
 
                 {/* Right: Hand Strength Badge + Help */}
-                <div className="flex lg:flex-col flex-row items-center gap-2 justify-center">
-                  {/* Hand Strength Poker Chip */}
+                <div className="flex lg:flex-col flex-row items-center gap-3 justify-center">
+                  {/* Hand Strength Badge */}
                   {narratorEvent?.handStrength && (
                     <div
-                      className={`poker-chip rounded-full w-20 h-20 sm:w-24 sm:h-24 flex flex-col items-center justify-center ${strengthBadge.bg} border-4 ${strengthBadge.border}`}
+                      className={`poker-chip rounded-xl w-24 h-24 sm:w-28 sm:h-28 flex flex-col items-center justify-center ${strengthBadge.bg} border-4 ${strengthBadge.border}`}
                     >
                       <div
-                        className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider opacity-70"
+                        className="text-[9px] sm:text-xs font-bold uppercase tracking-wider opacity-70"
                         style={{ fontFamily: "'Playfair Display', serif" }}
                       >
                         Hand
                       </div>
                       <div
-                        className={`text-[10px] sm:text-xs font-black ${strengthBadge.text} text-center leading-tight px-2 mt-0.5`}
+                        className={`text-xs sm:text-sm font-black ${strengthBadge.text} text-center leading-snug px-2 mt-1`}
                         style={{ fontFamily: "'Playfair Display', serif" }}
                       >
                         {narratorEvent.handStrength.split(' ').map((word, i) => (
@@ -314,7 +314,7 @@ export function CowboyPanel({
                   {/* Help button */}
                   <button
                     onClick={() => setShowHandRankings(true)}
-                    className="poker-chip w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-stone-700 to-stone-900 hover:from-stone-600 hover:to-stone-800 text-amber-300 font-black text-base sm:text-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
+                    className="poker-chip w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-stone-700 to-stone-900 hover:from-stone-600 hover:to-stone-800 text-amber-300 font-black text-lg sm:text-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
                     aria-label="View hand rankings"
                     title="Hand Rankings"
                     style={{ fontFamily: "'Playfair Display', serif" }}
@@ -324,17 +324,17 @@ export function CowboyPanel({
                 </div>
               </div>
 
-              {/* Action Buttons Row - Reduced spacing */}
-              <div className="mt-3 flex gap-2 sm:gap-2.5 justify-center items-center">
+              {/* Action Buttons Row - Improved spacing and size */}
+              <div className="mt-5 flex gap-3 sm:gap-4 justify-center items-center flex-wrap">
                 {/* History Button - always visible */}
                 <button
                   onClick={() => setShowHistory(true)}
                   aria-label="View action history"
                   title="Action History"
-                  className="poker-chip w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-stone-600 to-stone-800 hover:from-stone-500 hover:to-stone-700 text-amber-200 font-bold text-sm sm:text-base flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
+                  className="poker-chip w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-stone-600 to-stone-800 hover:from-stone-500 hover:to-stone-700 text-amber-200 font-bold flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </button>
@@ -344,7 +344,7 @@ export function CowboyPanel({
                   <button
                     onClick={onNextHand}
                     aria-label={isUserEliminated ? "Start a new game" : "Deal the next hand"}
-                    className="poker-chip px-8 sm:px-12 py-2.5 sm:py-3.5 rounded-xl font-bold text-sm sm:text-base transition-all bg-gradient-to-b from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500 text-amber-950 hover:scale-105 active:scale-95 border-2 border-amber-700"
+                    className="poker-chip px-8 sm:px-12 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all bg-gradient-to-b from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500 text-amber-950 hover:scale-105 active:scale-95 border-2 border-amber-700"
                     style={{ fontFamily: "'Playfair Display', serif" }}
                   >
                     {isUserEliminated ? 'NEW GAME' : 'NEXT HAND'}
@@ -353,7 +353,7 @@ export function CowboyPanel({
                   <button
                     onClick={onNext}
                     aria-label="Continue to next action"
-                    className="poker-chip px-8 sm:px-12 py-2.5 sm:py-3.5 rounded-xl font-bold text-sm sm:text-base transition-all bg-gradient-to-b from-sky-500 to-sky-700 hover:from-sky-400 hover:to-sky-600 text-white hover:scale-105 active:scale-95 border-2 border-sky-800 animate-pulse"
+                    className="poker-chip px-8 sm:px-12 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all bg-gradient-to-b from-sky-500 to-sky-700 hover:from-sky-400 hover:to-sky-600 text-white hover:scale-105 active:scale-95 border-2 border-sky-800 animate-pulse"
                     style={{ fontFamily: "'Playfair Display', serif" }}
                   >
                     NEXT
@@ -365,7 +365,7 @@ export function CowboyPanel({
                       disabled={buttonsDisabled}
                       aria-label="Fold your hand"
                       className={`
-                        poker-chip px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all
+                        poker-chip px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all
                         ${buttonsDisabled
                           ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
                           : 'bg-gradient-to-b from-rose-600 to-rose-800 hover:from-rose-500 hover:to-rose-700 text-white hover:scale-105 active:scale-95 border-2 border-rose-900'
@@ -381,7 +381,7 @@ export function CowboyPanel({
                       disabled={buttonsDisabled || !canCall}
                       aria-label={isCheck ? "Check" : `Call $${amountToCall}`}
                       className={`
-                        poker-chip px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all min-w-[85px] sm:min-w-[110px]
+                        poker-chip px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all min-w-[100px] sm:min-w-[130px]
                         ${buttonsDisabled || !canCall
                           ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
                           : 'bg-gradient-to-b from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 text-white hover:scale-105 active:scale-95 border-2 border-emerald-900'
@@ -397,7 +397,7 @@ export function CowboyPanel({
                       disabled={buttonsDisabled || !canRaise}
                       aria-label={raiseButtonText}
                       className={`
-                        poker-chip px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all min-w-[85px] sm:min-w-[110px]
+                        poker-chip px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all min-w-[100px] sm:min-w-[130px]
                         ${buttonsDisabled || !canRaise
                           ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
                           : 'bg-gradient-to-b from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500 text-amber-950 hover:scale-105 active:scale-95 border-2 border-amber-700'
