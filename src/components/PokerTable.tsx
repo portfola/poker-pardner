@@ -163,20 +163,6 @@ export function PokerTable({ gameState }: PokerTableProps) {
           </div>
         </div>
 
-        {/* Game Phase Indicator - Western wanted poster style */}
-        <div className="mt-4 text-center">
-          <div
-            className="inline-block bg-sand-100 border-4 border-wood-700 px-6 py-2 shadow-lg"
-            style={{
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
-              background: 'linear-gradient(135deg, #F5E6D3 0%, #E8D5B7 100%)',
-            }}
-          >
-            <span className="text-wood-900 text-sm font-body font-bold tracking-wider uppercase">
-              {currentPhase.replace('-', ' ')}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );

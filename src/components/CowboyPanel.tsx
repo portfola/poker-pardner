@@ -143,8 +143,8 @@ export function CowboyPanel({
               {/* Main Content Grid - Optimized for compactness */}
               <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-3 items-center">
 
-                {/* Left: Cowboy Portrait */}
-                <div className="flex justify-center lg:justify-start">
+                {/* Left: Cowboy Portrait + Phase Indicator */}
+                <div className="flex flex-col items-center lg:items-start gap-2">
                   <div className="relative">
                     <div
                       className="cowboy-portrait rounded-full w-16 h-16 sm:w-20 sm:h-20 overflow-hidden flex items-center justify-center"
@@ -161,6 +161,21 @@ export function CowboyPanel({
                     <div className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2 border-amber-600"></div>
                     <div className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2 border-amber-600"></div>
                     <div className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2 border-amber-600"></div>
+                  </div>
+
+                  {/* Game Phase Indicator */}
+                  <div
+                    className="px-3 py-1 rounded border-2 border-amber-700/60 shadow-sm"
+                    style={{
+                      background: 'linear-gradient(135deg, #F5E6D3 0%, #E8D5B7 100%)',
+                    }}
+                  >
+                    <span
+                      className="text-stone-800 text-[10px] sm:text-xs font-bold tracking-wider uppercase"
+                      style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
+                      {gameState.currentPhase.replace('-', ' ')}
+                    </span>
                   </div>
                 </div>
 
