@@ -5,7 +5,7 @@
 
 import { Player, GameState, BettingAction, Card, Rank } from '../types/game';
 import { getBestFiveCardHand, getBestHandFromSix, evaluateHand } from './handEvaluator';
-import { AI_THRESHOLDS, AI_VARIANCE, POT_ODDS_CALL_THRESHOLD } from '../constants/ai';
+import { DifficultyLevel, getDifficultyConfig, DEFAULT_DIFFICULTY } from '../constants/difficulty';
 
 /**
  * Evaluates the strength of a hand for AI decision-making.
@@ -72,12 +72,23 @@ function getCardValue(rank: Rank): number {
 /**
  * Makes a decision for an AI player.
  * Returns the action and optional raise amount.
+ *
+ * @param player - The AI player making the decision
+ * @param gameState - Current game state
+ * @param difficulty - AI difficulty level (easy/medium/hard), defaults to medium
  */
 export function makeAIDecision(
   player: Player,
-  gameState: GameState
+  gameState: GameState,
+  difficulty: DifficultyLevel = DEFAULT_DIFFICULTY
 ): { action: BettingAction; amount?: number } {
   const { currentBet, communityCards, minRaise } = gameState;
+
+  // Get difficulty-specific configuration
+  const config = getDifficultyConfig(difficulty);
+  const thresholds = config.thresholds;
+  const variance = config.variance;
+  const potOddsThreshold = config.potOddsCallThreshold;
 
   // Calculate hand strength
   const handStrength = evaluateHandStrength(player, communityCards);
@@ -90,14 +101,14 @@ export function makeAIDecision(
   // Pot odds consideration (simplified)
   const potOdds = gameState.pot > 0 ? amountToCall / gameState.pot : 0;
 
-  // Add randomness for unpredictability
-  const randomFactor = AI_VARIANCE.MIN + Math.random() * AI_VARIANCE.RANGE;
+  // Add randomness for unpredictability (using difficulty-specific variance)
+  const randomFactor = variance.MIN + Math.random() * variance.RANGE;
   const adjustedStrength = handStrength * randomFactor;
 
   // Decision logic
   if (amountToCall === 0) {
     // No bet to call - we can check for free
-    if (adjustedStrength >= AI_THRESHOLDS.RAISE && canRaise) {
+    if (adjustedStrength >= thresholds.RAISE && canRaise) {
       // Strong hand - bet/raise
       return { action: 'raise', amount: minRaise };
     }
@@ -106,23 +117,23 @@ export function makeAIDecision(
   }
 
   // There's a bet to call
-  if (adjustedStrength < AI_THRESHOLDS.FOLD) {
+  if (adjustedStrength < thresholds.FOLD) {
     // Very weak hand - fold
     return { action: 'fold' };
   }
 
-  if (adjustedStrength >= AI_THRESHOLDS.RAISE && canRaise) {
+  if (adjustedStrength >= thresholds.RAISE && canRaise) {
     // Strong hand - raise
     return { action: 'raise', amount: minRaise };
   }
 
-  if (adjustedStrength >= AI_THRESHOLDS.CALL && canCall) {
+  if (adjustedStrength >= thresholds.CALL && canCall) {
     // Medium hand - call
     return { action: 'call' };
   }
 
   // Weak hand - fold if bet is too big, otherwise call
-  if (potOdds < POT_ODDS_CALL_THRESHOLD && canCall) {
+  if (potOdds < potOddsThreshold && canCall) {
     // Small bet relative to pot - worth calling
     return { action: 'call' };
   }

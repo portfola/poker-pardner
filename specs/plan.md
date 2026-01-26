@@ -28,7 +28,7 @@
 
 ### Variable AI Difficulty
 - [x] Difficulty constants - Create `src/constants/difficulty.ts` with thresholds for Easy/Medium/Hard (2026-01-26)
-- [ ] AI difficulty parameter - Modify `src/utils/ai.ts` to accept and use difficulty parameter
+- [x] AI difficulty parameter - Modify `src/utils/ai.ts` to accept and use difficulty parameter (2026-01-26)
 - [ ] Difficulty type definition - Add difficulty to GameState in `src/types/game.ts`
 - [ ] Difficulty selection UI - Add difficulty selection to mode selection screen
 
