@@ -192,6 +192,8 @@ function App() {
               type: 'phase_advance',
               message: phaseMessages[nextPhase] || "New cards on the table!",
             })
+            // Require user to click Next before continuing
+            setWaitingForNext(true)
           }
           isProcessingAI.current = false
         }, NARRATION_DELAY)
