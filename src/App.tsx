@@ -23,6 +23,7 @@ import {
   trackUserAction,
   trackSessionStart,
 } from './utils/analytics'
+import { incrementSessionCount } from './utils/statistics'
 
 // Delay before showing narrator after an action (let user see animation)
 const NARRATION_DELAY = 800
@@ -57,6 +58,7 @@ function App() {
   // Track session start on mount
   useEffect(() => {
     trackSessionStart()
+    incrementSessionCount()
   }, [])
 
   // Handle mode selection

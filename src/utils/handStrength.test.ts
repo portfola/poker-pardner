@@ -64,6 +64,7 @@ function createGameState(overrides: Partial<GameState> = {}): GameState {
     bigBlind: 10,
     deck: [],
     mode: 'tutorial',
+    difficulty: 'medium',
     isHandComplete: false,
     winners: [],
     winningHands: [],

@@ -1,4 +1,5 @@
 import { GameMode, DifficultyLevel } from '../types/game'
+import { GameModeStats } from '../types/statistics'
 import { getAllStatistics, calculateWinRate, calculateNetProfit } from '../utils/statistics'
 import { DIFFICULTY_LABELS } from '../constants/difficulty'
 
@@ -28,7 +29,7 @@ export function StatisticsScreen({ onBack }: StatisticsScreenProps) {
   const statEntries: Array<{
     mode: GameMode
     difficulty: DifficultyLevel
-    stats: ReturnType<typeof calculateWinRate>
+    stats: GameModeStats
   }> = []
 
   Object.entries(stats.byModeAndDifficulty).forEach(([mode, difficulties]) => {

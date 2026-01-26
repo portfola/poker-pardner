@@ -7,6 +7,7 @@ import { useReducer, useCallback } from 'react';
 import { GameState, Player, BettingAction, NarratorEvent, ActionHistoryEntry, GameMode, DifficultyLevel } from '../types/game';
 import { createShuffledDeck, dealCards } from '../utils/cards';
 import { getBestFiveCardHand, determineWinners } from '../utils/handEvaluator';
+import { updateHandStatistics } from '../utils/statistics';
 
 // Action types for the reducer
 type GameAction =
@@ -96,6 +97,7 @@ function createInitialState(): GameState {
     bigBlind: 10,
     deck: [],
     mode: 'tutorial',
+    difficulty: 'medium',
     isHandComplete: false,
     winners: [],
     winningHands: [],
@@ -251,6 +253,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       newState.actionHistory = [];
       newState.isWaitingForNextAction = false;
 
+      // Track user's starting chips for statistics
+      const userPlayer = newState.players.find(p => p.isUser);
+      newState.userStartingChips = userPlayer?.chips || 0;
+      newState.userFoldedThisHand = false;
+      newState.userWentAllInThisHand = false;
+
       // Post blinds
       const stateWithBlinds = postBlinds(newState);
 
@@ -322,6 +330,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       switch (playerAction) {
         case 'fold':
           player.isFolded = true;
+          // Track if user folded
+          if (player.isUser) {
+            newState.userFoldedThisHand = true;
+          }
           break;
 
         case 'check':
@@ -342,6 +354,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
           if (player.chips === 0) {
             player.isAllIn = true;
+            // Track if user went all-in
+            if (player.isUser) {
+              newState.userWentAllInThisHand = true;
+            }
           }
           break;
         }
@@ -364,6 +380,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
           if (player.chips === 0) {
             player.isAllIn = true;
+            // Track if user went all-in
+            if (player.isUser) {
+              newState.userWentAllInThisHand = true;
+            }
           }
 
           // Reset hasActed for other players (they must respond to raise)
@@ -465,6 +485,23 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         newState.winners = [winner];
         newState.winningHands = [];
         newState.isHandComplete = true;
+
+        // Track statistics for the user
+        const userPlayer = newState.players.find(p => p.isUser);
+        if (userPlayer && newState.userStartingChips !== undefined) {
+          const userWon = winner.id === userPlayer.id;
+          const chipChange = userPlayer.chips - newState.userStartingChips;
+
+          updateHandStatistics({
+            won: userWon,
+            amount: chipChange,
+            folded: newState.userFoldedThisHand || false,
+            wentAllIn: newState.userWentAllInThisHand || false,
+            mode: newState.mode,
+            difficulty: newState.difficulty,
+          });
+        }
+
         return newState;
       }
 
@@ -503,6 +540,22 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       newState.winners = winners;
       newState.winningHands = winningHands;
       newState.isHandComplete = true;
+
+      // Track statistics for the user
+      const userPlayer = newState.players.find(p => p.isUser);
+      if (userPlayer && newState.userStartingChips !== undefined) {
+        const userWon = winners.some(w => w.id === userPlayer.id);
+        const chipChange = userPlayer.chips - newState.userStartingChips;
+
+        updateHandStatistics({
+          won: userWon,
+          amount: chipChange,
+          folded: newState.userFoldedThisHand || false,
+          wentAllIn: newState.userWentAllInThisHand || false,
+          mode: newState.mode,
+          difficulty: newState.difficulty,
+        });
+      }
 
       return newState;
     }

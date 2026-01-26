@@ -160,6 +160,12 @@ export interface GameState {
   actionHistory: ActionHistoryEntry[];
   /** Whether waiting for user to click Next to advance AI action */
   isWaitingForNextAction: boolean;
+  /** User's chip count at the start of the current hand (for statistics tracking) */
+  userStartingChips?: number;
+  /** Whether the user folded during the current hand */
+  userFoldedThisHand?: boolean;
+  /** Whether the user went all-in during the current hand */
+  userWentAllInThisHand?: boolean;
 }
 
 /**
