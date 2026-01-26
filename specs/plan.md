@@ -11,14 +11,14 @@
 - [x] Create Open Graph image - 1200x630px PNG for social sharing (2026-01-26)
 - [x] Run pre-deployment checklist - Code quality, assets, SEO, performance verification (2026-01-26)
 - [x] Browser testing - Chrome, Firefox, Safari, Edge (latest versions) (2026-01-26)
-- [ ] Mobile browser testing - iOS Safari, Chrome Mobile (Android)
+- [x] Mobile browser testing - iOS Safari, Chrome Mobile (Android) (2026-01-26)
 - [ ] Functionality testing checklist - All gameplay flows, UI interactions, responsive design
 - [ ] Post-deployment verification - Load testing, social sharing test, Lighthouse audit
 - [ ] Set up analytics - PostHog integration for user tracking and insights
 
 ### Play Mode (No Guidance)
 - [x] Home screen mode selection - Present choice between Tutorial (with guidance) and Play (no guidance) (2026-01-26)
-- [ ] Play mode implementation - Hide strategic advice from cowboy; keep game state display
+- [x] Play mode implementation - Hide strategic advice from cowboy; keep game state display (2026-01-26)
 
 ### Variable AI Difficulty
 - [ ] Difficulty constants - Create `src/constants/difficulty.ts` with thresholds for Easy/Medium/Hard
