@@ -107,6 +107,11 @@ export interface Player {
 export type GameMode = 'tutorial' | 'training';
 
 /**
+ * AI difficulty level.
+ */
+export type DifficultyLevel = 'easy' | 'medium' | 'hard';
+
+/**
  * Complete state of the poker game.
  * This is the single source of truth for the entire game.
  */
@@ -135,6 +140,8 @@ export interface GameState {
   deck: Card[];
   /** Current game mode */
   mode: GameMode;
+  /** AI difficulty level */
+  difficulty: DifficultyLevel;
   /** For tutorial mode: which hand (1-3) */
   tutorialHandNumber?: number;
   /** Whether the hand is complete and showing results */
