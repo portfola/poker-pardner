@@ -17,6 +17,12 @@ import {
   generateUserActionNarration,
   generateShowdownNarration,
 } from './utils/cowboyNarration'
+import {
+  trackModeSelection,
+  trackHandStart,
+  trackUserAction,
+  trackSessionStart,
+} from './utils/analytics'
 
 // Delay before showing narrator after an action (let user see animation)
 const NARRATION_DELAY = 800
@@ -47,10 +53,16 @@ function App() {
   // Check if hand has been dealt
   const hasCards = state.players.some(p => p.holeCards.length > 0)
 
+  // Track session start on mount
+  useEffect(() => {
+    trackSessionStart()
+  }, [])
+
   // Handle mode selection
   const handleModeSelect = (mode: 'tutorial' | 'training') => {
     setMode(mode)
     setModeSelected(true)
+    trackModeSelection(mode)
   }
 
   // Helper to get AI hand strength for narration
@@ -151,6 +163,9 @@ function App() {
         type: 'hand_start',
         message,
       })
+
+      // Track hand start
+      trackHandStart()
     }
   }, [hasCards, state.dealerPosition, state.players, state.smallBlind, state.bigBlind, setPendingEvent])
 
@@ -336,6 +351,7 @@ function App() {
           potAfter: state.pot,
           isUser: true,
         })
+        trackUserAction('fold', state.currentPhase)
         setTimeout(() => {
           setPendingEvent({
             type: 'user_action',
@@ -360,6 +376,7 @@ function App() {
         potAfter: state.pot,
         isUser: true,
       })
+      trackUserAction('fold', state.currentPhase)
       setTimeout(() => {
         setPendingEvent({
           type: 'user_action',
@@ -392,6 +409,7 @@ function App() {
         potAfter: state.pot + amountToCall,
         isUser: true,
       })
+      trackUserAction(action, state.currentPhase, amountToCall > 0 ? amountToCall : undefined)
 
       setTimeout(() => {
         setPendingEvent({
@@ -420,6 +438,7 @@ function App() {
         potAfter: state.pot + additionalChips,
         isUser: true,
       })
+      trackUserAction('raise', state.currentPhase, raiseAmount)
 
       setTimeout(() => {
         setPendingEvent({

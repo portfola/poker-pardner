@@ -59,6 +59,29 @@ Open your browser to the URL shown (typically http://localhost:5173)
 npm run build
 ```
 
+### Analytics Configuration (Optional)
+
+The app includes PostHog integration for user analytics. To enable:
+
+1. Create a `.env` file in the project root (see `.env.example`)
+2. Add your PostHog API key:
+   ```
+   VITE_POSTHOG_KEY=phc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   ```
+3. Optionally configure the PostHog host (defaults to `https://app.posthog.com`)
+4. To enable analytics in development mode, set:
+   ```
+   VITE_POSTHOG_DEV_MODE=true
+   ```
+
+**Privacy**: Analytics are disabled by default in development, respect Do Not Track settings, and do not capture IP addresses or enable session recording.
+
+**Tracked Events**:
+- Mode selection (tutorial vs. play)
+- Hand starts and completions
+- User actions (fold, call, raise, check)
+- Session starts and ends
+
 ### Testing
 
 ```bash
@@ -76,6 +99,7 @@ The project includes comprehensive test coverage with 167+ passing tests.
 - **Tailwind CSS** - Utility-first styling framework
 - **Vitest** - Unit testing framework
 - **React Testing Library** - Component testing utilities
+- **PostHog** - Privacy-first product analytics (optional)
 
 ## Roadmap
 
