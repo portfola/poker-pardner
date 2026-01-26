@@ -43,13 +43,13 @@
 - [x] Raise validation - Handle custom raise amounts in `src/hooks/useGameState.ts` and `src/App.tsx` (2026-01-26)
 
 ### Side Pot Calculation (Phase 2 Priority)
-- [ ] Side pot logic - Calculate side pots when multiple players all-in at different amounts
+- [x] Side pot logic - Calculate side pots when multiple players all-in at different amounts (2026-01-26)
 - [ ] Side pot showdown - Award main pot and side pots to correct winners in `src/utils/showdown.ts`
 - [ ] Side pot UI - Display side pot amounts in `src/components/ShowdownDisplay.tsx`
-- [ ] Test 2-player all-in with different amounts
-- [ ] Test 3-player all-in with different amounts
-- [ ] Test side pot with folded players
-- [ ] Test multiple side pots
+- [x] Test 2-player all-in with different amounts (2026-01-26)
+- [x] Test 3-player all-in with different amounts (2026-01-26)
+- [x] Test side pot with folded players (2026-01-26)
+- [x] Test multiple side pots (2026-01-26)
 
 ### End Game Scenarios (Phase 2 Priority)
 - [ ] Game ending when only 1 player has chips (all others eliminated)
