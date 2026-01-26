@@ -57,7 +57,7 @@
 - [x] Restart/replay functionality after game ends (2026-01-26)
 
 ### UI Edge Cases (Phase 2 Priority)
-- [ ] Test rapid clicking during animations
+- [x] Test rapid clicking during animations (2026-01-26)
 - [ ] Test action buttons during phase transitions
 - [ ] Test display of very large pot amounts (e.g., $10,000+)
 - [ ] Test display with long player names (10+ characters)
