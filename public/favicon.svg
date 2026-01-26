@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Western saloon background -->
+  <rect width="32" height="32" fill="#1a5f3a" rx="4"/>
+
+  <!-- Gold border -->
+  <rect width="32" height="32" fill="none" stroke="#d4af37" stroke-width="2" rx="4"/>
+
+  <!-- Spade symbol (poker/card game) with western styling -->
+  <g transform="translate(16, 16)">
+    <!-- Spade shape -->
+    <path d="M 0 -8 L 6 0 L 2 4 Q 0 6 -2 4 L -6 0 Z" fill="#ffffff" stroke="#d4af37" stroke-width="0.5"/>
+    <!-- Center stem -->
+    <rect x="-1.5" y="3" width="3" height="4" fill="#ffffff" stroke="#d4af37" stroke-width="0.5"/>
+  </g>
+
+  <!-- Western decorative corners -->
+  <circle cx="4" cy="4" r="1.5" fill="#d4af37" opacity="0.7"/>
+  <circle cx="28" cy="4" r="1.5" fill="#d4af37" opacity="0.7"/>
+  <circle cx="4" cy="28" r="1.5" fill="#d4af37" opacity="0.7"/>
+  <circle cx="28" cy="28" r="1.5" fill="#d4af37" opacity="0.7"/>
+</svg>
