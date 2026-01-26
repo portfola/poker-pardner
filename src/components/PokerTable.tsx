@@ -136,9 +136,9 @@ export function PokerTable({ gameState }: PokerTableProps) {
               </div>
             )}
 
-            {/* Bottom Player - User (Position 0) */}
+            {/* Bottom Player - User (Position 0) - Positioned lower with higher z-index to stay visible */}
             {bottomPlayer && (
-              <div className="absolute bottom-1 sm:bottom-2 md:bottom-4 left-1/2 -translate-x-1/2">
+              <div className="absolute bottom-[-12px] sm:bottom-[-8px] md:bottom-0 left-1/2 -translate-x-1/2 z-20">
                 <PlayerPosition
                   player={bottomPlayer}
                   isDealer={dealerPosition === 0}
@@ -149,7 +149,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
             )}
 
             {/* Center Area - Community Cards and Pot */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 z-10">
               {/* Pot Display */}
               <PotDisplay amount={pot} isAwarding={currentPhase === 'showdown' && gameState.isHandComplete} />
 

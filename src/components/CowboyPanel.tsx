@@ -1,6 +1,7 @@
 /**
  * Bottom panel combining cowboy narrator with action buttons.
  * Non-blocking UI that lets users see the full table while getting advice.
+ * Redesigned with vintage playing card aesthetic.
  */
 
 import { useState } from 'react';
@@ -53,125 +54,212 @@ export function CowboyPanel({
   // Button states - only enabled when it's user's turn and hand is active
   const buttonsDisabled = !isUserTurn || isHandComplete;
 
-  // Get strength color
-  const getStrengthColor = (strength: string | undefined) => {
-    if (!strength) return 'text-gray-300';
-    if (strength.includes('strong')) return 'text-green-400';
-    if (strength.includes('medium')) return 'text-yellow-400';
-    return 'text-red-400';
+  // Get strength badge color
+  const getStrengthBadge = (strength: string | undefined) => {
+    if (!strength) return { bg: 'bg-stone-100', border: 'border-stone-300', text: 'text-stone-600' };
+    if (strength.includes('strong')) return { bg: 'bg-emerald-50', border: 'border-emerald-400', text: 'text-emerald-700' };
+    if (strength.includes('medium')) return { bg: 'bg-amber-50', border: 'border-amber-400', text: 'text-amber-700' };
+    return { bg: 'bg-rose-50', border: 'border-rose-400', text: 'text-rose-700' };
   };
+
+  const strengthBadge = getStrengthBadge(narratorEvent?.handStrength);
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 z-20">
-        {/* Main panel */}
-        <div
-          className="mx-auto max-w-4xl px-2 sm:px-4 pb-2 sm:pb-4"
-        >
-          <div
-            className="rounded-t-xl sm:rounded-xl overflow-hidden shadow-2xl"
-            style={{
-              background: 'linear-gradient(to bottom, #5D4037, #4E342E, #3E2723)',
-              boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1)',
-            }}
-          >
-            {/* Wood grain texture */}
-            <div
-              className="absolute inset-0 opacity-10 pointer-events-none"
-              style={{
-                backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(62, 39, 35, 0.3) 3px, rgba(62, 39, 35, 0.3) 6px)',
-              }}
-            />
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 
+        .card-texture {
+          background:
+            linear-gradient(135deg, #f5f1e8 0%, #ebe4d1 100%);
+          position: relative;
+        }
+
+        .card-texture::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background-image:
+            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px),
+            repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
+          opacity: 0.5;
+          pointer-events: none;
+        }
+
+        .ornate-border {
+          border: 3px solid;
+          border-image: linear-gradient(135deg, #8b6914, #d4af37, #8b6914) 1;
+          box-shadow:
+            0 0 0 1px rgba(212, 175, 55, 0.3),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+            0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .cowboy-portrait {
+          border: 4px solid;
+          border-image: linear-gradient(145deg, #8b6914, #d4af37, #f4e5a8, #d4af37, #8b6914) 1;
+          box-shadow:
+            0 0 0 2px rgba(139, 105, 20, 0.4),
+            inset 0 2px 8px rgba(255, 255, 255, 0.3),
+            0 6px 16px rgba(0, 0, 0, 0.5);
+          background: radial-gradient(circle at 30% 30%, #f4e5a8, #d4af37, #8b6914);
+        }
+
+        .poker-chip {
+          position: relative;
+          box-shadow:
+            0 4px 12px rgba(0, 0, 0, 0.4),
+            inset 0 2px 4px rgba(255, 255, 255, 0.3),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .poker-chip::before {
+          content: '';
+          position: absolute;
+          inset: 4px;
+          border-radius: inherit;
+          border: 2px dashed rgba(255, 255, 255, 0.4);
+        }
+
+        @keyframes shimmer {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
+        }
+
+        .status-pulse {
+          animation: shimmer 2s ease-in-out infinite;
+        }
+      `}</style>
+
+      <div className="fixed bottom-0 left-0 right-0 z-20">
+        <div className="mx-auto max-w-5xl px-2 sm:px-4 pb-2 sm:pb-3">
+          <div className="card-texture rounded-t-2xl sm:rounded-2xl ornate-border overflow-visible">
             <div className="relative p-3 sm:p-4">
-              {/* Top row: Cowboy + Narration + Help button */}
-              <div className="flex items-start gap-3 mb-3">
-                {/* Cowboy avatar */}
-                <div
-                  className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-2xl sm:text-3xl border-3 border-wood-600"
-                  style={{
-                    background: 'linear-gradient(145deg, #8D6E63 0%, #6D4C41 100%)',
-                    boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.3)',
-                  }}
-                >
-                  <span role="img" aria-label="Cowboy">🤠</span>
+
+              {/* Main Content Grid - Optimized for compactness */}
+              <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-3 items-center">
+
+                {/* Left: Cowboy Portrait */}
+                <div className="flex justify-center lg:justify-start">
+                  <div className="relative">
+                    <div
+                      className="cowboy-portrait rounded-full w-16 h-16 sm:w-20 sm:h-20 overflow-hidden flex items-center justify-center"
+                    >
+                      <img
+                        src="/img/cowboy_smile.png"
+                        alt="Poker Cowboy Advisor"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Decorative corner elements */}
+                    <div className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2 border-amber-600"></div>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2 border-amber-600"></div>
+                    <div className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2 border-amber-600"></div>
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2 border-amber-600"></div>
+                  </div>
                 </div>
 
-                {/* Speech bubble / narration area */}
-                <div className="flex-1 min-w-0">
-                  <div
-                    className="rounded-lg p-2 sm:p-3 text-sm"
-                    style={{
-                      background: 'linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%)',
-                      boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.5)',
-                    }}
-                  >
+                {/* Center: Combined Narration & Advice */}
+                <div>
+                  {/* Main message with reasoning combined */}
+                  <div className="relative bg-gradient-to-br from-amber-50/90 via-yellow-50/90 to-amber-100/90 rounded-lg border-2 border-amber-800/30 p-2.5 sm:p-3 shadow-lg">
+                    <div
+                      className="absolute top-0 left-0 right-0 h-1 rounded-t-lg"
+                      style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
+                    ></div>
+
                     {narratorEvent ? (
-                      <p className="text-wood-900 font-body leading-snug">
-                        {narratorEvent.message}
-                      </p>
+                      <div className="space-y-1.5">
+                        <p
+                          className="text-stone-800 leading-snug text-xs sm:text-sm"
+                          style={{ fontFamily: "'Crimson Text', serif" }}
+                        >
+                          {narratorEvent.message}
+                        </p>
+
+                        {narratorEvent.reasoning && (
+                          <div className="pt-1.5 border-t border-amber-800/20">
+                            <p className="text-stone-600 text-[11px] sm:text-xs italic flex items-start gap-1.5">
+                              <span className="text-amber-700 flex-shrink-0 text-xs">💭</span>
+                              <span>{narratorEvent.reasoning}</span>
+                            </p>
+                          </div>
+                        )}
+
+                        {narratorEvent.advice && (
+                          <div className="pt-1.5 border-t border-amber-800/20">
+                            <p className="text-stone-700 text-[11px] sm:text-xs font-semibold flex items-start gap-1.5">
+                              <span className="text-emerald-700 flex-shrink-0">→</span>
+                              <span>{narratorEvent.advice}</span>
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     ) : (
-                      <p className="text-wood-700 font-body italic">
+                      <p
+                        className="text-stone-600 italic text-xs sm:text-sm"
+                        style={{ fontFamily: "'Crimson Text', serif" }}
+                      >
                         {isUserTurn ? "Your move, partner!" : `Watchin' ${currentPlayer?.name || 'the table'}...`}
                       </p>
                     )}
                   </div>
-
-                  {/* AI Reasoning (compact) */}
-                  {narratorEvent?.reasoning && (
-                    <div className="mt-1 px-2 py-1 rounded bg-wood-900/30 text-xs text-sand-200 italic">
-                      💭 {narratorEvent.reasoning}
-                    </div>
-                  )}
                 </div>
 
-                {/* Help button */}
-                <button
-                  onClick={() => setShowHandRankings(true)}
-                  className="flex-shrink-0 w-8 h-8 rounded-full bg-wood-600 hover:bg-wood-500 text-sand-100 font-bold text-sm flex items-center justify-center transition-colors"
-                  aria-label="View hand rankings"
-                  title="Hand Rankings"
-                >
-                  ?
-                </button>
+                {/* Right: Hand Strength Badge + Help */}
+                <div className="flex lg:flex-col flex-row items-center gap-2 justify-center">
+                  {/* Hand Strength Poker Chip */}
+                  {narratorEvent?.handStrength && (
+                    <div
+                      className={`poker-chip rounded-full w-20 h-20 sm:w-24 sm:h-24 flex flex-col items-center justify-center ${strengthBadge.bg} border-4 ${strengthBadge.border}`}
+                    >
+                      <div
+                        className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider opacity-70"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
+                        Hand
+                      </div>
+                      <div
+                        className={`text-[10px] sm:text-xs font-black ${strengthBadge.text} text-center leading-tight px-2 mt-0.5`}
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
+                        {narratorEvent.handStrength.split(' ').map((word, i) => (
+                          <div key={i}>{word}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Help button */}
+                  <button
+                    onClick={() => setShowHandRankings(true)}
+                    className="poker-chip w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-stone-700 to-stone-900 hover:from-stone-600 hover:to-stone-800 text-amber-300 font-black text-base sm:text-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
+                    aria-label="View hand rankings"
+                    title="Hand Rankings"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    ?
+                  </button>
+                </div>
               </div>
 
-              {/* Middle row: Hand strength & advice (when user's turn) */}
-              {narratorEvent?.type === 'user_turn' && (narratorEvent.handStrength || narratorEvent.advice) && (
-                <div className="mb-3 flex flex-wrap gap-2 text-xs sm:text-sm">
-                  {narratorEvent.handStrength && (
-                    <div className="bg-black/30 rounded px-2 py-1">
-                      <span className="text-sand-300">Hand: </span>
-                      <span className={`font-bold ${getStrengthColor(narratorEvent.handStrength)}`}>
-                        {narratorEvent.handStrength}
-                      </span>
-                    </div>
-                  )}
-                  {narratorEvent.advice && (
-                    <div className="flex-1 bg-black/30 rounded px-2 py-1 text-sand-200">
-                      <span className="text-sand-400">Advice: </span>
-                      {narratorEvent.advice}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Bottom row: Action buttons */}
-              <div className="flex gap-2 sm:gap-3">
+              {/* Action Buttons Row - Reduced spacing */}
+              <div className="mt-3 flex gap-2 sm:gap-2.5 justify-center">
                 <button
                   onClick={onFold}
                   disabled={buttonsDisabled}
                   aria-label="Fold your hand"
                   className={`
-                    flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-body font-bold text-sm sm:text-base transition-all
+                    poker-chip px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all
                     ${buttonsDisabled
-                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                      : 'bg-red-700 hover:bg-red-600 text-white hover:scale-105 active:scale-95 border-2 border-red-800'
+                      ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
+                      : 'bg-gradient-to-b from-rose-600 to-rose-800 hover:from-rose-500 hover:to-rose-700 text-white hover:scale-105 active:scale-95 border-2 border-rose-900'
                     }
                   `}
-                  style={!buttonsDisabled ? { boxShadow: '0 4px 8px rgba(0, 0, 0, 0.5)' } : {}}
+                  style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                  Fold
+                  FOLD
                 </button>
 
                 <button
@@ -179,15 +267,15 @@ export function CowboyPanel({
                   disabled={buttonsDisabled || !canCall}
                   aria-label={isCheck ? "Check" : `Call $${amountToCall}`}
                   className={`
-                    flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-body font-bold text-sm sm:text-base transition-all min-w-[90px] sm:min-w-[120px]
+                    poker-chip px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all min-w-[85px] sm:min-w-[110px]
                     ${buttonsDisabled || !canCall
-                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                      : 'bg-green-700 hover:bg-green-600 text-white hover:scale-105 active:scale-95 border-2 border-green-800'
+                      ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
+                      : 'bg-gradient-to-b from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 text-white hover:scale-105 active:scale-95 border-2 border-emerald-900'
                     }
                   `}
-                  style={!(buttonsDisabled || !canCall) ? { boxShadow: '0 4px 8px rgba(0, 0, 0, 0.5)' } : {}}
+                  style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                  {callButtonText}
+                  {callButtonText.toUpperCase()}
                 </button>
 
                 <button
@@ -195,25 +283,16 @@ export function CowboyPanel({
                   disabled={buttonsDisabled || !canRaise}
                   aria-label={raiseButtonText}
                   className={`
-                    flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-body font-bold text-sm sm:text-base transition-all min-w-[90px] sm:min-w-[120px]
+                    poker-chip px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all min-w-[85px] sm:min-w-[110px]
                     ${buttonsDisabled || !canRaise
-                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                      : 'bg-gradient-to-b from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-wood-900 hover:scale-105 active:scale-95 border-2 border-gold-600'
+                      ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
+                      : 'bg-gradient-to-b from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500 text-amber-950 hover:scale-105 active:scale-95 border-2 border-amber-700'
                     }
                   `}
-                  style={!(buttonsDisabled || !canRaise) ? { boxShadow: '0 4px 8px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.3)' } : {}}
+                  style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                  {raiseButtonText}
+                  {raiseButtonText.toUpperCase()}
                 </button>
-              </div>
-
-              {/* Status indicator */}
-              <div className="mt-2 text-center text-xs sm:text-sm font-body">
-                {isUserTurn ? (
-                  <span className="text-yellow-300 animate-pulse">Your turn to act</span>
-                ) : !isHandComplete && currentPlayer ? (
-                  <span className="text-sand-300/70">Waiting for {currentPlayer.name}...</span>
-                ) : null}
               </div>
             </div>
           </div>
@@ -227,14 +306,19 @@ export function CowboyPanel({
           onClick={() => setShowHandRankings(false)}
         >
           <div
-            className="bg-gray-800 rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto"
+            className="card-texture rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto border-4 border-amber-700"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <h2 className="text-white font-bold text-lg">Hand Rankings</h2>
+            <div className="flex items-center justify-between p-4 border-b-2 border-amber-800/30">
+              <h2
+                className="text-stone-800 font-black text-lg sm:text-xl"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Hand Rankings
+              </h2>
               <button
                 onClick={() => setShowHandRankings(false)}
-                className="text-gray-400 hover:text-white p-1"
+                className="text-stone-600 hover:text-stone-900 p-1 transition-colors"
                 aria-label="Close"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
