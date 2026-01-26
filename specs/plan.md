@@ -33,8 +33,8 @@
 - [x] Difficulty selection UI - Add difficulty selection to mode selection screen (2026-01-26)
 
 ### Progress Tracking & Statistics
-- [ ] Statistics utility - Create `src/utils/statistics.ts` for tracking and localStorage persistence
-- [ ] Statistics types - Create `src/types/statistics.ts` with type definitions
+- [x] Statistics utility - Create `src/utils/statistics.ts` for tracking and localStorage persistence (2026-01-26)
+- [x] Statistics types - Create `src/types/statistics.ts` with type definitions (2026-01-26)
 - [ ] Statistics screen - Create `src/components/StatisticsScreen.tsx` for stats display
 - [ ] Stats integration - Track hands played, hands won, biggest pot, win rate, streaks
 
