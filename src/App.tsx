@@ -1,41 +1,81 @@
 import './App.css'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useGameState } from './hooks/useGameState'
 import { PokerTable } from './components/PokerTable'
-import { Sidebar } from './components/Sidebar'
+import { CowboyPanel } from './components/CowboyPanel'
 import { ShowdownDisplay } from './components/ShowdownDisplay'
 import { MusicPlayer } from './components/MusicPlayer'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { makeAIDecision } from './utils/ai'
 import { TIMING } from './constants/timing'
-import { logger } from './utils/logger'
 import { getBestFiveCardHand, getBestHandFromSix, evaluateHand } from './utils/handEvaluator'
 import { evaluateHandStrength } from './utils/handStrength'
+import {
+  generateHandStartNarration,
+  generateAIActionNarration,
+  generateUserTurnNarration,
+  generateUserActionNarration,
+  generateShowdownNarration,
+} from './utils/cowboyNarration'
+
+// Delay before showing narrator after an action (let user see animation)
+const NARRATION_DELAY = 800
 
 function App() {
-  const { state, startNewHand, handlePlayerAction, isBettingComplete, startPhaseAdvance, advancePhase, determineWinner, resetForNextHand } = useGameState()
-  const [lastAction, setLastAction] = useState<string>('')
-  const [isProcessing, setIsProcessing] = useState(false)
+  const {
+    state,
+    startNewHand,
+    handlePlayerAction,
+    isBettingComplete,
+    startPhaseAdvance,
+    advancePhase,
+    determineWinner,
+    resetForNextHand,
+    setPendingEvent,
+  } = useGameState()
+
   const [showFoldConfirm, setShowFoldConfirm] = useState(false)
-  const processingRef = useRef(false)
-  const timeoutRef = useRef<number | null>(null)
+  const hasShownHandStart = useRef(false)
+  const isProcessingAI = useRef(false)
+  const lastPhaseRef = useRef<string>('')
 
   // Check if hand has been dealt
   const hasCards = state.players.some(p => p.holeCards.length > 0)
 
-  // Set last action message
-  const setAction = (message: string) => {
-    setLastAction(message)
-  }
+  // Helper to get AI hand strength for narration
+  const getAIHandStrength = useCallback((playerId: string): number => {
+    const player = state.players.find(p => p.id === playerId)
+    if (!player || player.holeCards.length !== 2) return 0
 
-  // Helper function to evaluate current hand strength
-  const evaluateCurrentHandStrength = (): 'weak' | 'medium' | 'strong' => {
-    const userPlayer = state.players.find(p => p.isUser)
-    if (!userPlayer || userPlayer.holeCards.length === 0) {
-      return 'weak'
+    if (state.communityCards.length === 0) {
+      const rankValues: Record<string, number> = {
+        '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8,
+        '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14
+      }
+      const v1 = rankValues[player.holeCards[0].rank]
+      const v2 = rankValues[player.holeCards[1].rank]
+      if (v1 === v2) return Math.min(10, v1 / 2 + 3)
+      return (v1 + v2) / 4
     }
 
-    // Pre-flop: simple evaluation
+    if (state.communityCards.length === 3) {
+      const allCards = [...player.holeCards, ...state.communityCards]
+      return evaluateHand(allCards).rank
+    } else if (state.communityCards.length === 4) {
+      const allCards = [...player.holeCards, ...state.communityCards]
+      return getBestHandFromSix(allCards).rank
+    } else if (state.communityCards.length === 5) {
+      return getBestFiveCardHand(player.holeCards, state.communityCards).rank
+    }
+
+    return 0
+  }, [state.players, state.communityCards])
+
+  // Helper to evaluate current hand strength
+  const evaluateCurrentHandStrength = useCallback((): 'weak' | 'medium' | 'strong' => {
+    const userPlayer = state.players.find(p => p.isUser)
+    if (!userPlayer || userPlayer.holeCards.length === 0) return 'weak'
+
     if (state.communityCards.length === 0) {
       const card1 = userPlayer.holeCards[0]
       const card2 = userPlayer.holeCards[1]
@@ -51,19 +91,15 @@ function App() {
       return (hasHighCard && suited) ? 'medium' : 'weak'
     }
 
-    // Post-flop: evaluate actual hand
     let evaluation
     const totalCards = userPlayer.holeCards.length + state.communityCards.length
 
     if (totalCards === 7) {
-      // River (7 cards)
       evaluation = getBestFiveCardHand(userPlayer.holeCards, state.communityCards)
     } else if (totalCards === 6) {
-      // Turn (6 cards)
       const allCards = [...userPlayer.holeCards, ...state.communityCards]
       evaluation = getBestHandFromSix(allCards)
     } else if (totalCards === 5) {
-      // Flop (5 cards)
       const allCards = [...userPlayer.holeCards, ...state.communityCards]
       evaluation = evaluateHand(allCards)
     } else {
@@ -71,286 +107,360 @@ function App() {
     }
 
     return evaluateHandStrength(evaluation)
-  }
+  }, [state.players, state.communityCards])
 
-  // Action handlers for user
+  // Check active players
+  const getActivePlayers = useCallback(() => {
+    return state.players.filter(p => !p.isFolded)
+  }, [state.players])
+
+
+  // Effect: Show hand start narration
+  useEffect(() => {
+    if (hasCards && !hasShownHandStart.current) {
+      hasShownHandStart.current = true
+
+      const dealerIdx = state.dealerPosition
+      const sbIdx = (dealerIdx + 1) % state.players.length
+      const bbIdx = (dealerIdx + 2) % state.players.length
+
+      const dealerName = state.players[dealerIdx]?.name || 'Dealer'
+      const sbName = state.players[sbIdx]?.name || 'Small Blind'
+      const bbName = state.players[bbIdx]?.name || 'Big Blind'
+
+      const message = generateHandStartNarration(
+        dealerName,
+        sbName,
+        bbName,
+        state.smallBlind,
+        state.bigBlind
+      )
+
+      setPendingEvent({
+        type: 'hand_start',
+        message,
+      })
+    }
+  }, [hasCards, state.dealerPosition, state.players, state.smallBlind, state.bigBlind, setPendingEvent])
+
+  // Effect: Handle AI turns and phase transitions
+  useEffect(() => {
+    // Don't run if game not started, already processing, or hand complete
+    if (!hasCards || isProcessingAI.current || state.isHandComplete) {
+      return
+    }
+
+    const currentPlayer = state.players[state.currentPlayerIndex]
+
+    // Check for single player remaining
+    const activePlayers = getActivePlayers()
+    if (activePlayers.length === 1) {
+      determineWinner()
+      return
+    }
+
+    // Check if betting round is complete - need to advance phase
+    if (!state.isAdvancingPhase && isBettingComplete()) {
+      isProcessingAI.current = true
+      startPhaseAdvance()
+
+      // Advance phase first (deal cards), then show narration
+      setTimeout(() => {
+        const nextPhase =
+          state.currentPhase === 'pre-flop' ? 'flop' :
+          state.currentPhase === 'flop' ? 'turn' :
+          state.currentPhase === 'turn' ? 'river' : 'showdown'
+
+        advancePhase()
+
+        // After cards are dealt, show narration
+        setTimeout(() => {
+          if (nextPhase === 'showdown') {
+            setPendingEvent({
+              type: 'showdown',
+              message: generateShowdownNarration(),
+            })
+          } else {
+            const phaseMessages: Record<string, string> = {
+              'flop': "Three cards on the board! Take a look at what we're workin' with, partner.",
+              'turn': "The turn card is here! One more to come after this.",
+              'river': "And there's the river! This is it - make your move!",
+            }
+            setPendingEvent({
+              type: 'phase_advance',
+              message: phaseMessages[nextPhase] || "New cards on the table!",
+            })
+          }
+          isProcessingAI.current = false
+        }, NARRATION_DELAY)
+      }, 100)
+
+      return
+    }
+
+    // If it's an AI player's turn
+    if (currentPlayer && !currentPlayer.isUser && !currentPlayer.isFolded && !currentPlayer.isAllIn) {
+      isProcessingAI.current = true
+
+      // Small delay before AI acts
+      const thinkingDelay = TIMING.AI_TURN_BASE_DELAY + Math.random() * TIMING.AI_TURN_RANDOM_DELAY
+
+      setTimeout(() => {
+        // Calculate and execute decision
+        const decision = makeAIDecision(currentPlayer, state)
+        const handStrength = getAIHandStrength(currentPlayer.id)
+
+        // Execute the action first
+        handlePlayerAction(currentPlayer.id, decision.action, decision.amount)
+
+        // Then show narration after animation delay
+        setTimeout(() => {
+          const narration = generateAIActionNarration(
+            currentPlayer,
+            decision.action,
+            decision.amount,
+            state,
+            handStrength
+          )
+
+          setPendingEvent({
+            type: 'ai_action',
+            message: narration.message,
+            playerName: currentPlayer.name,
+            action: decision.action,
+            reasoning: narration.reasoning,
+          })
+
+          isProcessingAI.current = false
+        }, NARRATION_DELAY)
+      }, thinkingDelay)
+
+      return
+    }
+
+    // If it's the user's turn, show advice
+    if (currentPlayer && currentPlayer.isUser && !currentPlayer.isFolded && !currentPlayer.isAllIn) {
+      const userPlayer = state.players.find(p => p.isUser)
+      if (userPlayer) {
+        const turnNarration = generateUserTurnNarration(userPlayer, state)
+        setPendingEvent({
+          type: 'user_turn',
+          message: turnNarration.message,
+          handStrength: turnNarration.handStrength,
+          advice: turnNarration.advice,
+        })
+      }
+    }
+  }, [
+    hasCards,
+    state.isHandComplete,
+    state.isAdvancingPhase,
+    state.currentPhase,
+    state.currentPlayerIndex,
+    state.players,
+    getActivePlayers,
+    getAIHandStrength,
+    isBettingComplete,
+    startPhaseAdvance,
+    advancePhase,
+    handlePlayerAction,
+    setPendingEvent,
+    determineWinner,
+  ])
+
+  // Effect: Handle showdown
+  useEffect(() => {
+    if (state.currentPhase === 'showdown' && !state.isHandComplete) {
+      const timer = setTimeout(() => {
+        determineWinner()
+      }, TIMING.SHOWDOWN_REVEAL_DELAY)
+      return () => clearTimeout(timer)
+    }
+  }, [state.currentPhase, state.isHandComplete, determineWinner])
+
+  // Reset flags when hand ends
+  useEffect(() => {
+    if (!hasCards) {
+      hasShownHandStart.current = false
+      isProcessingAI.current = false
+      lastPhaseRef.current = ''
+    }
+  }, [hasCards])
+
+  // User action handlers
   const handleFold = () => {
     const userPlayer = state.players.find(p => p.isUser)
-    if (userPlayer && !isProcessing) {
-      // Check hand strength - confirm if medium or strong
+    if (userPlayer) {
       const strength = evaluateCurrentHandStrength()
 
       if (strength === 'medium' || strength === 'strong') {
         setShowFoldConfirm(true)
       } else {
-        // Weak hand, fold immediately
         handlePlayerAction(userPlayer.id, 'fold')
-        setAction('You folded.')
+        setTimeout(() => {
+          setPendingEvent({
+            type: 'user_action',
+            message: generateUserActionNarration('fold'),
+            action: 'fold',
+          })
+        }, NARRATION_DELAY)
       }
     }
   }
 
-  // Confirm fold action
   const confirmFold = () => {
     const userPlayer = state.players.find(p => p.isUser)
     if (userPlayer) {
       handlePlayerAction(userPlayer.id, 'fold')
-      setAction('You folded.')
+      setTimeout(() => {
+        setPendingEvent({
+          type: 'user_action',
+          message: generateUserActionNarration('fold'),
+          action: 'fold',
+        })
+      }, NARRATION_DELAY)
     }
     setShowFoldConfirm(false)
   }
 
-  // Cancel fold action
   const cancelFold = () => {
     setShowFoldConfirm(false)
   }
 
   const handleCall = () => {
     const userPlayer = state.players.find(p => p.isUser)
-    if (userPlayer && !isProcessing) {
+    if (userPlayer) {
       const amountToCall = state.currentBet - userPlayer.currentBet
-      if (amountToCall === 0) {
-        handlePlayerAction(userPlayer.id, 'check')
-        setAction('You checked.')
-      } else {
-        handlePlayerAction(userPlayer.id, 'call')
-        setAction(`You called $${amountToCall}.`)
-      }
+      const action = amountToCall === 0 ? 'check' : 'call'
+
+      handlePlayerAction(userPlayer.id, action)
+
+      setTimeout(() => {
+        setPendingEvent({
+          type: 'user_action',
+          message: generateUserActionNarration(action),
+          action,
+        })
+      }, NARRATION_DELAY)
     }
   }
 
   const handleRaise = () => {
     const userPlayer = state.players.find(p => p.isUser)
-    if (userPlayer && !isProcessing) {
-      // For Phase 1, use minimum raise (currentBet + bigBlind)
+    if (userPlayer) {
       const raiseAmount = state.currentBet + state.bigBlind
+
       handlePlayerAction(userPlayer.id, 'raise', raiseAmount)
-      setAction(`You raised to $${raiseAmount}.`)
+
+      setTimeout(() => {
+        setPendingEvent({
+          type: 'user_action',
+          message: generateUserActionNarration('raise', raiseAmount),
+          action: 'raise',
+        })
+      }, NARRATION_DELAY)
     }
   }
 
-  // Custom start handler
   const handleStartNewHand = () => {
-    setLastAction('')
+    hasShownHandStart.current = false
+    isProcessingAI.current = false
+    lastPhaseRef.current = ''
     startNewHand()
   }
 
-  // Handle next hand after showdown
   const handleNextHand = () => {
     const userPlayer = state.players.find(p => p.isUser)
 
-    // If user is eliminated, start completely new game
     if (userPlayer && userPlayer.chips === 0) {
       handleStartNewHand()
       return
     }
 
-    // Otherwise, reset for next hand
     resetForNextHand()
-    setLastAction('')
+    hasShownHandStart.current = false
+    isProcessingAI.current = false
+    lastPhaseRef.current = ''
 
-    // Start new hand after a brief delay
     setTimeout(() => {
       startNewHand()
     }, TIMING.NEW_HAND_DELAY)
   }
 
-  // Handle showdown - determine winner when phase is showdown
-  useEffect(() => {
-    if (state.currentPhase === 'showdown' && !state.isHandComplete) {
-      // Trigger winner determination
-      const timer = setTimeout(() => {
-        determineWinner()
-      }, TIMING.SHOWDOWN_REVEAL_DELAY) // Pause to let players see the cards
-
-      return () => clearTimeout(timer)
-    }
-  }, [state.currentPhase, state.isHandComplete, determineWinner])
-
-  // AI automation with delays
-  useEffect(() => {
-    // Only run if game has actually started
-    if (!hasCards) {
-      return
-    }
-
-    // Prevent multiple simultaneous processes
-    if (processingRef.current) {
-      return
-    }
-
-    const currentPlayer = state.players[state.currentPlayerIndex]
-
-    // Check if betting round is complete
-    // Don't start phase advancement if already advancing
-    if (!state.isHandComplete && !state.isAdvancingPhase && isBettingComplete()) {
-      processingRef.current = true
-      setIsProcessing(true)
-
-      // Mark that we're starting to advance (prevents re-triggering)
-      startPhaseAdvance()
-
-      timeoutRef.current = window.setTimeout(() => {
-        setAction('Betting round complete.')
-        timeoutRef.current = window.setTimeout(() => {
-          const phaseNames: Record<string, string> = {
-            'pre-flop': 'Dealing the flop...',
-            'flop': 'Dealing the turn...',
-            'turn': 'Dealing the river...',
-            'river': 'Showdown!'
-          }
-          setAction(phaseNames[state.currentPhase] || 'Next phase...')
-
-          advancePhase()
-
-          processingRef.current = false
-          setIsProcessing(false)
-        }, TIMING.PHASE_ADVANCE_DELAY)
-      }, TIMING.BETTING_COMPLETE_DELAY)
-      return
-    }
-
-    // Only process if it's an AI player's turn
-    if (!currentPlayer || currentPlayer.isUser || state.isHandComplete) {
-      return
-    }
-
-    // Mark as processing
-    processingRef.current = true
-    setIsProcessing(true)
-
-    // Delay before AI acts (realistic thinking time)
-    const delay = TIMING.AI_TURN_BASE_DELAY + Math.random() * TIMING.AI_TURN_RANDOM_DELAY
-
-    timeoutRef.current = window.setTimeout(() => {
-      logger.debug('AI turn:', currentPlayer.name)
-
-      // Make AI decision
-      const decision = makeAIDecision(currentPlayer, state)
-
-      // Add narration based on action
-      let narration = `${currentPlayer.name} `
-      if (decision.action === 'fold') {
-        narration += 'folds.'
-      } else if (decision.action === 'check') {
-        narration += 'checks.'
-      } else if (decision.action === 'call') {
-        const amountToCall = state.currentBet - currentPlayer.currentBet
-        narration += `calls $${amountToCall}.`
-      } else if (decision.action === 'raise') {
-        narration += `raises to $${decision.amount}.`
-      }
-
-      setAction(narration)
-
-      // Execute the action
-      handlePlayerAction(currentPlayer.id, decision.action, decision.amount)
-
-      // Mark processing complete immediately so next player can act
-      processingRef.current = false
-      setIsProcessing(false)
-    }, delay)
-
-    // Cleanup function - clear any pending timeouts on unmount or dependency change
-    return () => {
-      if (timeoutRef.current !== null) {
-        window.clearTimeout(timeoutRef.current)
-        timeoutRef.current = null
-      }
-      processingRef.current = false
-    }
-  }, [state.currentPlayerIndex, state.players, state.currentPhase, state.isHandComplete, state.isAdvancingPhase, hasCards, isBettingComplete, startPhaseAdvance, advancePhase, handlePlayerAction])
-
   if (!hasCards) {
-    // Welcome screen - Saloon entrance
     return (
       <>
-      <MusicPlayer gameStarted={false} />
-      <div
-        className="min-h-screen flex items-center justify-center relative overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #3E2723 0%, #4E342E 50%, #3E2723 100%)',
-        }}
-      >
-        {/* Wood grain background */}
+        <MusicPlayer gameStarted={false} />
         <div
-          className="absolute inset-0 opacity-[0.15] pointer-events-none"
+          className="min-h-screen flex items-center justify-center relative overflow-hidden"
           style={{
-            backgroundImage: `
-              repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(93, 64, 55, 0.3) 2px, rgba(93, 64, 55, 0.3) 4px),
-              repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(93, 64, 55, 0.2) 80px, rgba(93, 64, 55, 0.2) 160px)
-            `,
+            background: 'linear-gradient(135deg, #3E2723 0%, #4E342E 50%, #3E2723 100%)',
           }}
-        />
-
-        {/* Warm lantern glow */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse at center, rgba(218, 165, 32, 0.12) 0%, transparent 60%)',
-          }}
-        />
-
-        <div className="text-center relative z-10">
-          {/* Western decorative stars */}
-          <div className="flex justify-center gap-6 mb-6">
-            <div className="text-gold-400/50 text-4xl">★</div>
-            <div className="text-gold-500/60 text-5xl">★</div>
-            <div className="text-gold-400/50 text-4xl">★</div>
-          </div>
-
-          {/* Wanted poster style title */}
+        >
           <div
-            className="inline-block bg-sand-100 border-8 border-wood-800 p-8 shadow-2xl mb-8"
+            className="absolute inset-0 opacity-[0.15] pointer-events-none"
             style={{
-              boxShadow: '0 12px 32px rgba(0, 0, 0, 0.8)',
-              background: 'linear-gradient(135deg, #F5E6D3 0%, #E8D5B7 100%)',
+              backgroundImage: `
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(93, 64, 55, 0.3) 2px, rgba(93, 64, 55, 0.3) 4px),
+                repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(93, 64, 55, 0.2) 80px, rgba(93, 64, 55, 0.2) 160px)
+              `,
             }}
-          >
-            {/* Title */}
-            <h1
-              className="text-6xl font-display font-bold text-wood-900 mb-2"
+          />
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'radial-gradient(ellipse at center, rgba(218, 165, 32, 0.12) 0%, transparent 60%)',
+            }}
+          />
+
+          <div className="text-center relative z-10">
+            <div className="flex justify-center gap-6 mb-6">
+              <div className="text-gold-400/50 text-4xl">★</div>
+              <div className="text-gold-500/60 text-5xl">★</div>
+              <div className="text-gold-400/50 text-4xl">★</div>
+            </div>
+
+            <div
+              className="inline-block bg-sand-100 border-8 border-wood-800 p-8 shadow-2xl mb-8"
               style={{
-                textShadow: '2px 2px 0px rgba(0, 0, 0, 0.1)',
+                boxShadow: '0 12px 32px rgba(0, 0, 0, 0.8)',
+                background: 'linear-gradient(135deg, #F5E6D3 0%, #E8D5B7 100%)',
               }}
             >
-              POKER PARDNER
-            </h1>
+              <h1
+                className="text-6xl font-display font-bold text-wood-900 mb-2"
+                style={{ textShadow: '2px 2px 0px rgba(0, 0, 0, 0.1)' }}
+              >
+                POKER PARDNER
+              </h1>
+              <div className="h-1 w-32 bg-wood-700 mx-auto my-4" />
+              <p className="text-lg font-body text-wood-800 font-semibold tracking-wide">
+                Learn Texas Hold'em
+              </p>
+              <p className="text-base font-body text-wood-700">Old West Style</p>
+            </div>
 
-            {/* Subtitle */}
-            <div className="h-1 w-32 bg-wood-700 mx-auto my-4" />
-            <p className="text-lg font-body text-wood-800 font-semibold tracking-wide">
-              Learn Texas Hold'em
-            </p>
-            <p className="text-base font-body text-wood-700">
-              Old West Style
-            </p>
-          </div>
+            <div className="text-6xl mb-6">🐴</div>
 
-          {/* Horseshoe for luck */}
-          <div className="text-6xl mb-6">🐴</div>
+            <button
+              onClick={handleStartNewHand}
+              aria-label="Start tutorial mode to learn poker"
+              className="bg-gradient-to-b from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-wood-900 font-body font-bold py-4 px-10 rounded-lg text-xl shadow-xl transition-all hover:scale-105 active:scale-95 border-4 border-gold-600"
+              style={{
+                boxShadow: '0 6px 20px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+              }}
+            >
+              Start Tutorial
+            </button>
 
-          {/* Start button - Saloon door style */}
-          <button
-            onClick={handleStartNewHand}
-            aria-label="Start tutorial mode to learn poker"
-            className="bg-gradient-to-b from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 text-wood-900 font-body font-bold py-4 px-10 rounded-lg text-xl shadow-xl transition-all hover:scale-105 active:scale-95 border-4 border-gold-600"
-            style={{
-              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
-            }}
-          >
-            Start Tutorial
-          </button>
-
-          {/* Card suits */}
-          <div className="flex justify-center gap-4 mt-8 text-2xl">
-            <span className="text-red-600">♥</span>
-            <span className="text-black">♠</span>
-            <span className="text-red-600">♦</span>
-            <span className="text-black">♣</span>
+            <div className="flex justify-center gap-4 mt-8 text-2xl">
+              <span className="text-red-600">♥</span>
+              <span className="text-black">♠</span>
+              <span className="text-red-600">♦</span>
+              <span className="text-black">♣</span>
+            </div>
           </div>
         </div>
-      </div>
       </>
     )
   }
@@ -358,17 +468,15 @@ function App() {
   return (
     <>
       <MusicPlayer gameStarted={true} />
-      <Sidebar gameState={state} lastAction={lastAction} />
-      <PokerTable
+      <PokerTable gameState={state} />
+      <CowboyPanel
         gameState={state}
+        narratorEvent={state.pendingEvent}
         onFold={handleFold}
         onCall={handleCall}
         onRaise={handleRaise}
       />
-      <ShowdownDisplay
-        gameState={state}
-        onNextHand={handleNextHand}
-      />
+      <ShowdownDisplay gameState={state} onNextHand={handleNextHand} />
       <ConfirmDialog
         isOpen={showFoldConfirm}
         title="Fold a Good Hand?"

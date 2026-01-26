@@ -7,16 +7,12 @@ import { GameState } from '../types/game';
 import { PlayerPosition } from './PlayerPosition';
 import { CommunityCards } from './CommunityCards';
 import { PotDisplay } from './PotDisplay';
-import { ActionButtons } from './ActionButtons';
 
 interface PokerTableProps {
   gameState: GameState;
-  onFold: () => void;
-  onCall: () => void;
-  onRaise: () => void;
 }
 
-export function PokerTable({ gameState, onFold, onCall, onRaise }: PokerTableProps) {
+export function PokerTable({ gameState }: PokerTableProps) {
   const { players, pot, communityCards, dealerPosition, currentPlayerIndex, currentPhase } =
     gameState;
 
@@ -31,7 +27,7 @@ export function PokerTable({ gameState, onFold, onCall, onRaise }: PokerTablePro
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-2 sm:p-4 pb-32 sm:pb-48 xl:pr-[360px] relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center p-2 sm:p-4 pb-44 sm:pb-52 relative overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #3E2723 0%, #4E342E 50%, #3E2723 100%)',
       }}
@@ -181,14 +177,6 @@ export function PokerTable({ gameState, onFold, onCall, onRaise }: PokerTablePro
             </span>
           </div>
         </div>
-
-        {/* Action Buttons */}
-        <ActionButtons
-          gameState={gameState}
-          onFold={onFold}
-          onCall={onCall}
-          onRaise={onRaise}
-        />
       </div>
     </div>
   );

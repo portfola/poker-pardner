@@ -4,7 +4,7 @@
  */
 
 import { useReducer, useCallback } from 'react';
-import { GameState, Player, BettingAction } from '../types/game';
+import { GameState, Player, BettingAction, NarratorEvent } from '../types/game';
 import { createShuffledDeck, dealCards } from '../utils/cards';
 import { getBestFiveCardHand, determineWinners } from '../utils/handEvaluator';
 
@@ -16,7 +16,9 @@ type GameAction =
   | { type: 'ADVANCE_PHASE' }
   | { type: 'DETERMINE_WINNER' }
   | { type: 'RESET_FOR_NEXT_HAND' }
-  | { type: 'ELIMINATE_PLAYER'; playerId: string };
+  | { type: 'ELIMINATE_PLAYER'; playerId: string }
+  | { type: 'SET_PENDING_EVENT'; event: NarratorEvent | null }
+  | { type: 'CLEAR_PENDING_EVENT' };
 
 /**
  * Creates the initial game state with 4 players.
@@ -94,6 +96,8 @@ function createInitialState(): GameState {
     winners: [],
     winningHands: [],
     isAdvancingPhase: false,
+    isWaitingForContinue: false,
+    pendingEvent: null,
   };
 }
 
@@ -236,6 +240,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       newState.winners = [];
       newState.winningHands = [];
       newState.isAdvancingPhase = false;
+      newState.isWaitingForContinue = false;
+      newState.pendingEvent = null;
 
       // Post blinds
       const stateWithBlinds = postBlinds(newState);
@@ -489,6 +495,22 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return newState;
     }
 
+    case 'SET_PENDING_EVENT': {
+      return {
+        ...state,
+        pendingEvent: action.event,
+        isWaitingForContinue: action.event !== null,
+      };
+    }
+
+    case 'CLEAR_PENDING_EVENT': {
+      return {
+        ...state,
+        pendingEvent: null,
+        isWaitingForContinue: false,
+      };
+    }
+
     default:
       return state;
   }
@@ -529,6 +551,14 @@ export function useGameState() {
     dispatch({ type: 'ELIMINATE_PLAYER', playerId });
   }, []);
 
+  const setPendingEvent = useCallback((event: NarratorEvent | null) => {
+    dispatch({ type: 'SET_PENDING_EVENT', event });
+  }, []);
+
+  const clearPendingEvent = useCallback(() => {
+    dispatch({ type: 'CLEAR_PENDING_EVENT' });
+  }, []);
+
   // Helper to check if betting round is complete
   const isBettingComplete = useCallback(() => {
     return isBettingRoundComplete(state);
@@ -558,5 +588,7 @@ export function useGameState() {
     isBettingComplete,
     getAmountToCall,
     getCurrentPlayer,
+    setPendingEvent,
+    clearPendingEvent,
   };
 }

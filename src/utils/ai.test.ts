@@ -46,6 +46,8 @@ function createGameState(overrides: Partial<GameState> = {}): GameState {
     winners: [],
     winningHands: [],
     isAdvancingPhase: false,
+    isWaitingForContinue: false,
+    pendingEvent: null,
     ...overrides,
   };
 }

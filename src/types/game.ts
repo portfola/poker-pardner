@@ -139,6 +139,10 @@ export interface GameState {
   winningHands: HandEvaluation[];
   /** Whether the game is currently transitioning between phases */
   isAdvancingPhase: boolean;
+  /** Whether the game is paused waiting for user to click continue */
+  isWaitingForContinue: boolean;
+  /** Current narrator event to display (null if no modal showing) */
+  pendingEvent: NarratorEvent | null;
 }
 
 /**
@@ -158,3 +162,40 @@ export interface PlayerAction {
  * Strength classification for a hand.
  */
 export type HandStrength = 'weak' | 'medium' | 'strong';
+
+/**
+ * Types of narrator events that trigger the cowboy modal.
+ */
+export type NarratorEventType =
+  | 'hand_start'      // Blinds posted, cards dealt
+  | 'ai_action'       // AI player acted
+  | 'user_action'     // User just acted (explain result)
+  | 'phase_advance'   // Flop/turn/river dealt
+  | 'showdown'        // Reveal hands
+  | 'user_turn';      // Prompt user with advice
+
+/**
+ * Narrator event data for the cowboy modal.
+ */
+export interface NarratorEvent {
+  /** Type of event being narrated */
+  type: NarratorEventType;
+  /** Cowboy's narration text */
+  message: string;
+  /** Who acted (for action events) */
+  playerName?: string;
+  /** What they did (for action events) */
+  action?: string;
+  /** Why they did it (for AI actions) */
+  reasoning?: string;
+  /** User's current hand strength (for user_turn events) */
+  handStrength?: string;
+  /** Strategic advice (for user_turn events) */
+  advice?: string;
+  /** Pre-calculated AI decision to execute on continue */
+  pendingAction?: {
+    playerId: string;
+    action: BettingAction;
+    amount?: number;
+  };
+}
