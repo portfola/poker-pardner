@@ -4,7 +4,7 @@
  */
 
 import { useReducer, useCallback } from 'react';
-import { GameState, Player, BettingAction, NarratorEvent } from '../types/game';
+import { GameState, Player, BettingAction, NarratorEvent, ActionHistoryEntry } from '../types/game';
 import { createShuffledDeck, dealCards } from '../utils/cards';
 import { getBestFiveCardHand, determineWinners } from '../utils/handEvaluator';
 
@@ -18,7 +18,9 @@ type GameAction =
   | { type: 'RESET_FOR_NEXT_HAND' }
   | { type: 'ELIMINATE_PLAYER'; playerId: string }
   | { type: 'SET_PENDING_EVENT'; event: NarratorEvent | null }
-  | { type: 'CLEAR_PENDING_EVENT' };
+  | { type: 'CLEAR_PENDING_EVENT' }
+  | { type: 'ADD_ACTION_HISTORY'; entry: Omit<ActionHistoryEntry, 'id' | 'timestamp'> }
+  | { type: 'SET_WAITING_FOR_NEXT'; waiting: boolean };
 
 /**
  * Creates the initial game state with 4 players.
@@ -98,6 +100,8 @@ function createInitialState(): GameState {
     isAdvancingPhase: false,
     isWaitingForContinue: false,
     pendingEvent: null,
+    actionHistory: [],
+    isWaitingForNextAction: false,
   };
 }
 
@@ -242,6 +246,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       newState.isAdvancingPhase = false;
       newState.isWaitingForContinue = false;
       newState.pendingEvent = null;
+      newState.actionHistory = [];
+      newState.isWaitingForNextAction = false;
 
       // Post blinds
       const stateWithBlinds = postBlinds(newState);
@@ -511,6 +517,25 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'ADD_ACTION_HISTORY': {
+      const newEntry: ActionHistoryEntry = {
+        ...action.entry,
+        id: state.actionHistory.length + 1,
+        timestamp: Date.now(),
+      };
+      return {
+        ...state,
+        actionHistory: [...state.actionHistory, newEntry],
+      };
+    }
+
+    case 'SET_WAITING_FOR_NEXT': {
+      return {
+        ...state,
+        isWaitingForNextAction: action.waiting,
+      };
+    }
+
     default:
       return state;
   }
@@ -559,6 +584,14 @@ export function useGameState() {
     dispatch({ type: 'CLEAR_PENDING_EVENT' });
   }, []);
 
+  const addActionHistory = useCallback((entry: Omit<ActionHistoryEntry, 'id' | 'timestamp'>) => {
+    dispatch({ type: 'ADD_ACTION_HISTORY', entry });
+  }, []);
+
+  const setWaitingForNext = useCallback((waiting: boolean) => {
+    dispatch({ type: 'SET_WAITING_FOR_NEXT', waiting });
+  }, []);
+
   // Helper to check if betting round is complete
   const isBettingComplete = useCallback(() => {
     return isBettingRoundComplete(state);
@@ -590,5 +623,7 @@ export function useGameState() {
     getCurrentPlayer,
     setPendingEvent,
     clearPendingEvent,
+    addActionHistory,
+    setWaitingForNext,
   };
 }

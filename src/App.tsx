@@ -32,6 +32,8 @@ function App() {
     determineWinner,
     resetForNextHand,
     setPendingEvent,
+    addActionHistory,
+    setWaitingForNext,
   } = useGameState()
 
   const [showFoldConfirm, setShowFoldConfirm] = useState(false)
@@ -198,41 +200,43 @@ function App() {
       return
     }
 
-    // If it's an AI player's turn
-    if (currentPlayer && !currentPlayer.isUser && !currentPlayer.isFolded && !currentPlayer.isAllIn) {
+    // If it's an AI player's turn and we're not already waiting for user to click Next
+    if (currentPlayer && !currentPlayer.isUser && !currentPlayer.isFolded && !currentPlayer.isAllIn && !state.isWaitingForNextAction) {
       isProcessingAI.current = true
 
-      // Small delay before AI acts
+      // Small delay before AI "thinks"
       const thinkingDelay = TIMING.AI_TURN_BASE_DELAY + Math.random() * TIMING.AI_TURN_RANDOM_DELAY
 
       setTimeout(() => {
-        // Calculate and execute decision
+        // Calculate decision but DON'T execute yet - wait for user to click Next
         const decision = makeAIDecision(currentPlayer, state)
         const handStrength = getAIHandStrength(currentPlayer.id)
 
-        // Execute the action first
-        handlePlayerAction(currentPlayer.id, decision.action, decision.amount)
+        const narration = generateAIActionNarration(
+          currentPlayer,
+          decision.action,
+          decision.amount,
+          state,
+          handStrength
+        )
 
-        // Then show narration after animation delay
-        setTimeout(() => {
-          const narration = generateAIActionNarration(
-            currentPlayer,
-            decision.action,
-            decision.amount,
-            state,
-            handStrength
-          )
-
-          setPendingEvent({
-            type: 'ai_action',
-            message: narration.message,
-            playerName: currentPlayer.name,
+        // Show narration with pending action stored
+        setPendingEvent({
+          type: 'ai_action',
+          message: narration.message,
+          playerName: currentPlayer.name,
+          action: decision.action,
+          reasoning: narration.reasoning,
+          pendingAction: {
+            playerId: currentPlayer.id,
             action: decision.action,
-            reasoning: narration.reasoning,
-          })
+            amount: decision.amount,
+          },
+        })
 
-          isProcessingAI.current = false
-        }, NARRATION_DELAY)
+        // Set waiting state so user must click Next
+        setWaitingForNext(true)
+        isProcessingAI.current = false
       }, thinkingDelay)
 
       return
@@ -255,9 +259,12 @@ function App() {
     hasCards,
     state.isHandComplete,
     state.isAdvancingPhase,
+    state.isWaitingForNextAction,
     state.currentPhase,
     state.currentPlayerIndex,
     state.players,
+    state.currentBet,
+    state.pot,
     getActivePlayers,
     getAIHandStrength,
     isBettingComplete,
@@ -265,6 +272,7 @@ function App() {
     advancePhase,
     handlePlayerAction,
     setPendingEvent,
+    setWaitingForNext,
     determineWinner,
   ])
 
@@ -297,6 +305,14 @@ function App() {
         setShowFoldConfirm(true)
       } else {
         handlePlayerAction(userPlayer.id, 'fold')
+        addActionHistory({
+          playerName: userPlayer.name,
+          playerId: userPlayer.id,
+          action: 'fold',
+          phase: state.currentPhase,
+          potAfter: state.pot,
+          isUser: true,
+        })
         setTimeout(() => {
           setPendingEvent({
             type: 'user_action',
@@ -312,6 +328,14 @@ function App() {
     const userPlayer = state.players.find(p => p.isUser)
     if (userPlayer) {
       handlePlayerAction(userPlayer.id, 'fold')
+      addActionHistory({
+        playerName: userPlayer.name,
+        playerId: userPlayer.id,
+        action: 'fold',
+        phase: state.currentPhase,
+        potAfter: state.pot,
+        isUser: true,
+      })
       setTimeout(() => {
         setPendingEvent({
           type: 'user_action',
@@ -334,6 +358,15 @@ function App() {
       const action = amountToCall === 0 ? 'check' : 'call'
 
       handlePlayerAction(userPlayer.id, action)
+      addActionHistory({
+        playerName: userPlayer.name,
+        playerId: userPlayer.id,
+        action,
+        amount: amountToCall > 0 ? amountToCall : undefined,
+        phase: state.currentPhase,
+        potAfter: state.pot + amountToCall,
+        isUser: true,
+      })
 
       setTimeout(() => {
         setPendingEvent({
@@ -349,8 +382,18 @@ function App() {
     const userPlayer = state.players.find(p => p.isUser)
     if (userPlayer) {
       const raiseAmount = state.currentBet + state.bigBlind
+      const additionalChips = raiseAmount - userPlayer.currentBet
 
       handlePlayerAction(userPlayer.id, 'raise', raiseAmount)
+      addActionHistory({
+        playerName: userPlayer.name,
+        playerId: userPlayer.id,
+        action: 'raise',
+        amount: raiseAmount,
+        phase: state.currentPhase,
+        potAfter: state.pot + additionalChips,
+        isUser: true,
+      })
 
       setTimeout(() => {
         setPendingEvent({
@@ -385,6 +428,42 @@ function App() {
     setTimeout(() => {
       startNewHand()
     }, TIMING.NEW_HAND_DELAY)
+  }
+
+  // Handle "Next" button click in tutorial mode - executes the pending AI action
+  const handleNext = () => {
+    const pendingAction = state.pendingEvent?.pendingAction
+    if (!pendingAction) {
+      // No pending action, just clear waiting state (e.g., for phase transitions)
+      setWaitingForNext(false)
+      return
+    }
+
+    const { playerId, action, amount } = pendingAction
+    const player = state.players.find(p => p.id === playerId)
+
+    if (player) {
+      // Execute the action
+      handlePlayerAction(playerId, action, amount)
+
+      // Record in action history
+      const amountForHistory = action === 'call'
+        ? state.currentBet - player.currentBet
+        : amount
+
+      addActionHistory({
+        playerName: player.name,
+        playerId: player.id,
+        action,
+        amount: amountForHistory,
+        phase: state.currentPhase,
+        potAfter: state.pot + (amountForHistory || 0),
+        isUser: player.isUser,
+      })
+    }
+
+    // Clear waiting state so game can continue
+    setWaitingForNext(false)
   }
 
   if (!hasCards) {
@@ -475,6 +554,7 @@ function App() {
         onFold={handleFold}
         onCall={handleCall}
         onRaise={handleRaise}
+        onNext={handleNext}
       />
       <ShowdownDisplay gameState={state} onNextHand={handleNextHand} />
       <ConfirmDialog

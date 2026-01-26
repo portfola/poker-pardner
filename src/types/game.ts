@@ -143,6 +143,10 @@ export interface GameState {
   isWaitingForContinue: boolean;
   /** Current narrator event to display (null if no modal showing) */
   pendingEvent: NarratorEvent | null;
+  /** History of all actions taken in the current hand */
+  actionHistory: ActionHistoryEntry[];
+  /** Whether waiting for user to click Next to advance AI action */
+  isWaitingForNextAction: boolean;
 }
 
 /**
@@ -198,4 +202,28 @@ export interface NarratorEvent {
     action: BettingAction;
     amount?: number;
   };
+}
+
+/**
+ * An entry in the action history log.
+ */
+export interface ActionHistoryEntry {
+  /** Unique ID for the entry */
+  id: number;
+  /** The player who took the action */
+  playerName: string;
+  /** The player ID */
+  playerId: string;
+  /** The action taken */
+  action: BettingAction;
+  /** Amount for raises/calls */
+  amount?: number;
+  /** The game phase when action was taken */
+  phase: GamePhase;
+  /** Pot size after this action */
+  potAfter: number;
+  /** Timestamp when action occurred */
+  timestamp: number;
+  /** Whether this is a user action */
+  isUser: boolean;
 }

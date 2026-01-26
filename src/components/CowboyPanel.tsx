@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { GameState, NarratorEvent } from '../types/game';
 import { HandRankings } from './HandRankings';
+import { ActionHistory } from './ActionHistory';
 
 interface CowboyPanelProps {
   gameState: GameState;
@@ -14,6 +15,7 @@ interface CowboyPanelProps {
   onFold: () => void;
   onCall: () => void;
   onRaise: () => void;
+  onNext: () => void;
 }
 
 export function CowboyPanel({
@@ -22,10 +24,12 @@ export function CowboyPanel({
   onFold,
   onCall,
   onRaise,
+  onNext,
 }: CowboyPanelProps) {
   const [showHandRankings, setShowHandRankings] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
-  const { players, currentPlayerIndex, currentBet, minRaise, bigBlind, isHandComplete } = gameState;
+  const { players, currentPlayerIndex, currentBet, minRaise, bigBlind, isHandComplete, actionHistory, isWaitingForNextAction } = gameState;
   const currentPlayer = players[currentPlayerIndex];
   const userPlayer = players.find(p => p.isUser);
 
@@ -245,54 +249,81 @@ export function CowboyPanel({
               </div>
 
               {/* Action Buttons Row - Reduced spacing */}
-              <div className="mt-3 flex gap-2 sm:gap-2.5 justify-center">
+              <div className="mt-3 flex gap-2 sm:gap-2.5 justify-center items-center">
+                {/* History Button - always visible */}
                 <button
-                  onClick={onFold}
-                  disabled={buttonsDisabled}
-                  aria-label="Fold your hand"
-                  className={`
-                    poker-chip px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all
-                    ${buttonsDisabled
-                      ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
-                      : 'bg-gradient-to-b from-rose-600 to-rose-800 hover:from-rose-500 hover:to-rose-700 text-white hover:scale-105 active:scale-95 border-2 border-rose-900'
-                    }
-                  `}
+                  onClick={() => setShowHistory(true)}
+                  aria-label="View action history"
+                  title="Action History"
+                  className="poker-chip w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-stone-600 to-stone-800 hover:from-stone-500 hover:to-stone-700 text-amber-200 font-bold text-sm sm:text-base flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                  FOLD
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </button>
 
-                <button
-                  onClick={onCall}
-                  disabled={buttonsDisabled || !canCall}
-                  aria-label={isCheck ? "Check" : `Call $${amountToCall}`}
-                  className={`
-                    poker-chip px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all min-w-[85px] sm:min-w-[110px]
-                    ${buttonsDisabled || !canCall
-                      ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
-                      : 'bg-gradient-to-b from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 text-white hover:scale-105 active:scale-95 border-2 border-emerald-900'
-                    }
-                  `}
-                  style={{ fontFamily: "'Playfair Display', serif" }}
-                >
-                  {callButtonText.toUpperCase()}
-                </button>
+                {/* Show Next button when waiting, otherwise show action buttons */}
+                {isWaitingForNextAction ? (
+                  <button
+                    onClick={onNext}
+                    aria-label="Continue to next action"
+                    className="poker-chip px-8 sm:px-12 py-2.5 sm:py-3.5 rounded-xl font-bold text-sm sm:text-base transition-all bg-gradient-to-b from-sky-500 to-sky-700 hover:from-sky-400 hover:to-sky-600 text-white hover:scale-105 active:scale-95 border-2 border-sky-800 animate-pulse"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    NEXT
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={onFold}
+                      disabled={buttonsDisabled}
+                      aria-label="Fold your hand"
+                      className={`
+                        poker-chip px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all
+                        ${buttonsDisabled
+                          ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
+                          : 'bg-gradient-to-b from-rose-600 to-rose-800 hover:from-rose-500 hover:to-rose-700 text-white hover:scale-105 active:scale-95 border-2 border-rose-900'
+                        }
+                      `}
+                      style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
+                      FOLD
+                    </button>
 
-                <button
-                  onClick={onRaise}
-                  disabled={buttonsDisabled || !canRaise}
-                  aria-label={raiseButtonText}
-                  className={`
-                    poker-chip px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all min-w-[85px] sm:min-w-[110px]
-                    ${buttonsDisabled || !canRaise
-                      ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
-                      : 'bg-gradient-to-b from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500 text-amber-950 hover:scale-105 active:scale-95 border-2 border-amber-700'
-                    }
-                  `}
-                  style={{ fontFamily: "'Playfair Display', serif" }}
-                >
-                  {raiseButtonText.toUpperCase()}
-                </button>
+                    <button
+                      onClick={onCall}
+                      disabled={buttonsDisabled || !canCall}
+                      aria-label={isCheck ? "Check" : `Call $${amountToCall}`}
+                      className={`
+                        poker-chip px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all min-w-[85px] sm:min-w-[110px]
+                        ${buttonsDisabled || !canCall
+                          ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
+                          : 'bg-gradient-to-b from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 text-white hover:scale-105 active:scale-95 border-2 border-emerald-900'
+                        }
+                      `}
+                      style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
+                      {callButtonText.toUpperCase()}
+                    </button>
+
+                    <button
+                      onClick={onRaise}
+                      disabled={buttonsDisabled || !canRaise}
+                      aria-label={raiseButtonText}
+                      className={`
+                        poker-chip px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all min-w-[85px] sm:min-w-[110px]
+                        ${buttonsDisabled || !canRaise
+                          ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
+                          : 'bg-gradient-to-b from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500 text-amber-950 hover:scale-105 active:scale-95 border-2 border-amber-700'
+                        }
+                      `}
+                      style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
+                      {raiseButtonText.toUpperCase()}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -330,6 +361,13 @@ export function CowboyPanel({
           </div>
         </div>
       )}
+
+      {/* Action History Modal */}
+      <ActionHistory
+        history={actionHistory}
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
+      />
     </>
   );
 }
