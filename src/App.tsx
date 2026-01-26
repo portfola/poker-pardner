@@ -3,7 +3,6 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useGameState } from './hooks/useGameState'
 import { PokerTable } from './components/PokerTable'
 import { CowboyPanel } from './components/CowboyPanel'
-import { ShowdownDisplay } from './components/ShowdownDisplay'
 import { MusicPlayer } from './components/MusicPlayer'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { makeAIDecision } from './utils/ai'
@@ -557,8 +556,8 @@ function App() {
         onCall={handleCall}
         onRaise={handleRaise}
         onNext={handleNext}
+        onNextHand={handleNextHand}
       />
-      <ShowdownDisplay gameState={state} onNextHand={handleNextHand} />
       <ConfirmDialog
         isOpen={showFoldConfirm}
         title="Fold a Good Hand?"

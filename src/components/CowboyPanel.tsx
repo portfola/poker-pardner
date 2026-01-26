@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { GameState, NarratorEvent } from '../types/game';
 import { HandRankings } from './HandRankings';
 import { ActionHistory } from './ActionHistory';
+import { describeHand } from '../utils/handStrength';
 
 interface CowboyPanelProps {
   gameState: GameState;
@@ -16,6 +17,7 @@ interface CowboyPanelProps {
   onCall: () => void;
   onRaise: () => void;
   onNext: () => void;
+  onNextHand: () => void;
 }
 
 export function CowboyPanel({
@@ -25,6 +27,7 @@ export function CowboyPanel({
   onCall,
   onRaise,
   onNext,
+  onNextHand,
 }: CowboyPanelProps) {
   const [showHandRankings, setShowHandRankings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -57,6 +60,31 @@ export function CowboyPanel({
 
   // Button states - only enabled when it's user's turn and hand is active
   const buttonsDisabled = !isUserTurn || isHandComplete;
+
+  // End of hand info
+  const { winners, winningHands, pot } = gameState;
+  const userWon = winners.some(w => w.isUser);
+  const isSplitPot = winners.length > 1;
+  const handDescription = winningHands.length > 0 ? describeHand(winningHands[0]) : '';
+  const isUserEliminated = userPlayer && userPlayer.chips === 0 && isHandComplete;
+
+  // Generate cowboy's end-of-hand message
+  const getEndOfHandMessage = () => {
+    if (!isHandComplete || winners.length === 0) return '';
+
+    if (userWon) {
+      if (isSplitPot) {
+        return `Well I'll be! You split the pot, partner! $${Math.floor(pot / winners.length)} comin' your way.`;
+      }
+      return `Hot diggity! You raked in $${pot}! That's how it's done in the Wild West!`;
+    } else {
+      const winnerName = winners[0]?.name || 'Someone';
+      if (isSplitPot) {
+        return `Split pot this round! ${winners.map(w => w.name).join(' and ')} divide $${pot} between 'em.`;
+      }
+      return `${winnerName} takes the pot - $${pot}. Tip your hat and get ready for the next one, partner.`;
+    }
+  };
 
   // Get strength badge color
   const getStrengthBadge = (strength: string | undefined) => {
@@ -188,7 +216,40 @@ export function CowboyPanel({
                       style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
                     ></div>
 
-                    {narratorEvent ? (
+                    {isHandComplete && winners.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {/* Winner announcement */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{userWon ? '🎉' : '🤠'}</span>
+                          <p
+                            className={`leading-snug text-xs sm:text-sm font-semibold ${userWon ? 'text-emerald-700' : 'text-stone-800'}`}
+                            style={{ fontFamily: "'Crimson Text', serif" }}
+                          >
+                            {getEndOfHandMessage()}
+                          </p>
+                        </div>
+
+                        {/* Winning hand description */}
+                        {handDescription && (
+                          <div className="pt-1.5 border-t border-amber-800/20">
+                            <p className="text-stone-600 text-[11px] sm:text-xs flex items-start gap-1.5">
+                              <span className="text-amber-700 flex-shrink-0">🃏</span>
+                              <span>Winning hand: <strong>{handDescription}</strong></span>
+                            </p>
+                          </div>
+                        )}
+
+                        {/* User eliminated warning */}
+                        {isUserEliminated && (
+                          <div className="pt-1.5 border-t border-amber-800/20">
+                            <p className="text-rose-700 text-[11px] sm:text-xs font-semibold flex items-start gap-1.5">
+                              <span className="flex-shrink-0">💸</span>
+                              <span>You're out of chips! Start a new game to try again.</span>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ) : narratorEvent ? (
                       <div className="space-y-1.5">
                         <p
                           className="text-stone-800 leading-snug text-xs sm:text-sm"
@@ -278,8 +339,17 @@ export function CowboyPanel({
                   </svg>
                 </button>
 
-                {/* Show Next button when waiting, otherwise show action buttons */}
-                {isWaitingForNextAction ? (
+                {/* Show Next Hand button when hand complete, Next button when waiting, otherwise action buttons */}
+                {isHandComplete && winners.length > 0 ? (
+                  <button
+                    onClick={onNextHand}
+                    aria-label={isUserEliminated ? "Start a new game" : "Deal the next hand"}
+                    className="poker-chip px-8 sm:px-12 py-2.5 sm:py-3.5 rounded-xl font-bold text-sm sm:text-base transition-all bg-gradient-to-b from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500 text-amber-950 hover:scale-105 active:scale-95 border-2 border-amber-700"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    {isUserEliminated ? 'NEW GAME' : 'NEXT HAND'}
+                  </button>
+                ) : isWaitingForNextAction ? (
                   <button
                     onClick={onNext}
                     aria-label="Continue to next action"
