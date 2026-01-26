@@ -252,6 +252,39 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Post blinds
       const stateWithBlinds = postBlinds(newState);
 
+      // Add blind entries to action history
+      const smallBlindPos = (stateWithBlinds.dealerPosition + 1) % stateWithBlinds.players.length;
+      const bigBlindPos = (stateWithBlinds.dealerPosition + 2) % stateWithBlinds.players.length;
+      const sbPlayer = stateWithBlinds.players[smallBlindPos];
+      const bbPlayer = stateWithBlinds.players[bigBlindPos];
+      const sbAmount = sbPlayer.currentBet;
+      const bbAmount = bbPlayer.currentBet;
+
+      stateWithBlinds.actionHistory = [
+        {
+          id: 1,
+          playerName: sbPlayer.name,
+          playerId: sbPlayer.id,
+          action: 'smallBlind',
+          amount: sbAmount,
+          phase: 'pre-flop',
+          potAfter: sbAmount,
+          timestamp: Date.now(),
+          isUser: sbPlayer.isUser,
+        },
+        {
+          id: 2,
+          playerName: bbPlayer.name,
+          playerId: bbPlayer.id,
+          action: 'bigBlind',
+          amount: bbAmount,
+          phase: 'pre-flop',
+          potAfter: sbAmount + bbAmount,
+          timestamp: Date.now(),
+          isUser: bbPlayer.isUser,
+        },
+      ];
+
       // Deal hole cards
       const stateWithCards = dealHoleCards(stateWithBlinds);
 

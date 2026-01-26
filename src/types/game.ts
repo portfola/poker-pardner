@@ -36,6 +36,12 @@ export type GamePhase = 'pre-flop' | 'flop' | 'turn' | 'river' | 'showdown';
 export type BettingAction = 'fold' | 'call' | 'raise' | 'check';
 
 /**
+ * Actions that can appear in the action history log.
+ * Includes betting actions plus blind postings.
+ */
+export type ActionHistoryAction = BettingAction | 'smallBlind' | 'bigBlind';
+
+/**
  * Rankings of poker hands from weakest to strongest.
  */
 export enum HandRank {
@@ -215,7 +221,7 @@ export interface ActionHistoryEntry {
   /** The player ID */
   playerId: string;
   /** The action taken */
-  action: BettingAction;
+  action: ActionHistoryAction;
   /** Amount for raises/calls */
   amount?: number;
   /** The game phase when action was taken */

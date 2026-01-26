@@ -28,6 +28,10 @@ function formatAction(entry: ActionHistoryEntry): string {
       return entry.amount ? `called $${entry.amount}` : 'called';
     case 'raise':
       return entry.amount ? `raised to $${entry.amount}` : 'raised';
+    case 'smallBlind':
+      return entry.amount ? `posted small blind $${entry.amount}` : 'posted small blind';
+    case 'bigBlind':
+      return entry.amount ? `posted big blind $${entry.amount}` : 'posted big blind';
     default:
       return entry.action;
   }
