@@ -1,6 +1,7 @@
 import './App.css'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useGameState } from './hooks/useGameState'
+import { useSoundEffects } from './hooks/useSoundEffects'
 import { PokerTable } from './components/PokerTable'
 import { CowboyPanel } from './components/CowboyPanel'
 import { MusicPlayer } from './components/MusicPlayer'
@@ -25,6 +26,7 @@ import {
   trackSessionStart,
 } from './utils/analytics'
 import { incrementSessionCount } from './utils/statistics'
+import { audioService } from './utils/audio'
 
 // Delay before showing narrator after an action (let user see animation)
 const NARRATION_DELAY = 800
@@ -57,10 +59,18 @@ function App() {
   // Check if hand has been dealt
   const hasCards = state.players.some(p => p.holeCards.length > 0)
 
+  // Enable sound effects when mode is selected
+  useSoundEffects(state)
+
   // Track session start on mount
   useEffect(() => {
     trackSessionStart()
     incrementSessionCount()
+  }, [])
+
+  // Preload sound effects on mount
+  useEffect(() => {
+    audioService.preload()
   }, [])
 
   // Handle mode selection
