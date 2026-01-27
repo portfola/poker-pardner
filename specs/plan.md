@@ -26,7 +26,7 @@
 - [x] Have the Cowboy speak out loud, so the user doesn't have to read the text (2026-01-27)
 
 ## Sound Effects
-- [ ] Audio utility - Create `src/utils/audio.ts` for audio management
+- [x] Audio utility - Create `src/utils/audio.ts` for audio management (2026-01-27)
 - [ ] Sound files - Add sound effects to `public/audio/` (deal, bet, fold, win, ambiance)
 - [ ] Sound integration - Wire up sounds to game events
 - [ ] Sound toggle - Add on/off setting
