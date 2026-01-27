@@ -3,9 +3,9 @@
 ## Pre-Production & Deployment
 
 - [ ] Post-deployment verification - Load testing, social sharing test, Lighthouse audit
-  - BLOCKED: Requires application to be deployed first. Need deployment configuration and hosting setup.
+  - BLOCKED: Requires application to be deployed first. Infrastructure is now ready for deployment.
 - [x] Set up analytics - PostHog integration for user tracking and insights (2026-01-26)
-- [ ] Create terraform infrastructure and Github Action for production deployment on AWS using S3 and Cloudfront, with Route53 DNS setup on domain poker.portfola.net. Consider whether other infrastructure is necessary and act accordingly.
+- [x] Create terraform infrastructure and Github Action for production deployment on AWS using S3 and Cloudfront, with Route53 DNS setup on domain poker.portfola.net. Consider whether other infrastructure is necessary and act accordingly. (2026-01-26)
 
 ## Performance Testing
 - [x] Test with 100+ consecutive hands (2026-01-26)
