@@ -10,6 +10,7 @@ import { HandRankings } from './HandRankings';
 import { ActionHistory } from './ActionHistory';
 import { describeHand, evaluateHandStrength, describeHoleCards } from '../utils/handStrength';
 import { getBestFiveCardHand, getBestHandFromSix, evaluateHand } from '../utils/handEvaluator';
+import { textToSpeechService } from '../utils/textToSpeech';
 
 interface CowboyPanelProps {
   gameState: GameState;
@@ -33,6 +34,7 @@ export function CowboyPanel({
   const [showHandRankings, setShowHandRankings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [bubbleKey, setBubbleKey] = useState(0);
+  const [voiceEnabled, setVoiceEnabled] = useState(() => textToSpeechService.isEnabled());
 
   const { players, currentPlayerIndex, currentBet, minRaise, bigBlind, isHandComplete, actionHistory, isWaitingForNextAction } = gameState;
   const currentPlayer = players[currentPlayerIndex];
@@ -101,6 +103,25 @@ export function CowboyPanel({
     setBubbleKey(prev => prev + 1);
   }, [narratorEvent?.message, isHandComplete, winners.length]);
 
+  // Speak narration when it changes
+  useEffect(() => {
+    if (textToSpeechService.isEnabled()) {
+      if (isHandComplete && winners.length > 0) {
+        // Speak end-of-hand message
+        const message = getEndOfHandMessage();
+        if (message) {
+          textToSpeechService.speak(message);
+        }
+      } else if (narratorEvent?.message) {
+        // Speak narrator message and reasoning combined
+        const fullMessage = narratorEvent.reasoning
+          ? `${narratorEvent.message} ${narratorEvent.reasoning}`
+          : narratorEvent.message;
+        textToSpeechService.speak(fullMessage);
+      }
+    }
+  }, [narratorEvent?.message, narratorEvent?.reasoning, isHandComplete, winners.length]);
+
   let raiseButtonText = 'Raise';
   if (!canRaise) {
     raiseButtonText = 'All-In';
@@ -130,6 +151,13 @@ export function CowboyPanel({
       // Show the slider
       setShowRaiseSlider(true);
     }
+  };
+
+  // Handle voice toggle
+  const handleVoiceToggle = () => {
+    const newState = !voiceEnabled;
+    setVoiceEnabled(newState);
+    textToSpeechService.setEnabled(newState);
   };
   const userWon = winners.some(w => w.isUser);
   const isSplitPot = winners.length > 1;
@@ -373,6 +401,28 @@ export function CowboyPanel({
                     <div className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2 border-amber-600"></div>
                     <div className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2 border-amber-600"></div>
                   </div>
+
+                  {/* Voice narration toggle - only show if available */}
+                  {textToSpeechService.isAvailable() && (
+                    <button
+                      onClick={handleVoiceToggle}
+                      className={`poker-chip w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 ${
+                        voiceEnabled
+                          ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 border-emerald-600 text-white'
+                          : 'bg-gradient-to-br from-stone-400 to-stone-600 border-stone-500 text-stone-200'
+                      }`}
+                      aria-label={voiceEnabled ? 'Disable voice narration' : 'Enable voice narration'}
+                      title={voiceEnabled ? 'Voice On' : 'Voice Off'}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        {voiceEnabled ? (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        ) : (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                        )}
+                      </svg>
+                    </button>
+                  )}
                 </div>
 
                 {/* Center: Combined Narration & Advice */}

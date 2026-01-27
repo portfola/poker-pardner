@@ -22,8 +22,8 @@
 - [x] In the Hand Strength box, adjust the type so that it fits better. Left-justify the text and use a sans-serif font with a slightly larger size. Title the box "Your Hand". (2026-01-27)
 
 ## Cowboy Voice Narration
-- [ ] Add ElevenLabs integration to use text-to-speech 
-- [ ] Have the Cowboy speak out loud, so the user doesn't have to read the text
+- [x] Add ElevenLabs integration to use text-to-speech (2026-01-27)
+- [x] Have the Cowboy speak out loud, so the user doesn't have to read the text (2026-01-27)
 
 ## Sound Effects
 - [ ] Audio utility - Create `src/utils/audio.ts` for audio management
