@@ -807,4 +807,429 @@ describe('useGameState', () => {
       expect(result.current.state.dealerPosition).toBe((initialDealer + 1) % 2);
     });
   });
+
+  describe('Hand Integrity - Phase Progression', () => {
+    it('should proceed through all phases in correct order: pre-flop → flop → turn → river → showdown', () => {
+      const { result } = renderHook(() => useGameState());
+
+      // Start new hand
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // Verify initial phase is pre-flop
+      expect(result.current.state.currentPhase).toBe('pre-flop');
+      expect(result.current.state.communityCards).toHaveLength(0);
+      expect(result.current.state.pot).toBe(15); // Blinds posted
+
+      // Verify all players have hole cards
+      result.current.state.players.forEach(player => {
+        expect(player.holeCards).toHaveLength(2);
+      });
+
+      // Complete pre-flop betting round (all players call/check)
+      while (!result.current.isBettingComplete()) {
+        const currentPlayer = result.current.getCurrentPlayer();
+        act(() => {
+          if (currentPlayer.currentBet === result.current.state.currentBet) {
+            result.current.handlePlayerAction(currentPlayer.id, 'check');
+          } else {
+            result.current.handlePlayerAction(currentPlayer.id, 'call');
+          }
+        });
+      }
+
+      // Advance to flop
+      act(() => {
+        result.current.advancePhase();
+      });
+
+      expect(result.current.state.currentPhase).toBe('flop');
+      expect(result.current.state.communityCards).toHaveLength(3);
+      expect(result.current.state.currentBet).toBe(0); // Bet resets after phase advance
+
+      // Verify all players' hasActed reset for new betting round
+      result.current.state.players.forEach(player => {
+        if (!player.isFolded) {
+          expect(player.hasActed).toBe(false);
+        }
+      });
+
+      // Complete flop betting round (all check)
+      while (!result.current.isBettingComplete()) {
+        const currentPlayer = result.current.getCurrentPlayer();
+        act(() => {
+          result.current.handlePlayerAction(currentPlayer.id, 'check');
+        });
+      }
+
+      // Advance to turn
+      act(() => {
+        result.current.advancePhase();
+      });
+
+      expect(result.current.state.currentPhase).toBe('turn');
+      expect(result.current.state.communityCards).toHaveLength(4);
+      expect(result.current.state.currentBet).toBe(0);
+
+      // Complete turn betting round (all check)
+      while (!result.current.isBettingComplete()) {
+        const currentPlayer = result.current.getCurrentPlayer();
+        act(() => {
+          result.current.handlePlayerAction(currentPlayer.id, 'check');
+        });
+      }
+
+      // Advance to river
+      act(() => {
+        result.current.advancePhase();
+      });
+
+      expect(result.current.state.currentPhase).toBe('river');
+      expect(result.current.state.communityCards).toHaveLength(5);
+      expect(result.current.state.currentBet).toBe(0);
+
+      // Complete river betting round (all check)
+      while (!result.current.isBettingComplete()) {
+        const currentPlayer = result.current.getCurrentPlayer();
+        act(() => {
+          result.current.handlePlayerAction(currentPlayer.id, 'check');
+        });
+      }
+
+      // Advance to showdown
+      act(() => {
+        result.current.advancePhase();
+      });
+
+      expect(result.current.state.currentPhase).toBe('showdown');
+
+      // Determine winner
+      act(() => {
+        result.current.determineWinner();
+      });
+
+      // Verify hand is complete
+      expect(result.current.state.isHandComplete).toBe(true);
+      expect(result.current.state.winners.length).toBeGreaterThan(0);
+    });
+
+    it('should maintain correct game state throughout entire hand with raises', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      const initialPot = result.current.state.pot;
+
+      // Pre-flop: first player raises
+      const firstPlayer = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(firstPlayer.id, 'raise', 20);
+      });
+
+      expect(result.current.state.currentBet).toBe(20);
+      const potAfterRaise = result.current.state.pot;
+      expect(potAfterRaise).toBeGreaterThan(initialPot);
+
+      // Other players fold except one who calls
+      let nextPlayer = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(nextPlayer.id, 'call');
+      });
+
+      nextPlayer = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(nextPlayer.id, 'fold');
+      });
+
+      nextPlayer = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(nextPlayer.id, 'fold');
+      });
+
+      // Should advance to flop
+      act(() => {
+        result.current.advancePhase();
+      });
+
+      expect(result.current.state.currentPhase).toBe('flop');
+      expect(result.current.state.communityCards).toHaveLength(3);
+
+      // Count non-folded players
+      const nonFoldedPlayers = result.current.state.players.filter(p => !p.isFolded);
+      expect(nonFoldedPlayers.length).toBe(2);
+
+      // Both remaining players check on flop
+      while (!result.current.isBettingComplete()) {
+        const currentPlayer = result.current.getCurrentPlayer();
+        act(() => {
+          result.current.handlePlayerAction(currentPlayer.id, 'check');
+        });
+      }
+
+      // Advance through remaining phases
+      act(() => {
+        result.current.advancePhase(); // to turn
+      });
+      expect(result.current.state.currentPhase).toBe('turn');
+
+      while (!result.current.isBettingComplete()) {
+        const currentPlayer = result.current.getCurrentPlayer();
+        act(() => {
+          result.current.handlePlayerAction(currentPlayer.id, 'check');
+        });
+      }
+
+      act(() => {
+        result.current.advancePhase(); // to river
+      });
+      expect(result.current.state.currentPhase).toBe('river');
+
+      while (!result.current.isBettingComplete()) {
+        const currentPlayer = result.current.getCurrentPlayer();
+        act(() => {
+          result.current.handlePlayerAction(currentPlayer.id, 'check');
+        });
+      }
+
+      act(() => {
+        result.current.advancePhase(); // to showdown
+      });
+      expect(result.current.state.currentPhase).toBe('showdown');
+
+      act(() => {
+        result.current.determineWinner();
+      });
+
+      expect(result.current.state.isHandComplete).toBe(true);
+    });
+
+    it('should skip directly to showdown when only one player remains after folds', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      expect(result.current.state.currentPhase).toBe('pre-flop');
+
+      // All players fold except one (using getCurrentPlayer to respect turn order)
+      for (let i = 0; i < 3; i++) {
+        const currentPlayer = result.current.getCurrentPlayer();
+        act(() => {
+          result.current.handlePlayerAction(currentPlayer.id, 'fold');
+        });
+      }
+
+      // Only one player remains, betting should be complete
+      expect(result.current.isBettingComplete()).toBe(true);
+
+      // Determine winner (no need to advance through phases)
+      act(() => {
+        result.current.determineWinner();
+      });
+
+      const winner = result.current.state.winners[0];
+      expect(winner).toBeDefined();
+      expect(winner.isFolded).toBe(false);
+      expect(result.current.state.isHandComplete).toBe(true);
+    });
+
+    it('should handle all-in scenario and proceed through all phases to showdown', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // Get current player and set them to have limited chips
+      const currentPlayer = result.current.getCurrentPlayer();
+      currentPlayer.chips = 15;
+
+      // Player goes all-in by raising
+      act(() => {
+        result.current.handlePlayerAction(currentPlayer.id, 'raise', 20);
+      });
+
+      const updatedPlayer = result.current.state.players.find(p => p.id === currentPlayer.id);
+      expect(updatedPlayer?.isAllIn).toBe(true);
+      expect(updatedPlayer?.chips).toBe(0);
+
+      // Other players call or fold
+      let nextPlayer = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(nextPlayer.id, 'call');
+      });
+
+      nextPlayer = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(nextPlayer.id, 'fold');
+      });
+
+      nextPlayer = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(nextPlayer.id, 'fold');
+      });
+
+      // Should advance to flop even with all-in player
+      act(() => {
+        result.current.advancePhase();
+      });
+
+      expect(result.current.state.currentPhase).toBe('flop');
+      expect(result.current.state.communityCards).toHaveLength(3);
+
+      // Continue through phases
+      const nonFoldedPlayers = result.current.state.players.filter(p => !p.isFolded && !p.isAllIn);
+      if (nonFoldedPlayers.length > 0) {
+        act(() => {
+          result.current.handlePlayerAction(nonFoldedPlayers[0].id, 'check');
+        });
+      }
+
+      act(() => {
+        result.current.advancePhase(); // to turn
+      });
+      expect(result.current.state.currentPhase).toBe('turn');
+
+      if (nonFoldedPlayers.length > 0) {
+        act(() => {
+          result.current.handlePlayerAction(nonFoldedPlayers[0].id, 'check');
+        });
+      }
+
+      act(() => {
+        result.current.advancePhase(); // to river
+      });
+      expect(result.current.state.currentPhase).toBe('river');
+
+      if (nonFoldedPlayers.length > 0) {
+        act(() => {
+          result.current.handlePlayerAction(nonFoldedPlayers[0].id, 'check');
+        });
+      }
+
+      act(() => {
+        result.current.advancePhase(); // to showdown
+      });
+      expect(result.current.state.currentPhase).toBe('showdown');
+
+      act(() => {
+        result.current.determineWinner();
+      });
+
+      expect(result.current.state.isHandComplete).toBe(true);
+      expect(result.current.state.winners.length).toBeGreaterThan(0);
+    });
+
+    it('should maintain deck integrity throughout phases (no duplicate cards)', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // Collect all dealt cards
+      const dealtCards: string[] = [];
+
+      // Add hole cards
+      result.current.state.players.forEach(player => {
+        player.holeCards.forEach(card => {
+          const cardStr = `${card.rank}${card.suit}`;
+          expect(dealtCards).not.toContain(cardStr); // No duplicates
+          dealtCards.push(cardStr);
+        });
+      });
+
+      // Advance through all phases and collect community cards
+      act(() => {
+        result.current.advancePhase(); // flop
+      });
+
+      result.current.state.communityCards.forEach(card => {
+        const cardStr = `${card.rank}${card.suit}`;
+        expect(dealtCards).not.toContain(cardStr);
+        dealtCards.push(cardStr);
+      });
+
+      act(() => {
+        result.current.advancePhase(); // turn
+      });
+
+      result.current.state.communityCards.forEach(card => {
+        const cardStr = `${card.rank}${card.suit}`;
+        if (!dealtCards.includes(cardStr)) {
+          dealtCards.push(cardStr);
+        }
+      });
+
+      act(() => {
+        result.current.advancePhase(); // river
+      });
+
+      result.current.state.communityCards.forEach(card => {
+        const cardStr = `${card.rank}${card.suit}`;
+        if (!dealtCards.includes(cardStr)) {
+          dealtCards.push(cardStr);
+        }
+      });
+
+      // Total should be 8 hole cards (4 players × 2) + 5 community cards = 13 unique cards
+      expect(dealtCards.length).toBe(13);
+
+      // Verify no duplicates
+      const uniqueCards = new Set(dealtCards);
+      expect(uniqueCards.size).toBe(dealtCards.length);
+    });
+
+    it('should reset player states correctly between betting rounds', () => {
+      const { result } = renderHook(() => useGameState());
+
+      act(() => {
+        result.current.startNewHand();
+      });
+
+      // Pre-flop: players act
+      const player1 = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(player1.id, 'call');
+      });
+      expect(result.current.state.players.find(p => p.id === player1.id)?.hasActed).toBe(true);
+
+      const player2 = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(player2.id, 'call');
+      });
+
+      const player3 = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(player3.id, 'call');
+      });
+
+      const player4 = result.current.getCurrentPlayer();
+      act(() => {
+        result.current.handlePlayerAction(player4.id, 'check');
+      });
+
+      // Advance to flop
+      act(() => {
+        result.current.advancePhase();
+      });
+
+      // Verify all players' hasActed flag is reset
+      result.current.state.players.forEach(player => {
+        expect(player.hasActed).toBe(false);
+      });
+
+      // Verify currentBet for each player is reset to 0
+      result.current.state.players.forEach(player => {
+        expect(player.currentBet).toBe(0);
+      });
+
+      // Verify global currentBet is reset to 0
+      expect(result.current.state.currentBet).toBe(0);
+    });
+  });
 });
