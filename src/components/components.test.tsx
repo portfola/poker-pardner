@@ -8,6 +8,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Card } from './Card';
 import { PotDisplay } from './PotDisplay';
 import { ActionButtons } from './ActionButtons';
+import { PlayerPosition } from './PlayerPosition';
 import { GameState, Player, Card as CardType } from '../types/game';
 
 // Helper to create a card
@@ -382,5 +383,74 @@ describe('ActionButtons component', () => {
     );
 
     expect(screen.getByText('All-In')).toBeInTheDocument();
+  });
+});
+
+describe('PlayerPosition component', () => {
+  it('should render player name correctly', () => {
+    const player = createPlayer({ name: 'Doc' });
+    render(<PlayerPosition player={player} isDealer={false} isCurrentTurn={false} />);
+    expect(screen.getByText('Doc')).toBeInTheDocument();
+  });
+
+  it('should render long player names (10+ characters) without overflow', () => {
+    const player = createPlayer({ name: 'Christopher' }); // 11 characters
+    const { container } = render(<PlayerPosition player={player} isDealer={false} isCurrentTurn={false} />);
+    expect(screen.getByText('Christopher')).toBeInTheDocument();
+
+    // Name should be in a div with text-center class to ensure centering
+    const nameElement = screen.getByText('Christopher');
+    expect(nameElement).toHaveClass('text-center');
+  });
+
+  it('should render very long player names (15+ characters) without overflow', () => {
+    const player = createPlayer({ name: 'WildBillHickok' }); // 15 characters
+    const { container } = render(<PlayerPosition player={player} isDealer={false} isCurrentTurn={false} />);
+    expect(screen.getByText('WildBillHickok')).toBeInTheDocument();
+  });
+
+  it('should render long player names in compact mode', () => {
+    const player = createPlayer({ name: 'SheriffJones' }); // 12 characters
+    render(<PlayerPosition player={player} isDealer={false} isCurrentTurn={false} compact={true} />);
+    expect(screen.getByText('SheriffJones')).toBeInTheDocument();
+  });
+
+  it('should render player with dealer button', () => {
+    const player = createPlayer({ name: 'You' });
+    render(<PlayerPosition player={player} isDealer={true} isCurrentTurn={false} />);
+    expect(screen.getByText('D')).toBeInTheDocument();
+  });
+
+  it('should highlight player on their turn', () => {
+    const player = createPlayer({ name: 'You' });
+    const { container } = render(<PlayerPosition player={player} isDealer={false} isCurrentTurn={true} />);
+    // Should have gold border when it's their turn
+    expect(container.querySelector('.border-gold-500')).toBeInTheDocument();
+  });
+
+  it('should show folded state', () => {
+    const player = createPlayer({ name: 'You', isFolded: true });
+    render(<PlayerPosition player={player} isDealer={false} isCurrentTurn={false} />);
+    expect(screen.getByText('FOLDED')).toBeInTheDocument();
+  });
+
+  it('should show all-in state', () => {
+    const player = createPlayer({ name: 'You', isAllIn: true });
+    render(<PlayerPosition player={player} isDealer={false} isCurrentTurn={false} />);
+    expect(screen.getByText('ALL IN')).toBeInTheDocument();
+  });
+
+  it('should show current bet', () => {
+    const player = createPlayer({ name: 'You', currentBet: 50 });
+    render(<PlayerPosition player={player} isDealer={false} isCurrentTurn={false} />);
+    expect(screen.getByText('Bet: $50')).toBeInTheDocument();
+  });
+
+  it('should display chips with appropriate color', () => {
+    const player = createPlayer({ name: 'You', chips: 80 });
+    const { container } = render(<PlayerPosition player={player} isDealer={false} isCurrentTurn={false} />);
+    expect(screen.getByText('$80')).toBeInTheDocument();
+    // Green for > 75 chips
+    expect(container.querySelector('.text-green-400')).toBeInTheDocument();
   });
 });

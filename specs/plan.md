@@ -60,7 +60,7 @@
 - [x] Test rapid clicking during animations (2026-01-26)
 - [x] Test action buttons during phase transitions (2026-01-26)
 - [x] Test display of very large pot amounts (e.g., $10,000+) (2026-01-26)
-- [ ] Test display with long player names (10+ characters)
+- [x] Test display with long player names (10+ characters) (2026-01-26)
 
 ### Performance Testing (Phase 2 Priority)
 - [ ] Test with 100+ consecutive hands

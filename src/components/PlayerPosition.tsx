@@ -69,7 +69,7 @@ export function PlayerPosition({
         )}
 
         {/* Player Name */}
-        <div className={`text-sand-100 font-body font-semibold text-center ${compact ? 'text-xs sm:text-sm mb-1' : 'text-sm sm:text-base mb-2'}`}>
+        <div className={`text-sand-100 font-body font-semibold text-center break-words ${compact ? 'text-xs sm:text-sm mb-1' : 'text-sm sm:text-base mb-2'}`}>
           {player.name}
         </div>
 
