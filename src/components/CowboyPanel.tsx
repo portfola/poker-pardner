@@ -8,7 +8,8 @@ import { useState, useEffect } from 'react';
 import { GameState, NarratorEvent } from '../types/game';
 import { HandRankings } from './HandRankings';
 import { ActionHistory } from './ActionHistory';
-import { describeHand } from '../utils/handStrength';
+import { describeHand, evaluateHandStrength, describeHoleCards } from '../utils/handStrength';
+import { getBestFiveCardHand, getBestHandFromSix, evaluateHand } from '../utils/handEvaluator';
 
 interface CowboyPanelProps {
   gameState: GameState;
@@ -153,15 +154,72 @@ export function CowboyPanel({
     }
   };
 
+  // Calculate current hand strength for the user
+  const getCurrentHandStrength = (): { strength: 'weak' | 'medium' | 'strong'; description: string } | null => {
+    if (!userPlayer || userPlayer.holeCards.length === 0) return null;
+
+    let strength: 'weak' | 'medium' | 'strong';
+    let handDescription: string;
+
+    if (userPlayer.holeCards.length === 2 && gameState.communityCards.length === 5) {
+      // Full board (river) - evaluate best 5-card hand from all 7 cards
+      const evaluation = getBestFiveCardHand(userPlayer.holeCards, gameState.communityCards);
+      strength = evaluateHandStrength(evaluation);
+      handDescription = describeHand(evaluation);
+    } else if (userPlayer.holeCards.length === 2 && gameState.communityCards.length === 3) {
+      // Flop (exactly 5 cards) - evaluate as-is
+      const allCards = [...userPlayer.holeCards, ...gameState.communityCards];
+      const evaluation = evaluateHand(allCards);
+      strength = evaluateHandStrength(evaluation);
+      handDescription = describeHand(evaluation);
+    } else if (userPlayer.holeCards.length === 2 && gameState.communityCards.length === 4) {
+      // Turn (6 cards) - find best 5-card combination
+      const allCards = [...userPlayer.holeCards, ...gameState.communityCards];
+      const evaluation = getBestHandFromSix(allCards);
+      strength = evaluateHandStrength(evaluation);
+      handDescription = describeHand(evaluation);
+    } else {
+      // Pre-flop or unusual state - just evaluate starting hand strength
+      handDescription = describeHoleCards(userPlayer.holeCards);
+
+      // Simple pre-flop strength evaluation
+      const card1 = userPlayer.holeCards[0];
+      const card2 = userPlayer.holeCards[1];
+
+      if (card1.rank === card2.rank) {
+        // Pocket pair
+        const highRanks = ['A', 'K', 'Q', 'J', '10'];
+        strength = highRanks.includes(card1.rank) ? 'strong' : 'medium';
+      } else {
+        // Unpaired cards
+        const highRanks = ['A', 'K', 'Q'];
+        const hasHighCard = highRanks.includes(card1.rank) || highRanks.includes(card2.rank);
+        const suited = card1.suit === card2.suit;
+
+        if (hasHighCard && suited) {
+          strength = 'medium';
+        } else if (hasHighCard) {
+          strength = 'weak';
+        } else {
+          strength = 'weak';
+        }
+      }
+    }
+
+    return { strength, description: handDescription };
+  };
+
+  const currentHandInfo = getCurrentHandStrength();
+
   // Get strength badge color
-  const getStrengthBadge = (strength: string | undefined) => {
+  const getStrengthBadge = (strength: 'weak' | 'medium' | 'strong' | undefined) => {
     if (!strength) return { bg: 'bg-stone-100', border: 'border-stone-300', text: 'text-stone-600' };
-    if (strength.includes('strong')) return { bg: 'bg-emerald-50', border: 'border-emerald-400', text: 'text-emerald-700' };
-    if (strength.includes('medium')) return { bg: 'bg-amber-50', border: 'border-amber-400', text: 'text-amber-700' };
+    if (strength === 'strong') return { bg: 'bg-emerald-50', border: 'border-emerald-400', text: 'text-emerald-700' };
+    if (strength === 'medium') return { bg: 'bg-amber-50', border: 'border-amber-400', text: 'text-amber-700' };
     return { bg: 'bg-rose-50', border: 'border-rose-400', text: 'text-rose-700' };
   };
 
-  const strengthBadge = getStrengthBadge(narratorEvent?.handStrength);
+  const strengthBadge = getStrengthBadge(currentHandInfo?.strength);
 
   return (
     <>
@@ -411,8 +469,8 @@ export function CowboyPanel({
                 {/* Right: Hand Strength Badge + Help (hidden in training mode) */}
                 {gameState.mode === 'tutorial' && (
                   <div className="flex lg:flex-col flex-row items-center gap-2 lg:gap-3 justify-center lg:justify-start">
-                    {/* Hand Strength Badge */}
-                    {narratorEvent?.handStrength && (
+                    {/* Hand Strength Badge - always visible when user has cards */}
+                    {currentHandInfo && (
                       <div
                         className={`poker-chip rounded-lg lg:rounded-xl w-20 h-20 lg:w-24 lg:h-24 flex flex-col items-center justify-center ${strengthBadge.bg} border-4 ${strengthBadge.border}`}
                       >
@@ -423,12 +481,10 @@ export function CowboyPanel({
                           Hand
                         </div>
                         <div
-                          className={`text-[9px] lg:text-xs font-black ${strengthBadge.text} text-center leading-tight px-1 mt-0.5 lg:mt-1`}
+                          className={`text-[9px] lg:text-xs font-black ${strengthBadge.text} text-center leading-tight px-1 mt-0.5 lg:mt-1 uppercase`}
                           style={{ fontFamily: "'Playfair Display', serif" }}
                         >
-                          {narratorEvent.handStrength.split(' ').map((word, i) => (
-                            <div key={i}>{word}</div>
-                          ))}
+                          {currentHandInfo.strength}
                         </div>
                       </div>
                     )}
