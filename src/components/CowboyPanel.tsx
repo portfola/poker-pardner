@@ -285,22 +285,18 @@ export function CowboyPanel({
                         )}
                       </div>
                     ) : narratorEvent ? (
-                      <div className="space-y-3">
+                      <div>
                         <p
                           className="text-stone-800 leading-relaxed text-sm sm:text-base"
                           style={{ fontFamily: "'Crimson Text', serif" }}
                         >
                           {narratorEvent.message}
+                          {narratorEvent.reasoning && (
+                            <span className="text-stone-600 italic">
+                              {' '}{narratorEvent.reasoning}
+                            </span>
+                          )}
                         </p>
-
-                        {narratorEvent.reasoning && (
-                          <div className="pt-3 border-t border-amber-800/20">
-                            <p className="text-stone-600 text-xs sm:text-sm italic flex items-start gap-2">
-                              <span className="text-amber-700 flex-shrink-0 text-base">💭</span>
-                              <span>{narratorEvent.reasoning}</span>
-                            </p>
-                          </div>
-                        )}
 
                         {narratorEvent.advice && gameState.mode === 'tutorial' && (
                           <div className="pt-3 border-t border-amber-800/20">

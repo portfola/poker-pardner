@@ -14,7 +14,7 @@
 - [ ] Test animation performance on low-end devices.
 
 ## Action Panel UI
-- [ ] Update and combine the two text areas showing the cowboy's words. For example, "So, Annie throws their cards away - they're out of this hand." should be combined with "With a decent hand, it ain't worth chasin'. Better to wait for a better spot." These should appear in the same section as part of a single paragraph, so that we can conserve vertical space.
+- [x] Update and combine the two text areas showing the cowboy's words. For example, "So, Annie throws their cards away - they're out of this hand." should be combined with "With a decent hand, it ain't worth chasin'. Better to wait for a better spot." These should appear in the same section as part of a single paragraph, so that we can conserve vertical space. (2026-01-27)
 - [ ] Give the container for the cowboy text the appearance of a cartoon speech bubble, making it clear that they cowboy is saying these words. Use CSS animation to inflate the speech bubble on entry and deflate it on exit.
 - [ ] Move the slider for raise amount to the right of the action buttons. Keep it small and simple, not fine-grained to precise amounts. Use a widge range with a maximum of 5 options for raise amounts.
 - [ ] Keep the Hand Strength module visible even when it is not the user's turn.
