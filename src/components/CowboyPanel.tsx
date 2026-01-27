@@ -31,6 +31,7 @@ export function CowboyPanel({
 }: CowboyPanelProps) {
   const [showHandRankings, setShowHandRankings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [bubbleKey, setBubbleKey] = useState(0);
 
   const { players, currentPlayerIndex, currentBet, minRaise, bigBlind, isHandComplete, actionHistory, isWaitingForNextAction } = gameState;
   const currentPlayer = players[currentPlayerIndex];
@@ -65,6 +66,11 @@ export function CowboyPanel({
       setShowRaiseSlider(false);
     }
   }, [isUserTurn, minRaiseAmount]);
+
+  // Trigger bubble animation when narrator event changes
+  useEffect(() => {
+    setBubbleKey(prev => prev + 1);
+  }, [narratorEvent?.message, isHandComplete, winners.length]);
 
   let raiseButtonText = 'Raise';
   if (!canRaise) {
@@ -196,6 +202,65 @@ export function CowboyPanel({
         .status-pulse {
           animation: shimmer 2s ease-in-out infinite;
         }
+
+        @keyframes bubble-inflate {
+          0% {
+            opacity: 0;
+            transform: scale(0.8) translateY(10px);
+          }
+          60% {
+            transform: scale(1.05) translateY(0);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+
+        @keyframes bubble-deflate {
+          0% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(0.9) translateY(5px);
+          }
+        }
+
+        .speech-bubble {
+          position: relative;
+          animation: bubble-inflate 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .speech-bubble.exiting {
+          animation: bubble-deflate 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+        }
+
+        .speech-bubble::before {
+          content: '';
+          position: absolute;
+          left: -12px;
+          top: 30px;
+          width: 0;
+          height: 0;
+          border-style: solid;
+          border-width: 15px 15px 15px 0;
+          border-color: transparent #d4af37 transparent transparent;
+          filter: drop-shadow(-2px 0px 1px rgba(0, 0, 0, 0.1));
+        }
+
+        .speech-bubble::after {
+          content: '';
+          position: absolute;
+          left: -8px;
+          top: 32px;
+          width: 0;
+          height: 0;
+          border-style: solid;
+          border-width: 13px 13px 13px 0;
+          border-color: transparent #fef9e7 transparent transparent;
+        }
       `}</style>
 
       <div className="fixed bottom-0 left-0 right-0 z-20">
@@ -245,7 +310,7 @@ export function CowboyPanel({
                 {/* Center: Combined Narration & Advice */}
                 <div>
                   {/* Main message with reasoning combined */}
-                  <div className="relative bg-gradient-to-br from-amber-50/90 via-yellow-50/90 to-amber-100/90 rounded-xl border-2 border-amber-800/30 p-4 sm:p-5 shadow-lg">
+                  <div key={bubbleKey} className="speech-bubble relative bg-gradient-to-br from-amber-50/90 via-yellow-50/90 to-amber-100/90 rounded-xl border-2 border-amber-800/30 p-4 sm:p-5 shadow-lg">
                     <div
                       className="absolute top-0 left-0 right-0 h-1.5 rounded-t-xl"
                       style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
