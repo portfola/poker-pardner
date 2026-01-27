@@ -8,6 +8,9 @@ interface PotDisplayProps {
 }
 
 export function PotDisplay({ amount, isAwarding = false }: PotDisplayProps) {
+  // Format large numbers with commas for readability
+  const formattedAmount = amount.toLocaleString('en-US');
+
   return (
     <div className={`flex flex-col items-center justify-center transition-all duration-500 ${isAwarding ? 'scale-110' : ''}`}>
       <div className="relative">
@@ -33,7 +36,7 @@ export function PotDisplay({ amount, isAwarding = false }: PotDisplayProps) {
               className="text-3xl font-display font-bold text-gold-400 tracking-wide"
               style={{ textShadow: '0 2px 6px rgba(0, 0, 0, 0.8), 0 0 10px rgba(218, 165, 32, 0.3)' }}
             >
-              ${amount}
+              ${formattedAmount}
             </div>
           </div>
 

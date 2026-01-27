@@ -127,6 +127,26 @@ describe('PotDisplay component', () => {
     const { container } = render(<PotDisplay amount={100} />);
     expect(container.querySelector('.scale-110')).not.toBeInTheDocument();
   });
+
+  it('should display large pot amounts with comma formatting', () => {
+    render(<PotDisplay amount={10000} />);
+    expect(screen.getByText('$10,000')).toBeInTheDocument();
+  });
+
+  it('should display very large pot amounts with comma formatting', () => {
+    render(<PotDisplay amount={999999} />);
+    expect(screen.getByText('$999,999')).toBeInTheDocument();
+  });
+
+  it('should display comma-separated thousands for readability', () => {
+    render(<PotDisplay amount={50000} />);
+    expect(screen.getByText('$50,000')).toBeInTheDocument();
+  });
+
+  it('should display amounts under 1000 without commas', () => {
+    render(<PotDisplay amount={500} />);
+    expect(screen.getByText('$500')).toBeInTheDocument();
+  });
 });
 
 describe('ActionButtons component', () => {
