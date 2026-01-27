@@ -55,9 +55,34 @@ export function CowboyPanel({
   const isCheck = amountToCall === 0;
   const callButtonText = isCheck ? 'Check' : `Call $${amountToCall}`;
 
-  // State for custom raise amount
+  // State for custom raise amount - now using discrete options
   const [raiseAmount, setRaiseAmount] = useState(minRaiseAmount);
   const [showRaiseSlider, setShowRaiseSlider] = useState(false);
+
+  // Calculate 5 raise options between min and max
+  const getRaiseOptions = (): number[] => {
+    if (maxRaiseAmount <= minRaiseAmount) return [minRaiseAmount];
+
+    const range = maxRaiseAmount - minRaiseAmount;
+    if (range <= bigBlind * 4) {
+      // Small range: just show what's available
+      const options: number[] = [];
+      for (let amt = minRaiseAmount; amt <= maxRaiseAmount && options.length < 5; amt += bigBlind) {
+        options.push(amt);
+      }
+      return options;
+    }
+
+    // Larger range: distribute 5 options evenly
+    const step = range / 4;
+    return [
+      minRaiseAmount,
+      Math.round((minRaiseAmount + step) / bigBlind) * bigBlind,
+      Math.round((minRaiseAmount + step * 2) / bigBlind) * bigBlind,
+      Math.round((minRaiseAmount + step * 3) / bigBlind) * bigBlind,
+      maxRaiseAmount,
+    ].filter((val, idx, arr) => arr.indexOf(val) === idx); // Remove duplicates
+  };
 
   // Reset raise amount when it's the user's turn or when betting changes
   useEffect(() => {
@@ -66,6 +91,9 @@ export function CowboyPanel({
       setShowRaiseSlider(false);
     }
   }, [isUserTurn, minRaiseAmount]);
+
+  // End of hand info - declare before useEffect that depends on it
+  const { winners, winningHands, pot } = gameState;
 
   // Trigger bubble animation when narrator event changes
   useEffect(() => {
@@ -102,9 +130,6 @@ export function CowboyPanel({
       setShowRaiseSlider(true);
     }
   };
-
-  // End of hand info
-  const { winners, winningHands, pot } = gameState;
   const userWon = winners.some(w => w.isUser);
   const isSplitPot = winners.length > 1;
   const handDescription = winningHands.length > 0 ? describeHand(winningHands[0]) : '';
@@ -422,34 +447,6 @@ export function CowboyPanel({
                 )}
               </div>
 
-              {/* Raise amount slider */}
-              {showRaiseSlider && isUserTurn && hasEnoughForMinRaise && !isHandComplete && (
-                <div className="mt-4 mx-auto max-w-md">
-                  <div className="card-texture rounded-xl p-4 border-2 border-amber-700/50">
-                    <label htmlFor="raise-slider" className="block text-stone-800 text-sm font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      Select raise amount: ${raiseAmount}
-                    </label>
-                    <input
-                      id="raise-slider"
-                      type="range"
-                      min={minRaiseAmount}
-                      max={maxRaiseAmount}
-                      step={bigBlind}
-                      value={raiseAmount}
-                      onChange={(e) => setRaiseAmount(Number(e.target.value))}
-                      className="w-full h-3 rounded-lg appearance-none cursor-pointer"
-                      style={{
-                        background: `linear-gradient(to right, #d4af37 0%, #d4af37 ${((raiseAmount - minRaiseAmount) / (maxRaiseAmount - minRaiseAmount)) * 100}%, #8b7355 ${((raiseAmount - minRaiseAmount) / (maxRaiseAmount - minRaiseAmount)) * 100}%, #8b7355 100%)`
-                      }}
-                    />
-                    <div className="flex justify-between text-xs text-stone-600 mt-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      <span>Min: ${minRaiseAmount}</span>
-                      <span>Max: ${maxRaiseAmount}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* Action Buttons Row - Improved spacing and size */}
               <div className="mt-5 flex gap-3 sm:gap-4 justify-center items-center flex-wrap">
                 {/* History Button - always visible */}
@@ -533,6 +530,29 @@ export function CowboyPanel({
                     >
                       {raiseButtonText.toUpperCase()}
                     </button>
+
+                    {/* Raise amount selector - to the right of action buttons */}
+                    {showRaiseSlider && isUserTurn && hasEnoughForMinRaise && !isHandComplete && (
+                      <div className="flex flex-col gap-1.5 ml-2">
+                        {getRaiseOptions().map((option) => (
+                          <button
+                            key={option}
+                            onClick={() => setRaiseAmount(option)}
+                            className={`
+                              poker-chip px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-2
+                              ${option === raiseAmount
+                                ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-amber-950 border-amber-700 scale-105'
+                                : 'bg-gradient-to-br from-stone-200 to-stone-300 text-stone-700 border-stone-400 hover:from-stone-300 hover:to-stone-400 hover:scale-105'
+                              }
+                            `}
+                            style={{ fontFamily: "'Playfair Display', serif" }}
+                            aria-label={`Raise to $${option}`}
+                          >
+                            ${option}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </>
                 )}
               </div>
