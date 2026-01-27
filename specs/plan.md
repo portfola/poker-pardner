@@ -10,7 +10,7 @@
 ## Performance Testing
 - [x] Test with 100+ consecutive hands (2026-01-26)
 - [x] Test hand integrity to ensure that game proceeds properly through each stage in order. (2026-01-26)
-- [ ] Test memory usage over extended gameplay.
+- [x] Test memory usage over extended gameplay. (2026-01-26)
 - [ ] Test animation performance on low-end devices.
 
 ## Action Panel UI
