@@ -37,7 +37,7 @@
   - Recommendation: Source from free sound libraries (Freesound.org, Zapsplat, etc.) or commission custom audio
   - Code is ready in audio.ts (lines 25-47) with proper volume levels and loop configuration
 - [x] Sound integration - Wire up sounds to game events (2026-01-27)
-- [ ] Sound toggle - Add on/off setting
+- [x] Sound toggle - Add on/off setting (2026-01-27)
 
 ## Hand History Review
 - [ ] Hand history utility - Create `src/utils/handHistory.ts` to track and store hands

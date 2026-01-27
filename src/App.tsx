@@ -5,6 +5,7 @@ import { useSoundEffects } from './hooks/useSoundEffects'
 import { PokerTable } from './components/PokerTable'
 import { CowboyPanel } from './components/CowboyPanel'
 import { MusicPlayer } from './components/MusicPlayer'
+import { SoundToggle } from './components/SoundToggle'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { ModeSelection } from './components/ModeSelection'
 import { GameOverScreen } from './components/GameOverScreen'
@@ -542,6 +543,7 @@ function App() {
     return (
       <>
         <MusicPlayer gameStarted={false} />
+        <SoundToggle gameStarted={false} />
         <ModeSelection onSelectMode={handleModeSelect} />
       </>
     )
@@ -552,6 +554,7 @@ function App() {
     return (
       <>
         <MusicPlayer gameStarted={false} />
+        <SoundToggle gameStarted={false} />
         <div
           className="min-h-screen flex items-center justify-center relative overflow-hidden"
           style={{
@@ -606,6 +609,7 @@ function App() {
   return (
     <>
       <MusicPlayer gameStarted={true} />
+      <SoundToggle gameStarted={true} />
       <PokerTable gameState={state} />
       <CowboyPanel
         gameState={state}
