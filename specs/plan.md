@@ -11,7 +11,7 @@
 - [x] Test with 100+ consecutive hands (2026-01-26)
 - [x] Test hand integrity to ensure that game proceeds properly through each stage in order. (2026-01-26)
 - [x] Test memory usage over extended gameplay. (2026-01-26)
-- [ ] Test animation performance on low-end devices.
+- [x] Test animation performance on low-end devices. (2026-01-27)
 
 ## Action Panel UI
 - [x] Update and combine the two text areas showing the cowboy's words. For example, "So, Annie throws their cards away - they're out of this hand." should be combined with "With a decent hand, it ain't worth chasin'. Better to wait for a better spot." These should appear in the same section as part of a single paragraph, so that we can conserve vertical space. (2026-01-27)
