@@ -354,7 +354,7 @@ export function CowboyPanel({
               {/* Main Content Grid - Improved spacing and layout */}
               <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_120px] gap-4 sm:gap-5 items-start">
 
-                {/* Left: Cowboy Portrait + Phase Indicator */}
+                {/* Left: Cowboy Portrait */}
                 <div className="flex flex-col items-center lg:items-start gap-3">
                   <div className="relative">
                     <div
@@ -372,21 +372,6 @@ export function CowboyPanel({
                     <div className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2 border-amber-600"></div>
                     <div className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2 border-amber-600"></div>
                     <div className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2 border-amber-600"></div>
-                  </div>
-
-                  {/* Game Phase Indicator */}
-                  <div
-                    className="px-3 py-2 rounded-lg border-2 border-amber-700/60 shadow-sm w-full text-center"
-                    style={{
-                      background: 'linear-gradient(135deg, #F5E6D3 0%, #E8D5B7 100%)',
-                    }}
-                  >
-                    <span
-                      className="text-stone-800 text-xs sm:text-sm font-bold tracking-wider uppercase block"
-                      style={{ fontFamily: "'Playfair Display', serif" }}
-                    >
-                      {gameState.currentPhase.replace('-', ' ')}
-                    </span>
                   </div>
                 </div>
 
@@ -466,9 +451,24 @@ export function CowboyPanel({
                   </div>
                 </div>
 
-                {/* Right: Hand Strength Badge + Help (hidden in training mode) */}
+                {/* Right: Game Status, Hand Strength Badge + Help (hidden in training mode) */}
                 {gameState.mode === 'tutorial' && (
                   <div className="flex lg:flex-col flex-row items-center gap-2 lg:gap-3 justify-center lg:justify-start">
+                    {/* Game Phase Indicator - at top */}
+                    <div
+                      className="px-3 py-2 rounded-lg border-2 border-amber-700/60 shadow-sm w-full text-center"
+                      style={{
+                        background: 'linear-gradient(135deg, #F5E6D3 0%, #E8D5B7 100%)',
+                      }}
+                    >
+                      <span
+                        className="text-stone-800 text-xs sm:text-sm font-bold tracking-wider uppercase block"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
+                        {gameState.currentPhase.replace('-', ' ')}
+                      </span>
+                    </div>
+
                     {/* Hand Strength Badge - always visible when user has cards */}
                     {currentHandInfo && (
                       <div
@@ -489,7 +489,7 @@ export function CowboyPanel({
                       </div>
                     )}
 
-                    {/* Help button */}
+                    {/* Help button - Hand Rankings icon at bottom */}
                     <button
                       onClick={() => setShowHandRankings(true)}
                       className="poker-chip w-10 h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-gradient-to-br from-stone-700 to-stone-900 hover:from-stone-600 hover:to-stone-800 text-amber-300 font-black text-base lg:text-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
