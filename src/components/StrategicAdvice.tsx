@@ -123,13 +123,13 @@ export function StrategicAdvice({ gameState }: StrategicAdviceProps) {
       {/* Current Hand Strength */}
       <div>
         <h4 className="text-gray-400 text-xs font-medium uppercase tracking-wide mb-2">
-          Current Hand
+          Your Hand
         </h4>
         <div className="bg-gray-700/50 rounded p-3">
-          <div className="text-white font-semibold mb-1">
+          <div className="text-white font-sans text-base text-left mb-1">
             {handDescription}
           </div>
-          <div className={`text-sm font-bold ${strengthColors[strength]}`}>
+          <div className={`text-base font-sans text-left font-bold ${strengthColors[strength]}`}>
             {strengthLabels[strength]} Strength
           </div>
         </div>

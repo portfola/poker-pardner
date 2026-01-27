@@ -19,7 +19,7 @@
 - [x] Move the slider for raise amount to the right of the action buttons. Keep it small and simple, not fine-grained to precise amounts. Use a wide range with a maximum of 5 options for raise amounts. (2026-01-27)
 - [x] Keep the Hand Strength module visible even when it is not the user's turn. (2026-01-27)
 - [x] Move the game status box (pre-flop, flop, etc) to the top of the right-side column of the action panel. Below it comes the Hand Strength box, then the Hand Rankings icon. (2026-01-27)
-- [ ] In the Hand Strength box, adjust the type so that it fits better. Left-justify the text and use a sans-serif font with a slightly larger size. Title the box "Your Hand".
+- [x] In the Hand Strength box, adjust the type so that it fits better. Left-justify the text and use a sans-serif font with a slightly larger size. Title the box "Your Hand". (2026-01-27)
 
 ## Cowboy Voice Narration
 - [ ] Add ElevenLabs integration to use text-to-speech 
