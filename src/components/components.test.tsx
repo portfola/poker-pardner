@@ -395,7 +395,7 @@ describe('PlayerPosition component', () => {
 
   it('should render long player names (10+ characters) without overflow', () => {
     const player = createPlayer({ name: 'Christopher' }); // 11 characters
-    const { container } = render(<PlayerPosition player={player} isDealer={false} isCurrentTurn={false} />);
+    const { container: _container } = render(<PlayerPosition player={player} isDealer={false} isCurrentTurn={false} />);
     expect(screen.getByText('Christopher')).toBeInTheDocument();
 
     // Name should be in a div with text-center class to ensure centering
@@ -405,7 +405,7 @@ describe('PlayerPosition component', () => {
 
   it('should render very long player names (15+ characters) without overflow', () => {
     const player = createPlayer({ name: 'WildBillHickok' }); // 15 characters
-    const { container } = render(<PlayerPosition player={player} isDealer={false} isCurrentTurn={false} />);
+    const { container: _container } = render(<PlayerPosition player={player} isDealer={false} isCurrentTurn={false} />);
     expect(screen.getByText('WildBillHickok')).toBeInTheDocument();
   });
 

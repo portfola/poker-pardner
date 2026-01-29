@@ -4,14 +4,14 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react';
 import { ActionButtons } from './ActionButtons';
 import { useGameState } from '../hooks/useGameState';
 import { GameState, Player, Card as CardType } from '../types/game';
 
 // Helper to create a card
-const c = (rank: CardType['rank'], suit: CardType['suit']): CardType => ({ rank, suit });
+const _c = (rank: CardType['rank'], suit: CardType['suit']): CardType => ({ rank, suit });
 
 // Helper to create a minimal player
 function createPlayer(overrides: Partial<Player> = {}): Player {
@@ -626,7 +626,7 @@ describe('UI Edge Cases - Rapid Clicking During Animations', () => {
       });
 
       const currentPlayer = result.current.getCurrentPlayer();
-      const playerId = currentPlayer.id;
+      const _playerId = currentPlayer.id;
 
       // Manually set isAdvancingPhase to true (simulating a phase transition)
       act(() => {

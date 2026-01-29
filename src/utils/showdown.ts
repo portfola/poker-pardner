@@ -5,7 +5,7 @@
 
 import { Player } from '../types/game';
 import { HandEvaluation, determineWinners } from './handEvaluator';
-import { calculateSidePots, distributePot, Pot } from './sidePots';
+import { calculateSidePots, distributePot } from './sidePots';
 
 /**
  * Result of showdown processing with winner and pot information.

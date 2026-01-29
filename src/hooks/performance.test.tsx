@@ -3,7 +3,7 @@
  * Tests memory usage and performance over extended gameplay.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useGameState } from './useGameState';
 
@@ -203,7 +203,7 @@ describe('Performance Tests', () => {
           await act(async () => {
             try {
               result.current.handlePlayerAction(currentPlayer.id, 'fold');
-            } catch (e) {
+            } catch {
               // Ignore errors from invalid actions
             }
           });
@@ -227,7 +227,7 @@ describe('Performance Tests', () => {
       }
 
       // Verify all snapshots have consistent structure
-      stateSnapshots.forEach((snapshot, index) => {
+      stateSnapshots.forEach((snapshot, _index) => {
         expect(snapshot.playersCount).toBeGreaterThan(0);
         expect(snapshot.hasUser).toBe(true);
         expect(snapshot.allPlayersHaveIds).toBe(true);
@@ -275,7 +275,7 @@ describe('Performance Tests', () => {
           await act(async () => {
             try {
               result.current.handlePlayerAction(currentPlayer.id, 'fold');
-            } catch (e) {
+            } catch {
               // Ignore
             }
           });
@@ -370,7 +370,7 @@ describe('Performance Tests', () => {
           await act(async () => {
             try {
               result.current.handlePlayerAction(currentPlayer.id, 'fold');
-            } catch (e) {
+            } catch {
               // Ignore invalid actions
             }
           });
@@ -466,7 +466,7 @@ describe('Performance Tests', () => {
           await act(async () => {
             try {
               result.current.handlePlayerAction(player.id, 'fold');
-            } catch (e) {
+            } catch {
               // Ignore
             }
           });
