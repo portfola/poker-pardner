@@ -27,3 +27,8 @@ output "certificate_arn" {
   description = "ACM certificate ARN"
   value       = aws_acm_certificate.website.arn
 }
+
+output "github_actions_role_arn" {
+  description = "IAM role ARN for GitHub Actions (use for AWS_ROLE_ARN secret)"
+  value       = aws_iam_role.github_actions.arn
+}
