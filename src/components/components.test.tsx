@@ -56,6 +56,7 @@ function createGameState(overrides: Partial<GameState> = {}): GameState {
     pendingEvent: null,
     actionHistory: [],
     isWaitingForNextAction: false,
+    isGameOver: false,
     ...overrides,
   };
 }

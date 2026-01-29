@@ -237,12 +237,12 @@ describe('Animation Performance Tests', () => {
     it('should render full poker table (9 cards total) efficiently', () => {
       // 2 hole cards for each of 4 players + 5 community cards = 13 cards
       const holeCards: CardType[] = Array(8).fill(null).map((_, i) => ({
-        rank: 'A',
+        rank: 'A' as CardType['rank'],
         suit: ['hearts', 'spades', 'diamonds', 'clubs'][i % 4] as 'hearts' | 'spades' | 'diamonds' | 'clubs',
       }));
 
       const communityCards: CardType[] = Array(5).fill(null).map((_, i) => ({
-        rank: ['K', 'Q', 'J', '10', '9'][i],
+        rank: (['K', 'Q', 'J', '10', '9'] as const)[i],
         suit: ['hearts', 'spades', 'diamonds', 'clubs', 'hearts'][i] as 'hearts' | 'spades' | 'diamonds' | 'clubs',
       }));
 
@@ -480,7 +480,7 @@ describe('Animation Performance Tests', () => {
     it('should handle maximum concurrent animations', () => {
       // Simulate worst case: all 4 players showing cards + 5 community cards
       const allCards: CardType[] = Array(13).fill(null).map((_, i) => ({
-        rank: ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'][i],
+        rank: (['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'] as const)[i],
         suit: ['hearts', 'spades', 'diamonds', 'clubs'][i % 4] as 'hearts' | 'spades' | 'diamonds' | 'clubs',
       }));
 
@@ -512,8 +512,8 @@ describe('Animation Performance Tests', () => {
 
     it('should maintain performance with rapid consecutive renders', () => {
       const cards: CardType[] = Array(5).fill(null).map((_, i) => ({
-        rank: ['A', 'K', 'Q', 'J', '10'][i],
-        suit: 'hearts',
+        rank: (['A', 'K', 'Q', 'J', '10'] as const)[i],
+        suit: 'hearts' as const,
       }));
 
       const renderTimes: number[] = [];

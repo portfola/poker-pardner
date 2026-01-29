@@ -3,8 +3,8 @@
  * This module orchestrates pot calculation, winner determination, and chip distribution.
  */
 
-import { Player } from '../types/game';
-import { HandEvaluation, determineWinners } from './handEvaluator';
+import { Player, HandEvaluation } from '../types/game';
+import { determineWinners } from './handEvaluator';
 import { calculateSidePots, distributePot } from './sidePots';
 
 /**

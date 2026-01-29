@@ -3,7 +3,7 @@
  * Covers various scenarios with multiple all-ins and folded players.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { calculateSidePots, distributePot, Pot } from './sidePots';
 import { Player } from '../types/game';
 
