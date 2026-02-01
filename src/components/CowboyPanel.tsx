@@ -375,15 +375,15 @@ export function CowboyPanel({
       `}</style>
 
       <div className="fixed bottom-0 left-0 right-0 z-20">
-        <div className="mx-auto max-w-5xl px-2 sm:px-4 pb-2 sm:pb-3">
+        <div className="mx-auto max-w-5xl px-2 sm:px-4 pb-1 sm:pb-2">
           <div className="card-texture rounded-t-2xl sm:rounded-2xl ornate-border overflow-visible">
-            <div className="relative p-4 sm:p-5">
+            <div className="relative p-2 sm:p-3">
 
               {/* Main Content Grid - Improved spacing and layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_120px] gap-4 sm:gap-5 items-start">
+              <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_120px] gap-2 sm:gap-3 items-start">
 
                 {/* Left: Cowboy Portrait */}
-                <div className="flex flex-col items-center lg:items-start gap-3">
+                <div className="flex flex-col items-center lg:items-start gap-2">
                   <div className="relative">
                     <div
                       className="cowboy-portrait rounded-2xl w-20 h-20 sm:w-24 sm:h-24 overflow-hidden flex items-center justify-center"
@@ -428,16 +428,16 @@ export function CowboyPanel({
                 {/* Center: Combined Narration & Advice */}
                 <div>
                   {/* Main message with reasoning combined */}
-                  <div key={bubbleKey} className="speech-bubble relative bg-gradient-to-br from-amber-50/90 via-yellow-50/90 to-amber-100/90 rounded-xl border-2 border-amber-800/30 p-4 sm:p-5 shadow-lg">
+                  <div key={bubbleKey} className="speech-bubble relative bg-gradient-to-br from-amber-50/90 via-yellow-50/90 to-amber-100/90 rounded-xl border-2 border-amber-800/30 p-2 sm:p-3 shadow-lg">
                     <div
                       className="absolute top-0 left-0 right-0 h-1.5 rounded-t-xl"
                       style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
                     ></div>
 
                     {isHandComplete && winners.length > 0 ? (
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {/* Winner announcement */}
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-start gap-2">
                           <span className="text-2xl flex-shrink-0">{userWon ? '🎉' : '🤠'}</span>
                           <p
                             className={`leading-relaxed text-sm sm:text-base font-semibold ${userWon ? 'text-emerald-700' : 'text-stone-800'}`}
@@ -449,7 +449,7 @@ export function CowboyPanel({
 
                         {/* Winning hand description */}
                         {handDescription && (
-                          <div className="pt-3 border-t border-amber-800/20">
+                          <div className="pt-2 border-t border-amber-800/20">
                             <p className="text-stone-600 text-xs sm:text-sm flex items-start gap-2">
                               <span className="text-amber-700 flex-shrink-0 text-base">🃏</span>
                               <span>Winning hand: <strong>{handDescription}</strong></span>
@@ -459,7 +459,7 @@ export function CowboyPanel({
 
                         {/* User eliminated warning */}
                         {isUserEliminated && (
-                          <div className="pt-3 border-t border-amber-800/20">
+                          <div className="pt-2 border-t border-amber-800/20">
                             <p className="text-rose-700 text-xs sm:text-sm font-semibold flex items-start gap-2">
                               <span className="flex-shrink-0 text-base">💸</span>
                               <span>You're out of chips! Start a new game to try again.</span>
@@ -482,7 +482,7 @@ export function CowboyPanel({
                         </p>
 
                         {narratorEvent.advice && gameState.mode === 'tutorial' && (
-                          <div className="pt-3 border-t border-amber-800/20">
+                          <div className="pt-2 border-t border-amber-800/20">
                             <p className="text-stone-700 text-xs sm:text-sm font-semibold flex items-start gap-2">
                               <span className="text-emerald-700 flex-shrink-0 text-base">→</span>
                               <span>{narratorEvent.advice}</span>
@@ -503,7 +503,7 @@ export function CowboyPanel({
 
                 {/* Right: Game Status, Hand Strength Badge + Help (hidden in training mode) */}
                 {gameState.mode === 'tutorial' && (
-                  <div className="flex lg:flex-col flex-row items-center gap-2 lg:gap-3 justify-center lg:justify-start">
+                  <div className="flex lg:flex-col flex-row items-center gap-2 justify-center lg:justify-start">
                     {/* Game Phase Indicator - at top */}
                     <div
                       className="px-3 py-2 rounded-lg border-2 border-amber-700/60 shadow-sm w-full text-center"
@@ -554,7 +554,7 @@ export function CowboyPanel({
               </div>
 
               {/* Action Buttons Row - Improved spacing and size */}
-              <div className="mt-5 flex gap-3 sm:gap-4 justify-center items-center flex-wrap">
+              <div className="mt-2 sm:mt-3 flex gap-2 sm:gap-3 justify-center items-center flex-wrap">
                 {/* History Button - always visible */}
                 <button
                   onClick={() => setShowHistory(true)}
@@ -639,7 +639,7 @@ export function CowboyPanel({
 
                     {/* Raise amount selector - to the right of action buttons */}
                     {showRaiseSlider && isUserTurn && hasEnoughForMinRaise && !isHandComplete && (
-                      <div className="flex flex-col gap-1.5 ml-2">
+                      <div className="flex flex-row gap-1.5 ml-2">
                         {getRaiseOptions().map((option) => (
                           <button
                             key={option}
