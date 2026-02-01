@@ -162,6 +162,8 @@ export interface GameState {
   isWaitingForNextAction: boolean;
   /** User's chip count at the start of the current hand (for statistics tracking) */
   userStartingChips?: number;
+  /** All players' chip counts at the start of the current hand (for hand history tracking) */
+  playersStartingChips?: Map<string, number>;
   /** Whether the user folded during the current hand */
   userFoldedThisHand?: boolean;
   /** Whether the user went all-in during the current hand */

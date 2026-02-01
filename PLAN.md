@@ -26,4 +26,4 @@
 ## Hand History Review
 - [x] Hand history utility - Create `src/utils/handHistory.ts` to track and store hands (2026-01-27)
 - [x] Hand history types - Create `src/types/handHistory.ts` (2026-01-27)
-- [ ] Hand history screen - Create `src/components/HandHistoryScreen.tsx` showing last 10 hands
+- [x] Hand history screen - Create `src/components/HandHistoryScreen.tsx` showing last 10 hands (2026-01-31)

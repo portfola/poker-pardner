@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { GameState, NarratorEvent } from '../types/game';
 import { HandRankings } from './HandRankings';
 import { ActionHistory } from './ActionHistory';
+import { HandHistoryScreen } from './HandHistoryScreen';
 import { describeHand, evaluateHandStrength, describeHoleCards } from '../utils/handStrength';
 import { getBestFiveCardHand, getBestHandFromSix, evaluateHand } from '../utils/handEvaluator';
 import { textToSpeechService } from '../utils/textToSpeech';
@@ -33,6 +34,7 @@ export function CowboyPanel({
 }: CowboyPanelProps) {
   const [showHandRankings, setShowHandRankings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showHandHistory, setShowHandHistory] = useState(false);
   const [bubbleKey, setBubbleKey] = useState(0);
   const [voiceEnabled, setVoiceEnabled] = useState(() => textToSpeechService.isEnabled());
 
@@ -543,16 +545,29 @@ export function CowboyPanel({
 
               {/* Action Buttons Row - Improved spacing and size */}
               <div className="mt-2 sm:mt-3 flex gap-2 sm:gap-3 justify-center items-center flex-wrap">
-                {/* History Button - always visible */}
+                {/* Action History Button - always visible */}
                 <button
                   onClick={() => setShowHistory(true)}
                   aria-label="View action history"
-                  title="Action History"
+                  title="Action History (Current Hand)"
                   className="poker-chip w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-stone-600 to-stone-800 hover:from-stone-500 hover:to-stone-700 text-amber-200 font-bold flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+
+                {/* Hand History Button - always visible */}
+                <button
+                  onClick={() => setShowHandHistory(true)}
+                  aria-label="View hand history"
+                  title="Hand History (Last 10 Hands)"
+                  className="poker-chip w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-amber-600 to-amber-800 hover:from-amber-500 hover:to-amber-700 text-yellow-100 font-bold flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-700/50"
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </button>
 
@@ -692,6 +707,12 @@ export function CowboyPanel({
         history={actionHistory}
         isOpen={showHistory}
         onClose={() => setShowHistory(false)}
+      />
+
+      {/* Hand History Modal */}
+      <HandHistoryScreen
+        isOpen={showHandHistory}
+        onClose={() => setShowHandHistory(false)}
       />
     </>
   );

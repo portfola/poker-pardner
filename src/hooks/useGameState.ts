@@ -9,6 +9,7 @@ import { createShuffledDeck, dealCards } from '../utils/cards';
 import { getBestFiveCardHand } from '../utils/handEvaluator';
 import { updateHandStatistics } from '../utils/statistics';
 import { handleShowdown } from '../utils/showdown';
+import { recordHand } from '../utils/handHistory';
 
 // Action types for the reducer
 type GameAction =
@@ -262,6 +263,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       newState.userFoldedThisHand = false;
       newState.userWentAllInThisHand = false;
 
+      // Track all players' starting chips for hand history
+      newState.playersStartingChips = new Map();
+      newState.players.forEach(player => {
+        newState.playersStartingChips!.set(player.id, player.chips);
+      });
+
       // Post blinds
       const stateWithBlinds = postBlinds(newState);
 
@@ -505,6 +512,15 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           });
         }
 
+        // Record hand to history
+        if (newState.playersStartingChips) {
+          try {
+            recordHand(newState, newState.playersStartingChips, []);
+          } catch (error) {
+            console.error('Failed to record hand:', error);
+          }
+        }
+
         return newState;
       }
 
@@ -557,6 +573,15 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           mode: newState.mode,
           difficulty: newState.difficulty,
         });
+      }
+
+      // Record hand to history
+      if (newState.playersStartingChips) {
+        try {
+          recordHand(newState, newState.playersStartingChips, winningHands);
+        } catch (error) {
+          console.error('Failed to record hand:', error);
+        }
       }
 
       return newState;
