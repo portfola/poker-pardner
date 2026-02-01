@@ -435,61 +435,49 @@ export function CowboyPanel({
                     ></div>
 
                     {isHandComplete && winners.length > 0 ? (
-                      <div className="space-y-2">
-                        {/* Winner announcement */}
-                        <div className="flex items-start gap-2">
-                          <span className="text-2xl flex-shrink-0">{userWon ? '🎉' : '🤠'}</span>
-                          <p
-                            className={`leading-relaxed text-sm sm:text-base font-semibold ${userWon ? 'text-emerald-700' : 'text-stone-800'}`}
-                            style={{ fontFamily: "'Crimson Text', serif" }}
-                          >
-                            {getEndOfHandMessage()}
-                          </p>
-                        </div>
-
-                        {/* Winning hand description */}
+                      <p
+                        className={`leading-relaxed text-sm sm:text-base ${userWon ? 'text-emerald-700 font-semibold' : 'text-stone-800'}`}
+                        style={{ fontFamily: "'Crimson Text', serif" }}
+                      >
+                        <span className="text-2xl mr-2">{userWon ? '🎉' : '🤠'}</span>
+                        {getEndOfHandMessage()}
                         {handDescription && (
-                          <div className="pt-2 border-t border-amber-800/20">
-                            <p className="text-stone-600 text-xs sm:text-sm flex items-start gap-2">
-                              <span className="text-amber-700 flex-shrink-0 text-base">🃏</span>
-                              <span>Winning hand: <strong>{handDescription}</strong></span>
-                            </p>
-                          </div>
+                          <>
+                            {' '}
+                            <span className="text-amber-700">🃏</span>
+                            {' '}
+                            <span className="text-stone-600">Winning hand: <strong>{handDescription}</strong>.</span>
+                          </>
                         )}
-
-                        {/* User eliminated warning */}
                         {isUserEliminated && (
-                          <div className="pt-2 border-t border-amber-800/20">
-                            <p className="text-rose-700 text-xs sm:text-sm font-semibold flex items-start gap-2">
-                              <span className="flex-shrink-0 text-base">💸</span>
-                              <span>You're out of chips! Start a new game to try again.</span>
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    ) : narratorEvent ? (
-                      <div>
-                        <p
-                          className="text-stone-800 leading-relaxed text-sm sm:text-base"
-                          style={{ fontFamily: "'Crimson Text', serif" }}
-                        >
-                          {narratorEvent.message}
-                          {narratorEvent.reasoning && (
-                            <span className="text-stone-600 italic">
-                              {' '}{narratorEvent.reasoning}
+                          <>
+                            {' '}
+                            <span className="text-rose-700 font-semibold">
+                              💸 You're out of chips! Start a new game to try again.
                             </span>
-                          )}
-                        </p>
-
-                        {narratorEvent.advice && gameState.mode === 'tutorial' && (
-                          <div className="pt-2 border-t border-amber-800/20">
-                            <p className="text-stone-700 text-xs sm:text-sm font-semibold flex items-start gap-2">
-                              <span className="text-emerald-700 flex-shrink-0 text-base">→</span>
-                              <span>{narratorEvent.advice}</span>
-                            </p>
-                          </div>
+                          </>
                         )}
-                      </div>
+                      </p>
+                    ) : narratorEvent ? (
+                      <p
+                        className="text-stone-800 leading-relaxed text-sm sm:text-base"
+                        style={{ fontFamily: "'Crimson Text', serif" }}
+                      >
+                        {narratorEvent.message}
+                        {narratorEvent.reasoning && (
+                          <span className="text-stone-600 italic">
+                            {' '}{narratorEvent.reasoning}
+                          </span>
+                        )}
+                        {narratorEvent.advice && gameState.mode === 'tutorial' && (
+                          <>
+                            {' '}
+                            <span className="text-emerald-700 font-semibold">
+                              → {narratorEvent.advice}
+                            </span>
+                          </>
+                        )}
+                      </p>
                     ) : (
                       <p
                         className="text-stone-600 italic text-sm sm:text-base"

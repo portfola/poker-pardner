@@ -2,7 +2,7 @@
 
 ## Action Panel UI
 - [x] Reduce the vertical space used by the Action Panel. Squeeze out as much margin and padding as possible to eliminate white space. Make sure the Action Panel is short enough that it does NOT cover the user's cards. For the Raise options, spread them out horizontally instead of vertically. (2026-01-31)
-- [ ] Reduce the size of the cowboy's speech bubble by removing the horizontal line inside it. There should not be 2 separate sections of text within the bubble. There should be one single, contiguous paragraph with one coherent style.
+- [x] Reduce the size of the cowboy's speech bubble by removing the horizontal line inside it. There should not be 2 separate sections of text within the bubble. There should be one single, contiguous paragraph with one coherent style. (2026-01-31)
 
 ## Cowboy Voice Narration
 - [x] Add ElevenLabs integration to use text-to-speech (2026-01-27)
