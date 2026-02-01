@@ -27,7 +27,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-2 sm:p-4 pb-56 sm:pb-64 md:pb-72 relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center p-2 sm:p-4 pb-24 sm:pb-28 md:pb-32 relative overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #3E2723 0%, #4E342E 50%, #3E2723 100%)',
       }}
@@ -138,7 +138,7 @@ export function PokerTable({ gameState }: PokerTableProps) {
 
             {/* Bottom Player - User (Position 0) - Positioned lower with higher z-index to stay visible */}
             {bottomPlayer && (
-              <div className="absolute bottom-[-12px] sm:bottom-[-8px] md:bottom-0 left-1/2 -translate-x-1/2 z-20">
+              <div className="absolute bottom-2 sm:bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-10">
                 <PlayerPosition
                   player={bottomPlayer}
                   isDealer={dealerPosition === 0}

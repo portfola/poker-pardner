@@ -170,7 +170,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
               <div className="text-3xl mb-2">📚</div>
               <div className="text-xl mb-2">Tutorial Mode</div>
               <div className="text-sm opacity-90">
-                Learn with full guidance and strategic advice at every step
+                Learn with full guidance and strategic advice
               </div>
             </button>
           </div>
@@ -188,7 +188,7 @@ export function ModeSelection({ onSelectMode }: ModeSelectionProps) {
               <div className="text-3xl mb-2">🔫</div>
               <div className="text-xl mb-2">Play Mode</div>
               <div className="text-sm opacity-90">
-                Test your skills with no strategic advice or hints
+                Test your skills with no hints
               </div>
             </button>
           </div>

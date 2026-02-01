@@ -319,76 +319,61 @@ export function CowboyPanel({
         @keyframes bubble-inflate {
           0% {
             opacity: 0;
-            transform: scale(0.8) translateY(10px);
-          }
-          60% {
-            transform: scale(1.05) translateY(0);
+            transform: scale(0.95);
           }
           100% {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-          }
-        }
-
-        @keyframes bubble-deflate {
-          0% {
             opacity: 1;
             transform: scale(1);
-          }
-          100% {
-            opacity: 0;
-            transform: scale(0.9) translateY(5px);
           }
         }
 
         .speech-bubble {
           position: relative;
-          animation: bubble-inflate 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+          animation: bubble-inflate 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .speech-bubble.exiting {
-          animation: bubble-deflate 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
-        }
-
+        /* Speech bubble tail pointing to cowboy */
         .speech-bubble::before {
           content: '';
           position: absolute;
-          left: -12px;
-          top: 30px;
+          left: -8px;
+          top: 50%;
+          transform: translateY(-50%);
           width: 0;
           height: 0;
           border-style: solid;
-          border-width: 15px 15px 15px 0;
-          border-color: transparent #d4af37 transparent transparent;
-          filter: drop-shadow(-2px 0px 1px rgba(0, 0, 0, 0.1));
+          border-width: 8px 8px 8px 0;
+          border-color: transparent rgba(180, 140, 50, 0.3) transparent transparent;
         }
 
         .speech-bubble::after {
           content: '';
           position: absolute;
-          left: -8px;
-          top: 32px;
+          left: -6px;
+          top: 50%;
+          transform: translateY(-50%);
           width: 0;
           height: 0;
           border-style: solid;
-          border-width: 13px 13px 13px 0;
+          border-width: 7px 7px 7px 0;
           border-color: transparent #fef9e7 transparent transparent;
         }
       `}</style>
 
       <div className="fixed bottom-0 left-0 right-0 z-20">
-        <div className="mx-auto max-w-5xl px-2 sm:px-4 pb-1 sm:pb-2">
-          <div className="card-texture rounded-t-2xl sm:rounded-2xl ornate-border overflow-visible">
-            <div className="relative p-2 sm:p-3">
+        <div className="mx-auto max-w-6xl px-1 sm:px-2 pb-0.5 sm:pb-1">
+          <div className="card-texture rounded-t-xl sm:rounded-xl ornate-border overflow-visible">
+            <div className="relative px-2 py-1.5 sm:px-3 sm:py-2">
 
-              {/* Main Content Grid - Improved spacing and layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_120px] gap-2 sm:gap-3 items-start">
+              {/* Three-Column Layout: Cowboy+Speech | Action Buttons | Status+Controls */}
+              <div className="flex flex-col lg:flex-row gap-2 items-center lg:items-stretch">
 
-                {/* Left: Cowboy Portrait */}
-                <div className="flex flex-col items-center lg:items-start gap-2">
-                  <div className="relative">
+                {/* LEFT: Cowboy Portrait + Speech Bubble */}
+                <div className="flex items-center gap-2 lg:flex-1 lg:min-w-0">
+                  {/* Compact Cowboy Portrait */}
+                  <div className="relative shrink-0">
                     <div
-                      className="cowboy-portrait rounded-2xl w-20 h-20 sm:w-24 sm:h-24 overflow-hidden flex items-center justify-center"
+                      className="cowboy-portrait rounded-xl w-14 h-14 sm:w-16 sm:h-16 overflow-hidden flex items-center justify-center"
                     >
                       <img
                         src="/img/cowboy_smile.png"
@@ -396,274 +381,258 @@ export function CowboyPanel({
                         className="w-full h-full object-cover"
                       />
                     </div>
-
-                    {/* Decorative corner elements */}
-                    <div className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2 border-amber-600"></div>
-                    <div className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2 border-amber-600"></div>
-                    <div className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2 border-amber-600"></div>
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2 border-amber-600"></div>
+                    {/* Decorative corners */}
+                    <div className="absolute -top-0.5 -left-0.5 w-2 h-2 border-l border-t border-amber-600"></div>
+                    <div className="absolute -top-0.5 -right-0.5 w-2 h-2 border-r border-t border-amber-600"></div>
+                    <div className="absolute -bottom-0.5 -left-0.5 w-2 h-2 border-l border-b border-amber-600"></div>
+                    <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 border-r border-b border-amber-600"></div>
                   </div>
 
-                  {/* Voice narration toggle - only show if available */}
-                  {textToSpeechService.isAvailable() && (
-                    <button
-                      onClick={handleVoiceToggle}
-                      className={`poker-chip w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 ${
-                        voiceEnabled
-                          ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 border-emerald-600 text-white'
-                          : 'bg-gradient-to-br from-stone-400 to-stone-600 border-stone-500 text-stone-200'
-                      }`}
-                      aria-label={voiceEnabled ? 'Disable voice narration' : 'Enable voice narration'}
-                      title={voiceEnabled ? 'Voice On' : 'Voice Off'}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        {voiceEnabled ? (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                        ) : (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
-                        )}
-                      </svg>
-                    </button>
-                  )}
-                </div>
+                  {/* Speech Bubble with tail */}
+                  <div className="flex-1 min-w-0 relative">
+                    <div key={bubbleKey} className="speech-bubble relative bg-gradient-to-br from-amber-50/95 via-yellow-50/95 to-amber-100/95 rounded-lg border border-amber-800/30 px-2.5 py-1.5 shadow-md">
+                      <div
+                        className="absolute top-0 left-0 right-0 h-0.5 rounded-t-lg"
+                        style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
+                      ></div>
 
-                {/* Center: Combined Narration & Advice */}
-                <div>
-                  {/* Main message with reasoning combined */}
-                  <div key={bubbleKey} className="speech-bubble relative bg-gradient-to-br from-amber-50/90 via-yellow-50/90 to-amber-100/90 rounded-xl border-2 border-amber-800/30 p-2 sm:p-3 shadow-lg">
-                    <div
-                      className="absolute top-0 left-0 right-0 h-1.5 rounded-t-xl"
-                      style={{ background: 'linear-gradient(90deg, transparent, #d4af37, transparent)' }}
-                    ></div>
-
-                    {isHandComplete && winners.length > 0 ? (
-                      <p
-                        className={`leading-relaxed text-sm sm:text-base ${userWon ? 'text-emerald-700 font-semibold' : 'text-stone-800'}`}
-                        style={{ fontFamily: "'Crimson Text', serif" }}
-                      >
-                        <span className="text-2xl mr-2">{userWon ? '🎉' : '🤠'}</span>
-                        {getEndOfHandMessage()}
-                        {handDescription && (
-                          <>
-                            {' '}
-                            <span className="text-amber-700">🃏</span>
-                            {' '}
-                            <span className="text-stone-600">Winning hand: <strong>{handDescription}</strong>.</span>
-                          </>
-                        )}
-                        {isUserEliminated && (
-                          <>
-                            {' '}
-                            <span className="text-rose-700 font-semibold">
-                              💸 You're out of chips! Start a new game to try again.
-                            </span>
-                          </>
-                        )}
-                      </p>
-                    ) : narratorEvent ? (
-                      <p
-                        className="text-stone-800 leading-relaxed text-sm sm:text-base"
-                        style={{ fontFamily: "'Crimson Text', serif" }}
-                      >
-                        {narratorEvent.message}
-                        {narratorEvent.reasoning && (
-                          <span className="text-stone-600 italic">
-                            {' '}{narratorEvent.reasoning}
-                          </span>
-                        )}
-                        {narratorEvent.advice && gameState.mode === 'tutorial' && (
-                          <>
-                            {' '}
-                            <span className="text-emerald-700 font-semibold">
-                              → {narratorEvent.advice}
-                            </span>
-                          </>
-                        )}
-                      </p>
-                    ) : (
-                      <p
-                        className="text-stone-600 italic text-sm sm:text-base"
-                        style={{ fontFamily: "'Crimson Text', serif" }}
-                      >
-                        {isUserTurn ? "Your move, partner!" : `Watchin' ${currentPlayer?.name || 'the table'}...`}
-                      </p>
-                    )}
+                      {isHandComplete && winners.length > 0 ? (
+                        <p
+                          className={`leading-snug text-xs sm:text-sm ${userWon ? 'text-emerald-700 font-semibold' : 'text-stone-800'}`}
+                          style={{ fontFamily: "'Crimson Text', serif" }}
+                        >
+                          <span className="text-base sm:text-lg mr-1">{userWon ? '🎉' : '🤠'}</span>
+                          {getEndOfHandMessage()}
+                          {handDescription && (
+                            <span className="text-stone-600"> 🃏 <strong>{handDescription}</strong></span>
+                          )}
+                          {isUserEliminated && (
+                            <span className="text-rose-700 font-semibold"> 💸 Out of chips!</span>
+                          )}
+                        </p>
+                      ) : narratorEvent ? (
+                        <p
+                          className="text-stone-800 leading-snug text-xs sm:text-sm"
+                          style={{ fontFamily: "'Crimson Text', serif" }}
+                        >
+                          {narratorEvent.message}
+                          {narratorEvent.reasoning && (
+                            <span className="text-stone-600 italic"> {narratorEvent.reasoning}</span>
+                          )}
+                          {narratorEvent.advice && gameState.mode === 'tutorial' && (
+                            <span className="text-emerald-700 font-semibold"> → {narratorEvent.advice}</span>
+                          )}
+                        </p>
+                      ) : (
+                        <p
+                          className="text-stone-600 italic text-xs sm:text-sm"
+                          style={{ fontFamily: "'Crimson Text', serif" }}
+                        >
+                          {isUserTurn ? "Your move, partner!" : `Watchin' ${currentPlayer?.name || 'the table'}...`}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* Right: Game Status, Hand Strength Badge + Help (hidden in training mode) */}
-                {gameState.mode === 'tutorial' && (
-                  <div className="flex lg:flex-col flex-row items-center gap-2 justify-center lg:justify-start">
-                    {/* Game Phase Indicator - at top */}
+                {/* CENTER: Game Phase (top) + Action Buttons (bottom) */}
+                <div className="flex flex-col items-center gap-1.5 lg:min-w-fit">
+                  {/* Game Phase Badge - above buttons */}
+                  {gameState.mode === 'tutorial' && (
                     <div
-                      className="px-3 py-2 rounded-lg border-2 border-amber-700/60 shadow-sm w-full text-center"
-                      style={{
-                        background: 'linear-gradient(135deg, #F5E6D3 0%, #E8D5B7 100%)',
-                      }}
+                      className="px-3 py-1 rounded-md border border-amber-700/60 whitespace-nowrap"
+                      style={{ background: 'linear-gradient(135deg, #F5E6D3 0%, #E8D5B7 100%)' }}
                     >
                       <span
-                        className="text-stone-800 text-xs sm:text-sm font-bold tracking-wider uppercase block"
+                        className="text-stone-800 text-[10px] sm:text-xs font-bold tracking-wide uppercase"
                         style={{ fontFamily: "'Playfair Display', serif" }}
                       >
                         {gameState.currentPhase.replace('-', ' ')}
                       </span>
                     </div>
+                  )}
 
-                    {/* Hand Strength Badge - always visible when user has cards */}
-                    {currentHandInfo && (
-                      <div
-                        className={`poker-chip rounded-lg lg:rounded-xl w-20 h-20 lg:w-24 lg:h-24 flex flex-col items-center justify-center ${strengthBadge.bg} border-4 ${strengthBadge.border}`}
+                  {/* Action Buttons Row */}
+                  <div className="flex items-center gap-1.5 flex-wrap justify-center">
+                    {isHandComplete && winners.length > 0 ? (
+                      <button
+                        onClick={onNextHand}
+                        aria-label={isUserEliminated ? "New game" : "Next hand"}
+                        className="poker-chip px-6 sm:px-8 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-all bg-gradient-to-b from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500 text-amber-950 hover:scale-105 active:scale-95 border border-amber-700"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
                       >
-                        <div
-                          className="text-[8px] lg:text-[9px] font-bold uppercase tracking-wider opacity-70"
+                        {isUserEliminated ? 'NEW GAME' : 'NEXT HAND'}
+                      </button>
+                    ) : isWaitingForNextAction ? (
+                      <button
+                        onClick={onNext}
+                        aria-label="Continue"
+                        className="poker-chip px-8 sm:px-10 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-all bg-gradient-to-b from-sky-500 to-sky-700 hover:from-sky-400 hover:to-sky-600 text-white hover:scale-105 active:scale-95 border border-sky-800 animate-pulse"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
+                        NEXT
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={onFold}
+                          disabled={buttonsDisabled}
+                          aria-label="Fold"
+                          className={`
+                            poker-chip px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-all
+                            ${buttonsDisabled
+                              ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border border-stone-400'
+                              : 'bg-gradient-to-b from-rose-600 to-rose-800 hover:from-rose-500 hover:to-rose-700 text-white hover:scale-105 active:scale-95 border border-rose-900'
+                            }
+                          `}
                           style={{ fontFamily: "'Playfair Display', serif" }}
                         >
-                          Hand
-                        </div>
-                        <div
-                          className={`text-[9px] lg:text-xs font-black ${strengthBadge.text} text-center leading-tight px-1 mt-0.5 lg:mt-1 uppercase`}
-                          style={{ fontFamily: "'Playfair Display', serif" }}
-                        >
-                          {currentHandInfo.strength}
-                        </div>
-                      </div>
-                    )}
+                          FOLD
+                        </button>
 
-                    {/* Help button - Hand Rankings icon at bottom */}
-                    <button
-                      onClick={() => setShowHandRankings(true)}
-                      className="poker-chip w-10 h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-gradient-to-br from-stone-700 to-stone-900 hover:from-stone-600 hover:to-stone-800 text-amber-300 font-black text-base lg:text-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
-                      aria-label="View hand rankings"
-                      title="Hand Rankings"
-                      style={{ fontFamily: "'Playfair Display', serif" }}
-                    >
-                      ?
-                    </button>
+                        <button
+                          onClick={onCall}
+                          disabled={buttonsDisabled || !canCall}
+                          aria-label={isCheck ? "Check" : `Call $${amountToCall}`}
+                          className={`
+                            poker-chip px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-all min-w-[70px] sm:min-w-[85px]
+                            ${buttonsDisabled || !canCall
+                              ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border border-stone-400'
+                              : 'bg-gradient-to-b from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 text-white hover:scale-105 active:scale-95 border border-emerald-900'
+                            }
+                          `}
+                          style={{ fontFamily: "'Playfair Display', serif" }}
+                        >
+                          {callButtonText.toUpperCase()}
+                        </button>
+
+                        <button
+                          onClick={handleRaiseClick}
+                          disabled={buttonsDisabled || !canRaise}
+                          aria-label={showRaiseSlider ? `Raise $${raiseAmount}` : raiseButtonText}
+                          className={`
+                            poker-chip px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm transition-all min-w-[70px] sm:min-w-[85px]
+                            ${buttonsDisabled || !canRaise
+                              ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border border-stone-400'
+                              : 'bg-gradient-to-b from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500 text-amber-950 hover:scale-105 active:scale-95 border border-amber-700'
+                            }
+                          `}
+                          style={{ fontFamily: "'Playfair Display', serif" }}
+                        >
+                          {raiseButtonText.toUpperCase()}
+                        </button>
+                      </>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* Action Buttons Row - Improved spacing and size */}
-              <div className="mt-2 sm:mt-3 flex gap-2 sm:gap-3 justify-center items-center flex-wrap">
-                {/* Action History Button - always visible */}
-                <button
-                  onClick={() => setShowHistory(true)}
-                  aria-label="View action history"
-                  title="Action History (Current Hand)"
-                  className="poker-chip w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-stone-600 to-stone-800 hover:from-stone-500 hover:to-stone-700 text-amber-200 font-bold flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-600/50"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </button>
+                  {/* Raise amount selector - below buttons when active */}
+                  {showRaiseSlider && isUserTurn && hasEnoughForMinRaise && !isHandComplete && (
+                    <div className="flex gap-1">
+                      {getRaiseOptions().map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => setRaiseAmount(option)}
+                          className={`
+                            poker-chip px-2 py-1 rounded text-[10px] sm:text-xs font-bold transition-all border
+                            ${option === raiseAmount
+                              ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-amber-950 border-amber-700 scale-105'
+                              : 'bg-gradient-to-br from-stone-200 to-stone-300 text-stone-700 border-stone-400 hover:scale-105'
+                            }
+                          `}
+                          style={{ fontFamily: "'Playfair Display', serif" }}
+                          aria-label={`$${option}`}
+                        >
+                          ${option}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
-                {/* Hand History Button - always visible */}
-                <button
-                  onClick={() => setShowHandHistory(true)}
-                  aria-label="View hand history"
-                  title="Hand History (Last 10 Hands)"
-                  className="poker-chip w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-amber-600 to-amber-800 hover:from-amber-500 hover:to-amber-700 text-yellow-100 font-bold flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-amber-700/50"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </button>
-
-                {/* Show Next Hand button when hand complete, Next button when waiting, otherwise action buttons */}
-                {isHandComplete && winners.length > 0 ? (
-                  <button
-                    onClick={onNextHand}
-                    aria-label={isUserEliminated ? "Start a new game" : "Deal the next hand"}
-                    className="poker-chip px-8 sm:px-12 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all bg-gradient-to-b from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500 text-amber-950 hover:scale-105 active:scale-95 border-2 border-amber-700"
-                    style={{ fontFamily: "'Playfair Display', serif" }}
-                  >
-                    {isUserEliminated ? 'NEW GAME' : 'NEXT HAND'}
-                  </button>
-                ) : isWaitingForNextAction ? (
-                  <button
-                    onClick={onNext}
-                    aria-label="Continue to next action"
-                    className="poker-chip px-8 sm:px-12 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all bg-gradient-to-b from-sky-500 to-sky-700 hover:from-sky-400 hover:to-sky-600 text-white hover:scale-105 active:scale-95 border-2 border-sky-800 animate-pulse"
-                    style={{ fontFamily: "'Playfair Display', serif" }}
-                  >
-                    NEXT
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      onClick={onFold}
-                      disabled={buttonsDisabled}
-                      aria-label="Fold your hand"
-                      className={`
-                        poker-chip px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all
-                        ${buttonsDisabled
-                          ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
-                          : 'bg-gradient-to-b from-rose-600 to-rose-800 hover:from-rose-500 hover:to-rose-700 text-white hover:scale-105 active:scale-95 border-2 border-rose-900'
-                        }
-                      `}
-                      style={{ fontFamily: "'Playfair Display', serif" }}
+                {/* RIGHT: Hand Strength + Utility Buttons */}
+                <div className="flex lg:flex-col items-center lg:items-end gap-1.5">
+                  {/* Hand Strength Badge - top right */}
+                  {gameState.mode === 'tutorial' && currentHandInfo && (
+                    <div
+                      className={`poker-chip rounded-lg px-2.5 py-1.5 flex items-center gap-1.5 ${strengthBadge.bg} border-2 ${strengthBadge.border}`}
                     >
-                      FOLD
-                    </button>
+                      <span
+                        className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wide opacity-70"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
+                        Hand:
+                      </span>
+                      <span
+                        className={`text-[10px] sm:text-xs font-black ${strengthBadge.text} uppercase`}
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
+                        {currentHandInfo.strength}
+                      </span>
+                    </div>
+                  )}
 
-                    <button
-                      onClick={onCall}
-                      disabled={buttonsDisabled || !canCall}
-                      aria-label={isCheck ? "Check" : `Call $${amountToCall}`}
-                      className={`
-                        poker-chip px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all min-w-[100px] sm:min-w-[130px]
-                        ${buttonsDisabled || !canCall
-                          ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
-                          : 'bg-gradient-to-b from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 text-white hover:scale-105 active:scale-95 border-2 border-emerald-900'
-                        }
-                      `}
-                      style={{ fontFamily: "'Playfair Display', serif" }}
-                    >
-                      {callButtonText.toUpperCase()}
-                    </button>
-
-                    <button
-                      onClick={handleRaiseClick}
-                      disabled={buttonsDisabled || !canRaise}
-                      aria-label={showRaiseSlider ? `Confirm raise to $${raiseAmount}` : raiseButtonText}
-                      className={`
-                        poker-chip px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all min-w-[100px] sm:min-w-[130px]
-                        ${buttonsDisabled || !canRaise
-                          ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-50 border-2 border-stone-400'
-                          : 'bg-gradient-to-b from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500 text-amber-950 hover:scale-105 active:scale-95 border-2 border-amber-700'
-                        }
-                      `}
-                      style={{ fontFamily: "'Playfair Display', serif" }}
-                    >
-                      {raiseButtonText.toUpperCase()}
-                    </button>
-
-                    {/* Raise amount selector - to the right of action buttons */}
-                    {showRaiseSlider && isUserTurn && hasEnoughForMinRaise && !isHandComplete && (
-                      <div className="flex flex-row gap-1.5 ml-2">
-                        {getRaiseOptions().map((option) => (
-                          <button
-                            key={option}
-                            onClick={() => setRaiseAmount(option)}
-                            className={`
-                              poker-chip px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-2
-                              ${option === raiseAmount
-                                ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-amber-950 border-amber-700 scale-105'
-                                : 'bg-gradient-to-br from-stone-200 to-stone-300 text-stone-700 border-stone-400 hover:from-stone-300 hover:to-stone-400 hover:scale-105'
-                              }
-                            `}
-                            style={{ fontFamily: "'Playfair Display', serif" }}
-                            aria-label={`Raise to $${option}`}
-                          >
-                            ${option}
-                          </button>
-                        ))}
-                      </div>
+                  {/* Utility buttons row */}
+                  <div className="flex items-center gap-1">
+                    {/* Voice toggle */}
+                    {textToSpeechService.isAvailable() && (
+                      <button
+                        onClick={handleVoiceToggle}
+                        className={`poker-chip w-8 h-8 rounded-md flex items-center justify-center transition-all hover:scale-110 active:scale-95 border ${
+                          voiceEnabled
+                            ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 border-emerald-600 text-white'
+                            : 'bg-gradient-to-br from-stone-400 to-stone-600 border-stone-500 text-stone-200'
+                        }`}
+                        aria-label={voiceEnabled ? 'Disable voice' : 'Enable voice'}
+                        title={voiceEnabled ? 'Voice On' : 'Voice Off'}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          {voiceEnabled ? (
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                          ) : (
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                          )}
+                        </svg>
+                      </button>
                     )}
-                  </>
-                )}
+
+                    {/* Action History */}
+                    <button
+                      onClick={() => setShowHistory(true)}
+                      aria-label="Action history"
+                      title="Action History"
+                      className="poker-chip w-8 h-8 rounded-md bg-gradient-to-br from-stone-600 to-stone-800 hover:from-stone-500 hover:to-stone-700 text-amber-200 flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-amber-600/50"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </button>
+
+                    {/* Hand History */}
+                    <button
+                      onClick={() => setShowHandHistory(true)}
+                      aria-label="Hand history"
+                      title="Hand History"
+                      className="poker-chip w-8 h-8 rounded-md bg-gradient-to-br from-amber-600 to-amber-800 hover:from-amber-500 hover:to-amber-700 text-yellow-100 flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-amber-700/50"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </button>
+
+                    {/* Help */}
+                    {gameState.mode === 'tutorial' && (
+                      <button
+                        onClick={() => setShowHandRankings(true)}
+                        className="poker-chip w-8 h-8 rounded-md bg-gradient-to-br from-stone-700 to-stone-900 hover:from-stone-600 hover:to-stone-800 text-amber-300 font-black text-sm flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-amber-600/50"
+                        aria-label="Hand rankings"
+                        title="Hand Rankings"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
+                        ?
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
