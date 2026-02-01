@@ -7,7 +7,7 @@
 ## Cowboy Voice Narration
 - [x] Add ElevenLabs integration to use text-to-speech (2026-01-27)
 - [x] Have the Cowboy speak out loud, so the user doesn't have to read the text (2026-01-27)
-- [ ] Troubleshoot narration audio and add tests
+- [x] Troubleshoot narration audio and add tests (2026-01-31)
 
 ## Sound Effects
 - [x] Audio utility - Create `src/utils/audio.ts` for audio management (2026-01-27)
